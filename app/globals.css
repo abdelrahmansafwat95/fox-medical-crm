@@ -1,0 +1,37 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 248 250 252;        /* slate-50 */
+  --foreground: 15 23 42;           /* slate-900 */
+  --card: 255 255 255;
+  --border: 226 232 240;            /* slate-200 */
+}
+
+html {
+  font-family: "Cairo", "Inter", system-ui, sans-serif;
+}
+
+body {
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* RTL utilities — applied automatically when <html dir="rtl"> */
+[dir="rtl"] .flip-x { transform: scaleX(-1); }
+
+/* Auth/loading shimmer */
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 1.6s linear infinite;
+}
