@@ -15,6 +15,11 @@ interface ReportRow {
   avg_quality: number | null;
 }
 
+interface InternalReportRow extends ReportRow {
+  _hcps: Set<string>;
+  _qScores: number[];
+}
+
 export default function ReportsPage() {
   const [data, setData] = useState<ReportRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +49,7 @@ export default function ReportsPage() {
       profiles: { full_name: string | null } | null;
     };
 
-    const grouped = new Map<string, ReportRow>();
+    const grouped = new Map<string, InternalReportRow>();
     for (const v of (visits ?? []) as unknown as Row[]) {
       const existing = grouped.get(v.rep_id) ?? {
         rep_id: v.rep_id,
@@ -56,7 +61,7 @@ export default function ReportsPage() {
         avg_quality: null,
         _hcps: new Set<string>(),
         _qScores: [] as number[]
-      } as ReportRow & { _hcps: Set<string>; _qScores: number[] };
+      };
 
       existing.visits += 1;
       if (v.check_in_within_geofence) existing.verified += 1;
@@ -68,17 +73,16 @@ export default function ReportsPage() {
     }
 
     const rows: ReportRow[] = Array.from(grouped.values()).map((r) => {
-      const enriched = r as ReportRow & { _hcps: Set<string>; _qScores: number[] };
       return {
         rep_id: r.rep_id,
         rep_name: r.rep_name,
         visits: r.visits,
         verified: r.verified,
         flagged: r.flagged,
-        unique_hcps: enriched._hcps.size,
+        unique_hcps: r._hcps.size,
         avg_quality:
-          enriched._qScores.length > 0
-            ? Math.round((enriched._qScores.reduce((s, n) => s + n, 0) / enriched._qScores.length) * 10) / 10
+          r._qScores.length > 0
+            ? r._qScores.reduce((a, b) => a + b, 0) / r._qScores.length
             : null
       };
     });

@@ -47,7 +47,7 @@ export function usePushNotifications() {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapid)
+      applicationServerKey: urlBase64ToUint8Array(vapid) as any
     });
 
     const { data: sess } = await supabase.auth.getSession();
