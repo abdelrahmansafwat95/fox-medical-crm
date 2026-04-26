@@ -1,0 +1,374 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { useGeolocation } from "@/lib/useGeolocation";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  Loader2,
+  LogOut,
+  MapPin,
+  AlertTriangle
+} from "lucide-react";
+
+interface VisitFull {
+  id: string;
+  status: string;
+  visit_type: string | null;
+  check_in_at: string | null;
+  check_out_at: string | null;
+  duration_minutes: number | null;
+  check_in_lat: number | null;
+  check_in_lng: number | null;
+  check_in_distance_m: number | null;
+  check_in_within_geofence: boolean | null;
+  check_in_selfie_url: string | null;
+  ai_summary: string | null;
+  ai_quality_score: number | null;
+  ai_coaching_notes: string | null;
+  doctor_attitude: string | null;
+  doctor_feedback: string | null;
+  objections: string | null;
+  key_message_delivered: string | null;
+  next_action: string | null;
+  next_visit_date: string | null;
+  notes: string | null;
+  manager_status: string;
+  hcps: { full_name: string; specialty: string | null } | null;
+  institutions: { name: string; district: string | null } | null;
+}
+
+export default function VisitDetailPage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const geo = useGeolocation();
+  const [visit, setVisit] = useState<VisitFull | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [rawNotes, setRawNotes] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [checkOutBusy, setCheckOutBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params.id) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id]);
+
+  async function load() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("visits")
+      .select(`
+        id, status, visit_type, check_in_at, check_out_at, duration_minutes,
+        check_in_lat, check_in_lng, check_in_distance_m, check_in_within_geofence, check_in_selfie_url,
+        ai_summary, ai_quality_score, ai_coaching_notes,
+        doctor_attitude, doctor_feedback, objections, key_message_delivered,
+        next_action, next_visit_date, notes, manager_status,
+        hcps(full_name, specialty),
+        institutions(name, district)
+      `)
+      .eq("id", params.id)
+      .single();
+    if (error) setError(error.message);
+    setVisit((data ?? null) as unknown as VisitFull | null);
+    setLoading(false);
+  }
+
+  async function runAiSummary() {
+    if (!rawNotes.trim()) {
+      setError("Type in your rough notes first.");
+      return;
+    }
+    setAiBusy(true);
+    setError(null);
+    const { data: sess } = await supabase.auth.getSession();
+    const res = await fetch("/api/ai/summarize-visit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sess.session?.access_token}`
+      },
+      body: JSON.stringify({ visit_id: params.id, raw_notes: rawNotes })
+    });
+    const j = await res.json();
+    setAiBusy(false);
+    if (!res.ok || !j.ok) {
+      setError("AI summary failed: " + (j.error ?? "unknown"));
+      return;
+    }
+    setRawNotes("");
+    await load();
+  }
+
+  async function checkOut() {
+    if (!geo.position) {
+      geo.refresh();
+      setError("Waiting for GPS — tap again in a second.");
+      return;
+    }
+    setCheckOutBusy(true);
+    const { data: sess } = await supabase.auth.getSession();
+    const res = await fetch("/api/tracking/check-out", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sess.session?.access_token}`
+      },
+      body: JSON.stringify({
+        visit_id: params.id,
+        lat: geo.position.latitude,
+        lng: geo.position.longitude
+      })
+    });
+    const j = await res.json();
+    setCheckOutBusy(false);
+    if (!j.success) {
+      setError("Check-out failed: " + (j.error ?? "unknown"));
+      return;
+    }
+    await load();
+  }
+
+  if (loading)
+    return (
+      <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">Loading…</div>
+    );
+  if (!visit)
+    return (
+      <div className="max-w-3xl mx-auto p-12 text-center">
+        <p className="text-slate-700">Visit not found.</p>
+        <Link href="/dashboard/visits" className="text-brand-700 underline text-sm">
+          Back to visits
+        </Link>
+      </div>
+    );
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <Link
+        href="/dashboard/visits"
+        className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to visits
+      </Link>
+
+      {/* Header card */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">
+              {visit.hcps?.full_name ?? "Unknown HCP"}
+            </h1>
+            <p className="text-sm text-slate-500">
+              {visit.hcps?.specialty ?? "—"} · {visit.institutions?.name ?? "—"}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                visit.status === "completed"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : visit.status === "in_progress"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-slate-100 text-slate-700"
+              }`}
+            >
+              {visit.status.replace("_", " ").toUpperCase()}
+            </span>
+            {visit.manager_status === "flagged" && (
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700 inline-flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> Flagged
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Geo verification banner */}
+        <div
+          className={`mt-4 p-3 rounded-lg border text-sm flex items-center gap-2 ${
+            visit.check_in_within_geofence
+              ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+              : "bg-red-50 border-red-200 text-red-900"
+          }`}
+        >
+          {visit.check_in_within_geofence ? (
+            <CheckCircle2 className="w-4 h-4" />
+          ) : (
+            <AlertTriangle className="w-4 h-4" />
+          )}
+          <span>
+            {visit.check_in_within_geofence ? "GPS-verified" : "Outside geofence"} ·
+            {" "}
+            {visit.check_in_distance_m?.toFixed(0)}m from anchor
+          </span>
+        </div>
+
+        {/* Timeline */}
+        <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <div className="text-xs text-slate-500">Check-in</div>
+            <div className="font-medium">
+              {visit.check_in_at ? new Date(visit.check_in_at).toLocaleString() : "—"}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500">Check-out</div>
+            <div className="font-medium">
+              {visit.check_out_at ? new Date(visit.check_out_at).toLocaleString() : "—"}
+            </div>
+          </div>
+          {visit.duration_minutes !== null && (
+            <div>
+              <div className="text-xs text-slate-500">Duration</div>
+              <div className="font-medium inline-flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {visit.duration_minutes} min
+              </div>
+            </div>
+          )}
+          {visit.visit_type && (
+            <div>
+              <div className="text-xs text-slate-500">Type</div>
+              <div className="font-medium capitalize">{visit.visit_type.replace("_", " ")}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Selfie */}
+        {visit.check_in_selfie_url && (
+          <div className="mt-4">
+            <div className="text-xs text-slate-500 mb-1">Verification selfie</div>
+            <img
+              src={visit.check_in_selfie_url}
+              alt="Selfie"
+              className="w-24 h-24 rounded-lg object-cover border border-slate-200"
+            />
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-3 text-sm text-red-700 bg-red-50 rounded-lg p-2 border border-red-200">
+            {error}
+          </div>
+        )}
+
+        {/* Check-out button */}
+        {visit.status === "in_progress" && (
+          <button
+            onClick={checkOut}
+            disabled={checkOutBusy}
+            className="mt-4 w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+          >
+            {checkOutBusy ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Checking out…
+              </>
+            ) : (
+              <>
+                <LogOut className="w-4 h-4" /> Check out & complete visit
+              </>
+            )}
+          </button>
+        )}
+      </div>
+
+      {/* AI summary section */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-5 h-5 text-yellow-600" />
+          <h2 className="font-semibold text-slate-900">AI visit summary</h2>
+          {visit.ai_quality_score !== null && (
+            <span className="ml-auto text-xs font-bold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+              Quality: {visit.ai_quality_score}/10
+            </span>
+          )}
+        </div>
+
+        {visit.ai_summary ? (
+          <div className="space-y-3">
+            <div className="text-sm text-slate-700 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              {visit.ai_summary}
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3 text-sm">
+              {visit.doctor_attitude && (
+                <Field label="Doctor attitude" value={visit.doctor_attitude} />
+              )}
+              {visit.doctor_feedback && (
+                <Field label="Doctor feedback" value={visit.doctor_feedback} />
+              )}
+              {visit.key_message_delivered && (
+                <Field label="Key message delivered" value={visit.key_message_delivered} />
+              )}
+              {visit.objections && <Field label="Objections" value={visit.objections} />}
+              {visit.next_action && <Field label="Next action" value={visit.next_action} />}
+              {visit.next_visit_date && (
+                <Field label="Next visit" value={visit.next_visit_date} />
+              )}
+            </div>
+            {visit.ai_coaching_notes && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                <div className="font-semibold text-blue-900 text-xs uppercase tracking-wide mb-1">
+                  Coaching notes for manager
+                </div>
+                <div className="text-slate-700">{visit.ai_coaching_notes}</div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-slate-500 mb-2">
+              Type rough notes from the visit and let AI structure them into a clean DCR.
+            </p>
+            <textarea
+              value={rawNotes}
+              onChange={(e) => setRawNotes(e.target.value)}
+              placeholder="e.g. Met Dr. Hassan, discussed Cardia 5mg vs Concor, he was open but worried about pricing for govt insurance patients, took 5 samples, agreed to try with 2 patients next week, follow up Tuesday..."
+              rows={5}
+              className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+            />
+            <button
+              onClick={runAiSummary}
+              disabled={aiBusy || !rawNotes.trim()}
+              className="mt-3 w-full sm:w-auto bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-5 py-2 rounded-lg inline-flex items-center justify-center gap-2"
+            >
+              {aiBusy ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Analyzing…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" /> Generate AI summary
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Map link */}
+      {visit.check_in_lat && visit.check_in_lng && (
+        <a
+          href={`https://www.google.com/maps?q=${visit.check_in_lat},${visit.check_in_lng}`}
+          target="_blank"
+          rel="noreferrer"
+          className="block bg-white rounded-xl border border-slate-200 shadow-sm p-3 hover:bg-slate-50 transition text-center text-sm text-blue-700 inline-flex items-center justify-center gap-2 w-full"
+        >
+          <MapPin className="w-4 h-4" /> View check-in location on Google Maps
+        </a>
+      )}
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="text-slate-800">{value}</div>
+    </div>
+  );
+}

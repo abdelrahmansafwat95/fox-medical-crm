@@ -1,50 +1,54 @@
-# 🦊💊 FoxSystems Medical CRM
+# 🦊💊 FoxSystems Medical CRM — v0.2
 
 AI-powered Pharmaceutical & Medical Sales CRM with **GPS-verified visit tracking**.
 Built for Egyptian and GCC pharma companies.
 
-**Stack:** Next.js 14 · TypeScript · Supabase (PostgreSQL + PostGIS) · Tailwind CSS · Anthropic Claude
+**Stack:** Next.js 14 · TypeScript · Supabase (PostgreSQL + PostGIS) · Tailwind CSS · Anthropic Claude · Mapbox GL JS
 **Owner:** FoxSystems Tech — foxsystemstech.com
+
+---
+
+## 🆕 What's new in v0.2 (Steps 4 + 5 + 6)
+
+- **GPS Check-in flow with selfie** — geofence-verified visit creation
+- **Visit detail page** with check-out, AI summary, doctor feedback fields
+- **Live tracking map** (Mapbox GL JS) with rep markers + 60s auto-refresh
+- **AI HCP scoring** — auto-segmentation (A/B/C/D/KOL) via Claude
+- **AI visit summaries** — rep dictates rough notes, Claude turns them into a clean DCR
+- **AI rep coaching** — strengths/weaknesses + concrete actions for managers
+- **AI route optimizer** — best visit order considering Cairo traffic + segments
+- **Tracking ping API** — `/api/tracking/ping` for continuous GPS updates
+- **PostGIS RPC functions** — `record_check_in`, `record_check_out`, `nearest_institutions`, `check_geofence`
 
 ---
 
 ## 🚀 First-Time Setup (do this once)
 
-### 1. Create a new Supabase project
+### 1. Create a Supabase project + enable PostGIS
 
-- Go to [supabase.com](https://supabase.com) → **New project**
-- Name: `fox-medical-crm`
-- Region: **Frankfurt** or **London** (closest to Egypt)
-- Save the database password somewhere safe
+- supabase.com → New project (Frankfurt or London region)
+- Database → Extensions → enable **postgis**
 
-### 2. Enable PostGIS
+### 2. Run the SQL files in order
 
-- Dashboard → **Database** → **Extensions** → search `postgis` → toggle ON
-
-### 3. Run the SQL files in order
-
-Open Dashboard → **SQL Editor** → New query, then paste and run each file from
-the `supabase/` folder **in this exact order**:
+Open Supabase SQL Editor → New query → paste and run each file from `supabase/`:
 
 1. `00-setup.sql` — extensions and helpers
 2. `01-org-structure.sql` — profiles, branches, territories
-3. `02-rbac.sql` — permissions matrix and role helpers
+3. `02-rbac.sql` — permissions matrix
 4. `03-medical-entities.sql` — institutions, HCPs, products
+5. **`04-visits-tracking.sql`** — visits, tour_plans, rep_locations, geofence functions ⭐ NEW
+6. **`05-storage.sql`** — buckets for selfies + signatures ⭐ NEW
 
-The verification queries at the bottom of each file should return the expected
-results before moving to the next.
+Run the verification queries at the bottom of each file before moving on.
 
-### 4. Disable email confirmation
+### 3. Disable email confirmation
 
-Dashboard → **Authentication** → **Providers** → **Email** → toggle OFF
-**“Confirm email”**. (Same as Fox RE — speeds up first-user creation.)
+Auth → Providers → Email → toggle OFF "Confirm email".
 
-### 5. Create your first admin user
+### 4. Create your first admin user
 
-Dashboard → **Authentication** → **Users** → **Add user** → enter your email
-and a password.
-
-Then go back to **SQL Editor** and run:
+Auth → Users → Add user, then in SQL editor:
 
 ```sql
 UPDATE public.profiles
@@ -52,71 +56,56 @@ UPDATE public.profiles
  WHERE id = (SELECT id FROM auth.users ORDER BY created_at ASC LIMIT 1);
 ```
 
-### 6. Grab credentials for `.env.local`
+### 5. Get a Mapbox access token (free)
 
-Dashboard → **Settings** → **API** → copy:
+- Go to [account.mapbox.com/access-tokens](https://account.mapbox.com/access-tokens/)
+- Sign up → "Create a token" → copy the **public token** (starts with `pk.`)
 
-- `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
-- `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `service_role` key → `SUPABASE_SERVICE_ROLE_KEY`
+### 6. Get an Anthropic API key
+
+- console.anthropic.com → API Keys → Create
+
+### 7. Fill in `.env.local`
+
+```bash
+cp .env.example .env.local
+# edit .env.local with all 4 keys: Supabase URL + anon + service_role,
+# Anthropic key, and Mapbox token
+```
 
 ---
 
 ## 💻 Run Locally
 
 ```bash
-# 1. Install dependencies (use legacy peer deps — same as Fox RE)
 npm install --legacy-peer-deps
-
-# 2. Create .env.local from the template and fill in your Supabase values
-cp .env.example .env.local
-#    → edit .env.local, paste your Supabase URL + keys
-
-# 3. Start dev server
-npm run dev
-
-# Open http://localhost:3000 → log in with the admin account you created
+npm run dev    # runs on http://localhost:3001
 ```
 
-You should see:
+### Test the differentiator (GPS check-in)
 
-1. Login screen with EN/AR toggle
-2. After login → Dashboard with KPI cards (HCPs, institutions, products counts)
-3. The seeded counts: `institutions=5`, `products=3`, `hcps=0`
+1. Sign in
+2. **Dashboard → "New Check-in"** (top right)
+3. Allow location permission when prompted
+4. You'll see seeded Cairo institutions sorted by distance
+5. **Tip for testing**: open Chrome DevTools → 3-dot menu → More tools → Sensors → set Location to **Custom** and paste `29.9603, 31.2569` (Maadi Polyclinic Demo coordinates) — that puts you exactly on the geofence
+6. Pick the institution → choose an HCP → take selfie → confirm
+7. You'll see the visit detail page with GPS-verified badge ✓
+8. **Dictate rough notes** → click "Generate AI summary" → Claude returns a structured DCR
+9. **Check out** → visit completes with duration
 
 ---
 
-## 🌍 Deploy to Vercel (same flow as Fox RE)
-
-### 1. Create a NEW GitHub repo
+## 🌍 Deploy to Vercel
 
 ```bash
-# In the project folder:
-git init
-git branch -M main
-git add .
-git commit -m "Initial commit — Fox Medical CRM scaffold"
-
-# Create empty repo on github.com (e.g. 'fox-medical-crm'), then:
+git init && git branch -M main
+git add . && git commit -m "Fox Medical CRM v0.2 — GPS + AI"
 git remote add origin https://github.com/YOUR_USERNAME/fox-medical-crm.git
 git push -u origin main
 ```
 
-### 2. Import to Vercel
-
-- Go to [vercel.com/new](https://vercel.com/new)
-- Pick the new GitHub repo → **Import**
-- Framework: Next.js (auto-detected)
-- **Add environment variables** (paste the same values from `.env.local`):
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`
-  - `NEXT_PUBLIC_APP_NAME`
-  - `NEXT_PUBLIC_APP_URL` — set to your Vercel URL once you have it
-- Click **Deploy**
-
-After ~60 seconds you'll have a live URL like
-`fox-medical-crm.vercel.app` that auto-redeploys on every `git push`.
+Then vercel.com/new → import repo → **paste all env vars including the Mapbox token** → Deploy.
 
 ---
 
@@ -125,47 +114,59 @@ After ~60 seconds you'll have a live URL like
 ```
 fox-medical-crm/
 ├── app/
-│   ├── layout.tsx              ← root layout
-│   ├── page.tsx                ← redirects to /login or /dashboard
-│   ├── globals.css             ← Tailwind + Cairo font
-│   ├── login/
-│   │   └── page.tsx            ← bilingual login (EN/AR)
+│   ├── api/
+│   │   ├── tracking/{ping, check-in, check-out}/route.ts  ⭐ NEW
+│   │   └── ai/{score-hcp, summarize-visit, coach-rep, optimize-route}/route.ts  ⭐ NEW
+│   ├── login/page.tsx
 │   └── dashboard/
-│       ├── layout.tsx          ← auth-guarded shell with Sidebar + Topbar
-│       ├── page.tsx            ← KPI dashboard
-│       ├── hcps/               ← (placeholder) Step 4
-│       ├── institutions/       ← (placeholder) Step 4
-│       ├── products/           ← (placeholder) Step 4
-│       ├── visits/             ← (placeholder) Step 4
-│       ├── tracking/           ← (placeholder) Step 5
-│       ├── samples/            ← (placeholder) Step 7
-│       ├── orders/             ← (placeholder) Step 7
-│       ├── reports/            ← (placeholder) Step 7
-│       ├── team/               ← (placeholder) future
-│       └── settings/           ← (placeholder) future
+│       ├── layout.tsx
+│       ├── page.tsx                       ⭐ now with live KPIs
+│       ├── hcps/page.tsx                  ⭐ AI scoring button per HCP
+│       ├── institutions/page.tsx          ⭐ map preview links
+│       ├── products/page.tsx              ⭐ key messages expander
+│       ├── visits/
+│       │   ├── page.tsx                   ⭐ list with status + geo badge
+│       │   ├── check-in/page.tsx          ⭐ THE GPS check-in flow
+│       │   └── [id]/page.tsx              ⭐ detail + AI summary + check-out
+│       ├── tracking/page.tsx              ⭐ live Mapbox map
+│       ├── samples/, orders/, reports/, team/, settings/   (placeholders)
 ├── components/
-│   ├── Sidebar.tsx             ← desktop nav
-│   ├── MobileNav.tsx           ← mobile bottom tab bar
-│   └── Topbar.tsx              ← top header with user + notifications
+│   ├── Sidebar.tsx, MobileNav.tsx, Topbar.tsx
 ├── lib/
-│   ├── supabase.ts             ← Supabase client
-│   ├── types.ts                ← TypeScript types matching the DB
-│   └── utils.ts                ← cn() helper
+│   ├── supabase.ts
+│   ├── types.ts                           ⭐ Visit, RepLocation, NearestInstitution types
+│   ├── useGeolocation.ts                  ⭐ NEW — GPS hook
+│   └── utils.ts
 ├── supabase/
-│   ├── 00-setup.sql            ← Step 1 — extensions
-│   ├── 01-org-structure.sql    ← Step 1 — profiles, branches, territories
-│   ├── 02-rbac.sql             ← Step 1 — permissions matrix
-│   └── 03-medical-entities.sql ← Step 2 — institutions, HCPs, products
-├── public/
-│   └── icons/                  ← PWA icons (added in later steps)
-├── .env.example                ← template — copy to .env.local
-├── .gitignore                  ← never commit .env.local
-├── next.config.js
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-└── README.md                   ← this file
+│   ├── 00-setup.sql
+│   ├── 01-org-structure.sql
+│   ├── 02-rbac.sql
+│   ├── 03-medical-entities.sql
+│   ├── 04-visits-tracking.sql             ⭐ NEW
+│   └── 05-storage.sql                     ⭐ NEW
+├── .env.example                           ⭐ now requires Mapbox + Anthropic
+├── package.json                           ⭐ now port 3001 + mapbox-gl
+└── README.md
 ```
+
+---
+
+## 🎯 The Money Shot Demo
+
+This is the 60-second flow that closes a pharma sales meeting:
+
+1. Open `/dashboard/visits/check-in` on phone
+2. App reads GPS → sees you're 47m from "Dr. Hassan Maadi Clinic"
+3. Tap green "CHECK IN" button
+4. Take selfie
+5. Pick visit type, confirm
+6. Land on visit detail page → big green "GPS-verified ✓ 47m from anchor" banner
+7. Dictate rough notes → click "Generate AI summary"
+8. Claude returns structured DCR with quality score, doctor attitude, objections, coaching notes
+9. Tap "Check out" → visit completes with auto-calculated duration
+10. Manager opens `/dashboard/tracking` → sees the rep's live position on the map
+
+**That's the slide that wins the contract.**
 
 ---
 
@@ -173,34 +174,37 @@ fox-medical-crm/
 
 | Step | Status | What it adds |
 |---|---|---|
-| 1 | ✅ done | Supabase foundation: extensions, profiles, RBAC, territories |
-| 2 | ✅ done | Medical entities: institutions, HCPs, products, key messages |
-| 3 | ✅ done | **Project scaffold + login + dashboard shell** ← you are here |
-| 4 |  🔜  | Visits + GPS check-in + geofencing (the differentiator) |
-| 5 |  🔜  | Live tracking map (Mapbox + Supabase Realtime) |
-| 6 |  🔜  | AI features (HCP segmentation, visit summaries, coaching) |
-| 7 |  🔜  | Samples, orders, expenses, reports |
-| 8 |  🔜  | PWA + push notifications + offline mode |
-| 9 |  🔜  | Anomaly engine + compliance alerts |
-| 10 |  🔜 | Capacitor native app for true background GPS |
+| 1 | ✅ done | Supabase foundation |
+| 2 | ✅ done | Medical entities |
+| 3 | ✅ done | Project scaffold + login + dashboard shell |
+| **4** | ✅ **done** | **Visits + GPS check-in + geofencing + selfie** |
+| **5** | ✅ **done** | **Live tracking map** (Mapbox + Realtime) |
+| **6** | ✅ **done** | **AI features** (HCP scoring, visit summaries, coaching, route optimizer) |
+| 7 | 🔜 next | Samples, orders, expenses, reports |
+| 8 | 🔜 | PWA + push notifications + offline mode |
+| 9 | 🔜 | Anomaly engine + compliance alerts |
+| 10 | 🔜 | Capacitor native app for true background GPS |
 
 ---
 
 ## ❓ Troubleshooting
 
-**`npm install` fails with peer dep errors**
-→ Use `npm install --legacy-peer-deps` (same fix as Fox RE).
+**Check-in says "outside_geofence"**
+→ You're more than the institution's radius (default 100m) from its registered coordinates.
+   For testing, override your browser GPS via DevTools → Sensors → Custom location, or
+   widen the geofence: `UPDATE institutions SET geofence_radius_m = 500 WHERE name = '...';`
 
-**Login button does nothing / "Invalid email or password"**
-→ Check `.env.local` has the correct Supabase URL and anon key.
-→ Confirm "Confirm email" is OFF in Supabase Auth settings.
+**Map shows "Mapbox token missing"**
+→ Add `NEXT_PUBLIC_MAPBOX_TOKEN=pk.…` to `.env.local` (and Vercel env vars), then restart `npm run dev`.
 
-**Dashboard shows "—" or "0" for everything**
-→ You haven't run the SQL files yet, OR you're signed in as a non-admin user
-   whose RLS doesn't let them see the catalog.
+**AI features return "missing_anthropic_key"**
+→ Add `ANTHROPIC_API_KEY=sk-ant-…` to `.env.local`.
 
-**Vercel build fails with "Cannot find module '@/lib/...'"**
-→ Make sure `tsconfig.json` has the `paths` mapping. It's already set in this repo.
+**RLS errors when inserting visits**
+→ Make sure you're signed in. Anonymous users can't insert into `visits` or `rep_locations`.
+
+**npm install fails**
+→ Always use `npm install --legacy-peer-deps` (same fix as Fox RE).
 
 ---
 
