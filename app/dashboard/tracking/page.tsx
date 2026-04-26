@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { MapPin, Users, RefreshCw, AlertCircle } from "lucide-react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 interface RepLatest {
   rep_id: string;
@@ -20,40 +20,33 @@ const CAIRO_CENTER: [number, number] = [31.2357, 30.0444];
 
 export default function LiveTrackingPage() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<Record<string, maplibregl.Marker>>({});
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
   const [reps, setReps] = useState<RepLatest[]>([]);
   const [loading, setLoading] = useState(true);
   const [tokenMissing, setTokenMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Initialize MapLibre map with MapTiler tiles
+  // 1. Initialize Mapbox map
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
 
-    const key = process.env.NEXT_PUBLIC_MAPTILER_KEY;
-    if (!key) {
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    if (!token) {
       setTokenMissing(true);
       setLoading(false);
       return;
     }
+    mapboxgl.accessToken = token;
 
-    mapRef.current = new maplibregl.Map({
+    mapRef.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${key}`,
+      style: "mapbox://styles/mapbox/streets-v12",
       center: CAIRO_CENTER,
       zoom: 10
     });
 
-    mapRef.current.addControl(new maplibregl.NavigationControl(), "top-right");
-
-    // RTL plugin so Arabic labels render correctly
-    if (!maplibregl.getRTLTextPluginStatus || maplibregl.getRTLTextPluginStatus() === "unavailable") {
-      maplibregl.setRTLTextPlugin(
-        "https://cdn.maptiler.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js",
-        true
-      );
-    }
+    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     return () => {
       mapRef.current?.remove();
@@ -66,6 +59,7 @@ export default function LiveTrackingPage() {
     setLoading(true);
     setError(null);
 
+    // Pull last 24h of pings, then keep latest per rep
     const since = new Date(Date.now() - 24 * 3600_000).toISOString();
     const { data, error } = await supabase
       .from("rep_locations")
@@ -83,6 +77,7 @@ export default function LiveTrackingPage() {
       return;
     }
 
+    // Group: latest ping per rep
     const latest = new Map<string, RepLatest>();
     type Row = {
       rep_id: string;
@@ -109,14 +104,17 @@ export default function LiveTrackingPage() {
     setReps(list);
     setLoading(false);
 
+    // Render markers
     if (mapRef.current) {
+      // Remove old markers
       Object.values(markersRef.current).forEach((m) => m.remove());
       markersRef.current = {};
 
       list.forEach((r) => {
         const el = document.createElement("div");
         const minutesAgo = (Date.now() - new Date(r.recorded_at).getTime()) / 60_000;
-        const color = minutesAgo < 5 ? "#10b981" : minutesAgo < 30 ? "#f59e0b" : "#94a3b8";
+        const color =
+          minutesAgo < 5 ? "#10b981" : minutesAgo < 30 ? "#f59e0b" : "#94a3b8";
         el.innerHTML = `
           <div style="
             background:${color}; width:20px; height:20px; border-radius:50%;
@@ -131,7 +129,7 @@ export default function LiveTrackingPage() {
           </div>
         `;
 
-        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
+        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
           <div style="font-family:system-ui;">
             <div style="font-weight:600; margin-bottom:4px;">${r.rep_name}</div>
             <div style="font-size:11px; color:#64748b;">
@@ -142,24 +140,23 @@ export default function LiveTrackingPage() {
           </div>
         `);
 
-        const marker = new maplibregl.Marker({ element: el })
+        const marker = new mapboxgl.Marker({ element: el })
           .setLngLat([r.longitude, r.latitude])
           .setPopup(popup)
           .addTo(mapRef.current!);
         markersRef.current[r.rep_id] = marker;
       });
 
+      // Fit to bounds if any markers
       if (list.length > 0) {
-        const bounds = new maplibregl.LngLatBounds(
-          [list[0].longitude, list[0].latitude],
-          [list[0].longitude, list[0].latitude]
-        );
+        const bounds = new mapboxgl.LngLatBounds();
         list.forEach((r) => bounds.extend([r.longitude, r.latitude]));
         mapRef.current.fitBounds(bounds, { padding: 80, maxZoom: 13 });
       }
     }
   }
 
+  // 3. Load + auto-refresh every 60s
   useEffect(() => {
     if (tokenMissing) return;
     loadLocations();
@@ -177,9 +174,7 @@ export default function LiveTrackingPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Live Tracking</h1>
-            <p className="text-xs text-slate-500">
-              Real-time field force locations · auto-refreshes every 60s · powered by MapTiler
-            </p>
+            <p className="text-xs text-slate-500">Real-time field force locations · auto-refreshes every 60s</p>
           </div>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -202,17 +197,17 @@ export default function LiveTrackingPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm text-amber-900">
-            <strong>MapTiler key missing.</strong> Add{" "}
-            <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_MAPTILER_KEY</code> to your{" "}
+            <strong>Mapbox token missing.</strong> Add{" "}
+            <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_MAPBOX_TOKEN</code> to your{" "}
             <code className="bg-amber-100 px-1 rounded">.env.local</code> (and Vercel env vars).
-            Get a free key — no credit card required — at{" "}
+            Get a free token at{" "}
             <a
               className="underline"
-              href="https://cloud.maptiler.com/account/keys/"
+              href="https://account.mapbox.com/access-tokens/"
               target="_blank"
               rel="noreferrer"
             >
-              cloud.maptiler.com
+              account.mapbox.com
             </a>
             .
           </div>
@@ -227,6 +222,7 @@ export default function LiveTrackingPage() {
 
       {!tokenMissing && (
         <div className="grid lg:grid-cols-4 gap-4 h-full">
+          {/* Map */}
           <div className="lg:col-span-3">
             <div
               ref={mapContainer}
@@ -234,6 +230,7 @@ export default function LiveTrackingPage() {
             />
           </div>
 
+          {/* Side panel with rep list */}
           <div className="lg:col-span-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-3 border-b border-slate-100 flex items-center gap-2">
               <Users className="w-4 h-4 text-slate-500" />

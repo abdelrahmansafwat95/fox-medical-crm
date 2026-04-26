@@ -1,25 +1,176 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Settings, User, BellRing, Loader2, Check } from "lucide-react";
+import { usePushNotifications } from "@/lib/usePushNotifications";
 
-export default function Page() {
+export default function SettingsPage() {
+  const [profile, setProfile] = useState<{
+    full_name: string;
+    full_name_ar: string;
+    phone: string;
+    product_line: string;
+  }>({ full_name: "", full_name_ar: "", phone: "", product_line: "" });
+  const [email, setEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const push = usePushNotifications();
+
+  useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      setEmail(u.user.email ?? "");
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("full_name, full_name_ar, phone, product_line")
+        .eq("id", u.user.id)
+        .single();
+      if (p) {
+        setProfile({
+          full_name: p.full_name ?? "",
+          full_name_ar: p.full_name_ar ?? "",
+          phone: p.phone ?? "",
+          product_line: p.product_line ?? ""
+        });
+      }
+    })();
+  }, []);
+
+  async function save() {
+    setSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) {
+      setSaving(false);
+      return;
+    }
+    await supabase
+      .from("profiles")
+      .update({
+        full_name: profile.full_name,
+        full_name_ar: profile.full_name_ar || null,
+        phone: profile.phone || null,
+        product_line: profile.product_line || null
+      })
+      .eq("id", u.user.id);
+    setSaving(false);
+    setSavedAt(new Date());
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
+        <div className="p-2 rounded-lg bg-slate-100 text-slate-700">
           <Settings className="w-6 h-6" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
       </div>
-      <p className="text-slate-500 mb-6">Company, branding, integrations, billing</p>
+      <p className="text-slate-500 mb-4">Your profile and notification preferences.</p>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
-        <div className="text-5xl mb-4">🚧</div>
-        <h2 className="font-semibold text-slate-900">Coming up in the next step</h2>
-        <p className="text-sm text-slate-500 mt-2">
-          This page will be wired up to your Supabase data once we get there.
-        </p>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <User className="w-4 h-4 text-slate-500" />
+          <h2 className="font-semibold text-slate-900">Profile</h2>
+        </div>
+        <div className="space-y-3">
+          <Field label="Email" value={email} disabled />
+          <Field
+            label="Full name"
+            value={profile.full_name}
+            onChange={(v) => setProfile({ ...profile, full_name: v })}
+          />
+          <Field
+            label="Full name (Arabic)"
+            value={profile.full_name_ar}
+            onChange={(v) => setProfile({ ...profile, full_name_ar: v })}
+            dir="rtl"
+          />
+          <Field
+            label="Phone"
+            value={profile.phone}
+            onChange={(v) => setProfile({ ...profile, phone: v })}
+          />
+          <Field
+            label="Product line"
+            value={profile.product_line}
+            onChange={(v) => setProfile({ ...profile, product_line: v })}
+            placeholder="e.g. Cardio-Metabolic"
+          />
+          <button
+            onClick={save}
+            disabled={saving}
+            className="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-5 py-2 rounded-lg inline-flex items-center justify-center gap-2"
+          >
+            {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Save"}
+          </button>
+          {savedAt && (
+            <span className="text-xs text-emerald-700 inline-flex items-center gap-1 ml-2">
+              <Check className="w-3 h-3" /> Saved
+            </span>
+          )}
+        </div>
       </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <BellRing className="w-4 h-4 text-slate-500" />
+          <h2 className="font-semibold text-slate-900">Push notifications</h2>
+        </div>
+        {!push.supported ? (
+          <p className="text-sm text-slate-500">Your browser doesn&apos;t support push notifications.</p>
+        ) : push.subscribed ? (
+          <div>
+            <p className="text-sm text-emerald-700 mb-2">✓ Push notifications enabled on this device.</p>
+            <button
+              onClick={() => push.unsubscribe()}
+              className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg"
+            >
+              Disable
+            </button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-slate-600 mb-2">Get notified about flagged visits, approvals, and reminders.</p>
+            <button
+              onClick={() => push.subscribe()}
+              className="text-sm bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-medium"
+            >
+              Enable push notifications
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  disabled,
+  dir,
+  placeholder
+}: {
+  label: string;
+  value: string;
+  onChange?: (v: string) => void;
+  disabled?: boolean;
+  dir?: "ltr" | "rtl";
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-slate-700 mb-1">{label}</label>
+      <input
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        disabled={disabled}
+        dir={dir}
+        placeholder={placeholder}
+        className="w-full p-2 border border-slate-300 rounded-lg text-sm disabled:bg-slate-50 disabled:text-slate-500"
+      />
     </div>
   );
 }

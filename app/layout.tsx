@@ -4,13 +4,18 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "FoxSystems Medical CRM",
   description:
-    "AI-powered Pharmaceutical & Medical Sales CRM with GPS-verified visit tracking. Built for Egyptian and GCC pharma companies.",
+    "AI-powered Pharmaceutical & Medical Sales CRM with GPS-verified visit tracking.",
   applicationName: "FoxSystems Medical CRM",
+  manifest: "/manifest.json",
   authors: [{ name: "FoxSystems Tech", url: "https://foxsystemstech.com" }],
   appleWebApp: {
     capable: true,
     title: "Fox Medical",
     statusBarStyle: "default"
+  },
+  icons: {
+    apple: "/icons/icon-192.png",
+    icon: "/icons/icon-192.png"
   }
 };
 
@@ -28,7 +33,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" dir="ltr">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Register service worker on the client */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(){});
+                });
+              }
+            `
+          }}
+        />
+      </body>
     </html>
   );
 }

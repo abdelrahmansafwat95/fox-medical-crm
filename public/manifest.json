@@ -1,0 +1,20 @@
+{
+  "name": "FoxSystems Medical CRM",
+  "short_name": "Fox Medical",
+  "description": "AI-powered Pharma & Medical Sales CRM with GPS-verified visits.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0fdfa",
+  "theme_color": "#14b8a6",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Check in",       "url": "/dashboard/visits/check-in",  "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "My visits",      "url": "/dashboard/visits",            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Live tracking",  "url": "/dashboard/tracking",          "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

@@ -1,172 +1,166 @@
-# 🦊💊 FoxSystems Medical CRM — v0.2
+# 🦊💊 FoxSystems Medical CRM — v0.3 (FEATURE COMPLETE)
 
-AI-powered Pharmaceutical & Medical Sales CRM with **GPS-verified visit tracking**.
-Built for Egyptian and GCC pharma companies.
+AI-powered Pharmaceutical & Medical Sales CRM with **GPS-verified visit tracking** and **automated compliance**.
 
-**Stack:** Next.js 14 · TypeScript · Supabase (PostgreSQL + PostGIS) · Tailwind CSS · Anthropic Claude · Mapbox GL JS
+**Stack:** Next.js 14 · TypeScript · Supabase (PostgreSQL + PostGIS) · Tailwind · Anthropic Claude · Mapbox GL JS · Web Push
 **Owner:** FoxSystems Tech — foxsystemstech.com
+**Live target:** 250–750 EGP per rep per month (1/10th of Veeva)
 
 ---
 
-## 🆕 What's new in v0.2 (Steps 4 + 5 + 6)
+## 🎉 What ships in v0.3
 
-- **GPS Check-in flow with selfie** — geofence-verified visit creation
-- **Visit detail page** with check-out, AI summary, doctor feedback fields
-- **Live tracking map** (Mapbox GL JS) with rep markers + 60s auto-refresh
-- **AI HCP scoring** — auto-segmentation (A/B/C/D/KOL) via Claude
-- **AI visit summaries** — rep dictates rough notes, Claude turns them into a clean DCR
-- **AI rep coaching** — strengths/weaknesses + concrete actions for managers
-- **AI route optimizer** — best visit order considering Cairo traffic + segments
-- **Tracking ping API** — `/api/tracking/ping` for continuous GPS updates
-- **PostGIS RPC functions** — `record_check_in`, `record_check_out`, `nearest_institutions`, `check_geofence`
+This release closes Steps 7-12 — turning the GPS-tracking core into a **feature-complete CRM**:
+
+### Step 7 — Samples, Orders, Expenses
+- `samples_inventory` + `samples_transactions` with full audit trail
+- Atomic `give_sample_to_hcp()` RPC (decrements stock, logs transaction, updates visit)
+- Orders module (auto-numbered, status pipeline draft → paid)
+- Expenses module with categories (transport/fuel/meal/etc.) and approval flow
+
+### Step 8 — Reports
+- **Excel export** (xlsx) and **PDF export** (jspdf + autotable)
+- Field-force performance dashboard with verify-rate scoring
+- Day-range filter (7d / 30d / 90d)
+
+### Step 9 — Tour Plans + Targets
+- Reps submit daily plans → managers approve/reject
+- Manager sets monthly KPI targets per rep (calls, coverage, order value)
+- HCP coverage view (last visit per HCP, days since)
+
+### Step 10 — Compliance / Anomaly Engine
+- Pure-SQL `detect_visit_anomalies()` function
+- Detects: outside-geofence, impossible travel speed (>120 km/h), duplicate visit, visit too short (<3 min)
+- Auto-flags suspicious visits, severity-tagged
+- Manager UI to resolve / mark false-positive
+
+### Step 11 — Notifications + WhatsApp + AI Chat
+- **Web Push** (VAPID) with service worker + bell hook
+- In-app `notifications` table + read/unread state
+- WhatsApp send via wa.me (logs every message for audit)
+- **AI Assistant** chat with 5 modes: free chat, email writer, WhatsApp writer, detailing pitch, objection handler
+
+### Step 12 — PWA + Offline mode
+- Installable as a home-screen app on iOS + Android
+- Service worker with network-first caching + offline fallback page
+- IndexedDB-backed offline queue (`fetchOrQueue` / `flushQueue`) — visits logged offline auto-sync when online
+- Push handler for background notifications
+
+### Plus polish
+- Sidebar reorganized into 5 logical groups
+- Dashboard now shows 8 live KPIs including alert + notification counters
+- Leaderboard with one-click AI Coach button per rep
 
 ---
 
-## 🚀 First-Time Setup (do this once)
+## 🚀 Setup from scratch (~25 min)
 
-### 1. Create a Supabase project + enable PostGIS
+> **If you already have v0.2 running, see the "Upgrade from v0.2" section below — just 3 SQL files + new env vars.**
 
-- supabase.com → New project (Frankfurt or London region)
+### 1. Create Supabase project + enable PostGIS
+- supabase.com → New project (Frankfurt or London)
 - Database → Extensions → enable **postgis**
 
-### 2. Run the SQL files in order
+### 2. Run all SQL files in order
+Open Supabase SQL Editor and run, **in order**:
+1. `supabase/00-setup.sql`
+2. `supabase/01-org-structure.sql`
+3. `supabase/02-rbac.sql`
+4. `supabase/03-medical-entities.sql`
+5. `supabase/04-visits-tracking.sql`
+6. `supabase/05-storage.sql`
+7. `supabase/06-samples-orders-expenses.sql` ⭐ NEW
+8. `supabase/07-targets-reports.sql` ⭐ NEW
+9. `supabase/08-compliance-notifications.sql` ⭐ NEW
 
-Open Supabase SQL Editor → New query → paste and run each file from `supabase/`:
-
-1. `00-setup.sql` — extensions and helpers
-2. `01-org-structure.sql` — profiles, branches, territories
-3. `02-rbac.sql` — permissions matrix
-4. `03-medical-entities.sql` — institutions, HCPs, products
-5. **`04-visits-tracking.sql`** — visits, tour_plans, rep_locations, geofence functions ⭐ NEW
-6. **`05-storage.sql`** — buckets for selfies + signatures ⭐ NEW
-
-Run the verification queries at the bottom of each file before moving on.
+Each file ends with verification queries — run them too.
 
 ### 3. Disable email confirmation
-
 Auth → Providers → Email → toggle OFF "Confirm email".
 
-### 4. Create your first admin user
-
-Auth → Users → Add user, then in SQL editor:
-
+### 4. Create the first admin
+Auth → Users → Add user, then:
 ```sql
 UPDATE public.profiles
    SET role = 'admin', full_name = 'Abdelrahman Safwat'
  WHERE id = (SELECT id FROM auth.users ORDER BY created_at ASC LIMIT 1);
 ```
 
-### 5. Get a Mapbox access token (free)
+### 5. Generate VAPID keys (for push)
+```bash
+npx web-push generate-vapid-keys
+```
+Copy both keys.
 
-- Go to [account.mapbox.com/access-tokens](https://account.mapbox.com/access-tokens/)
-- Sign up → "Create a token" → copy the **public token** (starts with `pk.`)
+### 6. Get Mapbox token
+[account.mapbox.com/access-tokens](https://account.mapbox.com/access-tokens/) — copy the `pk.…` token.
 
-### 6. Get an Anthropic API key
+### 7. Get Anthropic API key
+console.anthropic.com → API Keys → Create.
 
-- console.anthropic.com → API Keys → Create
-
-### 7. Fill in `.env.local`
-
+### 8. Fill `.env.local`
 ```bash
 cp .env.example .env.local
-# edit .env.local with all 4 keys: Supabase URL + anon + service_role,
-# Anthropic key, and Mapbox token
+# Fill in: Supabase keys, Anthropic, Mapbox, BOTH VAPID keys
+```
+
+### 9. Run locally
+```bash
+npm install --legacy-peer-deps
+npm run dev   # http://localhost:3001
 ```
 
 ---
 
-## 💻 Run Locally
+## 🆙 Upgrade from v0.2
 
-```bash
-npm install --legacy-peer-deps
-npm run dev    # runs on http://localhost:3001
-```
+Already have v0.2 running? Just do this:
 
-### Test the differentiator (GPS check-in)
-
-1. Sign in
-2. **Dashboard → "New Check-in"** (top right)
-3. Allow location permission when prompted
-4. You'll see seeded Cairo institutions sorted by distance
-5. **Tip for testing**: open Chrome DevTools → 3-dot menu → More tools → Sensors → set Location to **Custom** and paste `29.9603, 31.2569` (Maadi Polyclinic Demo coordinates) — that puts you exactly on the geofence
-6. Pick the institution → choose an HCP → take selfie → confirm
-7. You'll see the visit detail page with GPS-verified badge ✓
-8. **Dictate rough notes** → click "Generate AI summary" → Claude returns a structured DCR
-9. **Check out** → visit completes with duration
+1. **Replace the project folder** (or copy in only the new/changed files).
+2. **Run the 3 new SQL files** in order:
+   - `06-samples-orders-expenses.sql`
+   - `07-targets-reports.sql`
+   - `08-compliance-notifications.sql`
+3. **Generate VAPID keys** + add to `.env.local` and Vercel env vars:
+   ```
+   NEXT_PUBLIC_VAPID_PUBLIC_KEY=…
+   VAPID_PRIVATE_KEY=…
+   ```
+4. **Reinstall deps** (we added `xlsx`, `jspdf`, `web-push`, `idb`):
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+5. **Push to GitHub** — Vercel auto-deploys.
 
 ---
 
 ## 🌍 Deploy to Vercel
 
 ```bash
-git init && git branch -M main
-git add . && git commit -m "Fox Medical CRM v0.2 — GPS + AI"
-git remote add origin https://github.com/YOUR_USERNAME/fox-medical-crm.git
-git push -u origin main
+git add .
+git commit -m "v0.3 — feature complete (samples, reports, compliance, push, PWA)"
+git push
 ```
 
-Then vercel.com/new → import repo → **paste all env vars including the Mapbox token** → Deploy.
+Add **all** env vars (including both VAPID keys) in Vercel → Settings → Environment Variables before pushing.
 
 ---
 
-## 📂 Project Structure
+## 🎯 The 90-second pharma demo
 
-```
-fox-medical-crm/
-├── app/
-│   ├── api/
-│   │   ├── tracking/{ping, check-in, check-out}/route.ts  ⭐ NEW
-│   │   └── ai/{score-hcp, summarize-visit, coach-rep, optimize-route}/route.ts  ⭐ NEW
-│   ├── login/page.tsx
-│   └── dashboard/
-│       ├── layout.tsx
-│       ├── page.tsx                       ⭐ now with live KPIs
-│       ├── hcps/page.tsx                  ⭐ AI scoring button per HCP
-│       ├── institutions/page.tsx          ⭐ map preview links
-│       ├── products/page.tsx              ⭐ key messages expander
-│       ├── visits/
-│       │   ├── page.tsx                   ⭐ list with status + geo badge
-│       │   ├── check-in/page.tsx          ⭐ THE GPS check-in flow
-│       │   └── [id]/page.tsx              ⭐ detail + AI summary + check-out
-│       ├── tracking/page.tsx              ⭐ live Mapbox map
-│       ├── samples/, orders/, reports/, team/, settings/   (placeholders)
-├── components/
-│   ├── Sidebar.tsx, MobileNav.tsx, Topbar.tsx
-├── lib/
-│   ├── supabase.ts
-│   ├── types.ts                           ⭐ Visit, RepLocation, NearestInstitution types
-│   ├── useGeolocation.ts                  ⭐ NEW — GPS hook
-│   └── utils.ts
-├── supabase/
-│   ├── 00-setup.sql
-│   ├── 01-org-structure.sql
-│   ├── 02-rbac.sql
-│   ├── 03-medical-entities.sql
-│   ├── 04-visits-tracking.sql             ⭐ NEW
-│   └── 05-storage.sql                     ⭐ NEW
-├── .env.example                           ⭐ now requires Mapbox + Anthropic
-├── package.json                           ⭐ now port 3001 + mapbox-gl
-└── README.md
-```
+Sequence to close a meeting with a brand director:
 
----
+1. Open `https://your-app.vercel.app/dashboard/visits/check-in` on phone
+2. App detects rep is 47m from "Maadi Polyclinic" → green CHECK IN button
+3. Rep takes selfie → confirms → visit auto-creates with **GPS-verified** badge ✓
+4. Rep dictates rough notes → Claude returns structured DCR with quality score
+5. Rep checks out → visit completes, duration auto-calculated
+6. Manager opens `/dashboard/tracking` → sees the rep's live position on the map
+7. Manager opens `/dashboard/compliance` → clicks "Run scan" → system finds 3 anomalies (outside-geofence, impossible-speed travel, duplicate visits)
+8. Manager opens `/dashboard/leaderboard` → clicks "AI Coach" on a rep → Claude returns strengths/weaknesses + recommended actions
+9. Manager opens `/dashboard/reports` → clicks **Excel** → downloads field-force performance report
 
-## 🎯 The Money Shot Demo
-
-This is the 60-second flow that closes a pharma sales meeting:
-
-1. Open `/dashboard/visits/check-in` on phone
-2. App reads GPS → sees you're 47m from "Dr. Hassan Maadi Clinic"
-3. Tap green "CHECK IN" button
-4. Take selfie
-5. Pick visit type, confirm
-6. Land on visit detail page → big green "GPS-verified ✓ 47m from anchor" banner
-7. Dictate rough notes → click "Generate AI summary"
-8. Claude returns structured DCR with quality score, doctor attitude, objections, coaching notes
-9. Tap "Check out" → visit completes with auto-calculated duration
-10. Manager opens `/dashboard/tracking` → sees the rep's live position on the map
-
-**That's the slide that wins the contract.**
+**That's the slide deck that wins the contract.** Veeva can't do the geofence verification natively. IQVIA charges $150+/user/month. You charge 250 EGP.
 
 ---
 
@@ -174,37 +168,88 @@ This is the 60-second flow that closes a pharma sales meeting:
 
 | Step | Status | What it adds |
 |---|---|---|
-| 1 | ✅ done | Supabase foundation |
-| 2 | ✅ done | Medical entities |
-| 3 | ✅ done | Project scaffold + login + dashboard shell |
-| **4** | ✅ **done** | **Visits + GPS check-in + geofencing + selfie** |
-| **5** | ✅ **done** | **Live tracking map** (Mapbox + Realtime) |
-| **6** | ✅ **done** | **AI features** (HCP scoring, visit summaries, coaching, route optimizer) |
-| 7 | 🔜 next | Samples, orders, expenses, reports |
-| 8 | 🔜 | PWA + push notifications + offline mode |
-| 9 | 🔜 | Anomaly engine + compliance alerts |
-| 10 | 🔜 | Capacitor native app for true background GPS |
+| 1-3 | ✅ done | Schema, scaffold, login |
+| 4 | ✅ done | GPS check-in + geofence + selfie |
+| 5 | ✅ done | Live tracking map |
+| 6 | ✅ done | AI features (scoring, summary, coaching) |
+| **7** | ✅ **done** | **Samples, orders, expenses** |
+| **8** | ✅ **done** | **Reports + Excel/PDF + leaderboard + coverage** |
+| **9** | ✅ **done** | **Tour plans + targets** |
+| **10** | ✅ **done** | **Compliance / anomaly engine** |
+| **11** | ✅ **done** | **Push + WhatsApp + AI chat** |
+| **12** | ✅ **done** | **PWA + offline mode** |
+
+**Future / Phase 2:**
+- Capacitor wrapper for true background GPS (browsers throttle locked-screen GPS)
+- UltraMsg / WhatsApp Business API (currently uses wa.me link strategy)
+- Multi-tenant white-label setup
+- Pharmacy chain dashboards
+- Advanced ROI analytics per HCP
+
+---
+
+## 📂 Project Structure (key new files)
+
+```
+fox-medical-crm/
+├── app/
+│   ├── api/
+│   │   ├── ai/
+│   │   │   └── assistant/route.ts            ⭐ NEW — multi-mode AI chat
+│   │   ├── whatsapp/send/route.ts             ⭐ NEW
+│   │   ├── push/{subscribe,send}/route.ts     ⭐ NEW
+│   │   └── compliance/scan/route.ts           ⭐ NEW
+│   └── dashboard/
+│       ├── samples/                           ⭐ NEW
+│       ├── orders/                            ⭐ NEW (real)
+│       ├── expenses/                          ⭐ NEW
+│       ├── reports/                           ⭐ NEW (real, with export)
+│       ├── leaderboard/                       ⭐ NEW
+│       ├── compliance/                        ⭐ NEW
+│       ├── tour-plans/                        ⭐ NEW
+│       ├── targets/                           ⭐ NEW
+│       ├── coverage/                          ⭐ NEW
+│       ├── notifications/                     ⭐ NEW
+│       ├── whatsapp/                          ⭐ NEW
+│       ├── assistant/                         ⭐ NEW
+│       └── settings/                          ⭐ NEW (real)
+├── lib/
+│   ├── export.ts                              ⭐ NEW — xlsx + jspdf
+│   ├── usePushNotifications.ts                ⭐ NEW
+│   └── offlineQueue.ts                        ⭐ NEW — IndexedDB queue
+├── public/
+│   ├── manifest.json                          ⭐ NEW
+│   ├── sw.js                                  ⭐ NEW (service worker + push)
+│   ├── offline.html                           ⭐ NEW
+│   └── icons/icon-{192,512}.png               ⭐ NEW (placeholder solid teal)
+├── supabase/
+│   ├── 06-samples-orders-expenses.sql          ⭐ NEW
+│   ├── 07-targets-reports.sql                 ⭐ NEW
+│   └── 08-compliance-notifications.sql         ⭐ NEW
+└── .env.example                               ⭐ now includes VAPID keys
+```
 
 ---
 
 ## ❓ Troubleshooting
 
-**Check-in says "outside_geofence"**
-→ You're more than the institution's radius (default 100m) from its registered coordinates.
-   For testing, override your browser GPS via DevTools → Sensors → Custom location, or
-   widen the geofence: `UPDATE institutions SET geofence_radius_m = 500 WHERE name = '...';`
+**Push notifications don't work**
+→ Check both `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` are set. Generate with `npx web-push generate-vapid-keys`. Push only works on HTTPS (or localhost), so test on Vercel preview URL not local IP.
 
-**Map shows "Mapbox token missing"**
-→ Add `NEXT_PUBLIC_MAPBOX_TOKEN=pk.…` to `.env.local` (and Vercel env vars), then restart `npm run dev`.
+**"detect_visit_anomalies" RPC fails**
+→ The function depends on PostGIS. Make sure the extension is enabled (Database → Extensions → postgis).
 
-**AI features return "missing_anthropic_key"**
-→ Add `ANTHROPIC_API_KEY=sk-ant-…` to `.env.local`.
+**Excel/PDF export does nothing**
+→ Make sure `npm install` ran with `--legacy-peer-deps`. Confirm `xlsx`, `jspdf`, `jspdf-autotable` in `node_modules/`.
 
-**RLS errors when inserting visits**
-→ Make sure you're signed in. Anonymous users can't insert into `visits` or `rep_locations`.
+**Service worker not registering**
+→ Hard reload (Cmd+Shift+R) after first deploy. Check DevTools → Application → Service Workers.
 
-**npm install fails**
-→ Always use `npm install --legacy-peer-deps` (same fix as Fox RE).
+**Offline queue not syncing**
+→ The queue runs `flushQueue()` only when called explicitly. Wire it into a `window.online` event listener in your visit-check-in page if needed (already imported, just call on `online` event).
+
+**Icons look like solid teal squares**
+→ They are placeholders. Replace `public/icons/icon-{192,512}.png` with real branded icons before launch.
 
 ---
 

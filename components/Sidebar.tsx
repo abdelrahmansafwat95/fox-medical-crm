@@ -12,91 +12,111 @@ import {
   Package,
   ShoppingCart,
   BarChart3,
-  UserCog,
   Settings,
-  LogOut
+  Calendar,
+  Trophy,
+  Target as TargetIcon,
+  Shield,
+  Bell,
+  MessageCircle,
+  Sparkles,
+  Receipt,
+  UserCircle
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-};
-
-const NAV: NavItem[] = [
-  { href: "/dashboard",              label: "Dashboard",   icon: LayoutDashboard },
-  { href: "/dashboard/hcps",         label: "HCPs",        icon: Users },
-  { href: "/dashboard/institutions", label: "Institutions",icon: Building2 },
-  { href: "/dashboard/products",     label: "Products",    icon: Pill },
-  { href: "/dashboard/visits",       label: "Visits",      icon: ClipboardList },
-  { href: "/dashboard/tracking",     label: "Live Tracking",icon: MapPin },
-  { href: "/dashboard/samples",      label: "Samples",     icon: Package },
-  { href: "/dashboard/orders",       label: "Orders",      icon: ShoppingCart },
-  { href: "/dashboard/reports",      label: "Reports",     icon: BarChart3 },
-  { href: "/dashboard/team",         label: "Team",        icon: UserCog },
-  { href: "/dashboard/settings",     label: "Settings",    icon: Settings }
+const NAV_GROUPS: { title: string; items: { href: string; label: string; icon: typeof LayoutDashboard }[] }[] = [
+  {
+    title: "Daily",
+    items: [
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+      { href: "/dashboard/visits", label: "Visits", icon: ClipboardList },
+      { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin },
+      { href: "/dashboard/tour-plans", label: "Tour Plans", icon: Calendar },
+      { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
+    ]
+  },
+  {
+    title: "Customers",
+    items: [
+      { href: "/dashboard/hcps", label: "HCPs", icon: Users },
+      { href: "/dashboard/institutions", label: "Institutions", icon: Building2 },
+      { href: "/dashboard/coverage", label: "Coverage", icon: UserCircle },
+    ]
+  },
+  {
+    title: "Products & Sales",
+    items: [
+      { href: "/dashboard/products", label: "Products", icon: Pill },
+      { href: "/dashboard/samples", label: "Samples", icon: Package },
+      { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
+      { href: "/dashboard/expenses", label: "Expenses", icon: Receipt },
+    ]
+  },
+  {
+    title: "AI & Communication",
+    items: [
+      { href: "/dashboard/assistant", label: "AI Assistant", icon: Sparkles },
+      { href: "/dashboard/whatsapp", label: "WhatsApp", icon: MessageCircle },
+    ]
+  },
+  {
+    title: "Manager",
+    items: [
+      { href: "/dashboard/tracking", label: "Live Tracking", icon: MapPin },
+      { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+      { href: "/dashboard/leaderboard", label: "Leaderboard", icon: Trophy },
+      { href: "/dashboard/targets", label: "Targets", icon: TargetIcon },
+      { href: "/dashboard/compliance", label: "Compliance", icon: Shield },
+      { href: "/dashboard/team", label: "Team", icon: Users },
+      { href: "/dashboard/settings", label: "Settings", icon: Settings }
+    ]
+  }
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.replace("/login");
-  }
 
   return (
-    <aside className="hidden md:flex w-64 shrink-0 flex-col bg-white border-e border-slate-200 h-screen sticky top-0">
-      {/* Brand */}
-      <div className="p-5 border-b border-slate-200">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="text-2xl">🦊💊</span>
-          <div>
-            <div className="font-bold text-slate-900 leading-tight">Fox Medical</div>
-            <div className="text-[11px] text-slate-500 leading-tight">FoxSystems Tech</div>
+    <aside className="w-60 bg-white border-r border-slate-200 hidden md:flex flex-col h-screen sticky top-0">
+      <div className="p-4 border-b border-slate-200 flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">
+          🦊
+        </div>
+        <div>
+          <div className="font-bold text-slate-900 text-sm leading-tight">Fox Medical</div>
+          <div className="text-[10px] text-slate-500">CRM v0.3</div>
+        </div>
+      </div>
+      <nav className="flex-1 overflow-y-auto p-2">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.title} className="mb-3">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1">
+              {group.title}
+            </div>
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const active =
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname?.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition mb-0.5 ${
+                    active
+                      ? "bg-brand-50 text-brand-700 font-medium"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
-        </Link>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-        {NAV.map((item) => {
-          const active =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname?.startsWith(item.href));
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition",
-                active
-                  ? "bg-brand-50 text-brand-700 font-medium"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              )}
-            >
-              <Icon className="w-4 h-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+        ))}
       </nav>
-
-      {/* Sign out */}
-      <div className="p-3 border-t border-slate-200">
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-red-50 hover:text-red-700 transition"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign out
-        </button>
-      </div>
     </aside>
   );
 }
