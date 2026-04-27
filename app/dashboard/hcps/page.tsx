@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Users, Sparkles, Search, Phone, MessageCircle, Plus, Pencil } from "lucide-react";
 import type { HCP } from "@/lib/types";
@@ -81,7 +82,9 @@ export default function HCPsPage() {
     setLoading(false);
   }
 
-  async function aiScore(hcp_id: string) {
+  async function aiScore(e: React.MouseEvent, hcp_id: string) {
+    e.preventDefault();
+    e.stopPropagation();
     setScoringId(hcp_id);
     try {
       const { data } = await supabase.auth.getSession();
@@ -102,6 +105,12 @@ export default function HCPsPage() {
     } finally {
       setScoringId(null);
     }
+  }
+
+  function openEdit(e: React.MouseEvent, h: HCP) {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditing(h);
   }
 
   const filtered = hcps.filter((h) =>
@@ -125,7 +134,9 @@ export default function HCPsPage() {
           <Plus className="w-4 h-4" /> Add HCP
         </button>
       </div>
-      <p className="text-slate-500 mb-6">Healthcare professionals — doctors, pharmacists, nurses</p>
+      <p className="text-slate-500 mb-6">
+        Healthcare professionals — tap any HCP to see their full activity timeline.
+      </p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
         <div className="relative">
@@ -154,7 +165,11 @@ export default function HCPsPage() {
         ) : (
           <div className="divide-y divide-slate-100">
             {filtered.map((h) => (
-              <div key={h.id} className="p-4 hover:bg-slate-50 transition flex items-start gap-4">
+              <Link
+                key={h.id}
+                href={`/dashboard/hcps/${h.id}`}
+                className="p-4 hover:bg-slate-50 transition flex items-start gap-4"
+              >
                 <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold shrink-0">
                   {h.full_name.charAt(0)}
                 </div>
@@ -188,26 +203,36 @@ export default function HCPsPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                   {h.mobile && (
-                    <a href={`tel:${h.mobile}`} className="p-2 rounded-lg text-slate-500 hover:bg-slate-100">
+                    <a
+                      href={`tel:${h.mobile}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                    >
                       <Phone className="w-4 h-4" />
                     </a>
                   )}
                   {h.whatsapp && (
-                    <a href={`https://wa.me/${h.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50">
+                    <a
+                      href={`https://wa.me/${h.whatsapp.replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50"
+                    >
                       <MessageCircle className="w-4 h-4" />
                     </a>
                   )}
                   <button
-                    onClick={() => setEditing(h)}
+                    onClick={(e) => openEdit(e, h)}
                     className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
                     title="Edit"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => aiScore(h.id)}
+                    onClick={(e) => aiScore(e, h.id)}
                     disabled={scoringId === h.id}
                     className="text-xs px-2.5 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 disabled:bg-brand-400 inline-flex items-center gap-1"
                   >
@@ -215,7 +240,7 @@ export default function HCPsPage() {
                     {scoringId === h.id ? "Scoring…" : "AI Score"}
                   </button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
