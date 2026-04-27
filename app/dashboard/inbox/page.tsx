@@ -139,7 +139,7 @@ export default function InboxPage() {
       .select(
         "id, rep_id, check_in_at, duration_minutes, check_in_within_geofence, check_in_distance_m, visit_type, ai_quality_score, profiles(full_name), hcps(full_name), institutions(name)"
       )
-      .eq("manager_status", "flagged")
+      .in("manager_status", ["flagged", "pending"])
       .order("check_in_at", { ascending: false })
       .limit(50);
 
@@ -440,7 +440,7 @@ export default function InboxPage() {
 
           {/* ============ FLAGGED VISITS =============== */}
           <Section
-            title="Flagged visits"
+            title="Visits needing review"
             icon={AlertTriangle}
             count={f.flaggedVisits.length}
             expanded={expanded.flagged_visits}
