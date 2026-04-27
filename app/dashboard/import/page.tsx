@@ -299,7 +299,7 @@ export default function ImportPage() {
     const dbKeys = new Set<string>();
     if (schema.dedupeBy && dbCheck.data) {
       dbCheck.data.forEach((r) => {
-        const key = schema.dedupeBy!(r as Record<string, unknown>);
+        const key = schema.dedupeBy!(r as unknown as Record<string, unknown>);
         if (key) dbKeys.add(key);
       });
     }
