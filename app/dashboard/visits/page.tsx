@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { ClipboardList, Plus, MapPin, Clock, CheckCircle2, AlertTriangle, PlayCircle } from "lucide-react";
+import {
+  ClipboardList,
+  Plus,
+  MapPin,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  PlayCircle,
+  ClipboardEdit
+} from "lucide-react";
 
 interface VisitWithJoins {
   id: string;
@@ -58,12 +67,20 @@ export default function VisitsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Visits</h1>
         </div>
-        <Link
-          href="/dashboard/visits/check-in"
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium shadow-sm"
-        >
-          <Plus className="w-4 h-4" /> New Check-in
-        </Link>
+        <div className="flex gap-2 flex-wrap">
+          <Link
+            href="/dashboard/visits/manual"
+            className="bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium text-sm"
+          >
+            <ClipboardEdit className="w-4 h-4" /> Log manually
+          </Link>
+          <Link
+            href="/dashboard/visits/check-in"
+            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> New Check-in
+          </Link>
+        </div>
       </div>
       <p className="text-slate-500 mb-6">
         Daily call reports with GPS-verified check-in.
