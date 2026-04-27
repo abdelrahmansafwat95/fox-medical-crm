@@ -197,10 +197,10 @@ export default function DashboardHome() {
               <Step done label="Steps 1-12 — Feature-complete CRM" />
               <Step done label="Demo seed data — 380 visits, 50 HCPs, 12 institutions ✨" />
               <Step done label="Manager Approval Inbox — unified queue ✨" />
-              <Step label="Sample distribution flow (next)" />
-              <Step label="Order builder inside visit" />
-              <Step label="Manual visit entry" />
-              <Step label="Edit dialogs across all entities" />
+              <Step done label="Sample distribution flow ✨" />
+              <Step done label="Order builder inside visit ✨" />
+              <Step done label="Manual visit entry ✨" />
+              <Step done label="Edit dialogs across all entities ✨" />
             </ul>
           </div>
         </div>
