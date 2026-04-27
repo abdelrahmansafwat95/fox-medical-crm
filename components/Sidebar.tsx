@@ -25,7 +25,8 @@ import {
   Receipt,
   UserCircle,
   Inbox,
-  TrendingUp
+  TrendingUp,
+  CalendarDays
 } from "lucide-react";
 
 interface NavItem {
@@ -48,6 +49,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/visits", label: "Visits", icon: ClipboardList },
       { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin },
       { href: "/dashboard/tour-plans", label: "Tour Plans", icon: Calendar },
+      { href: "/dashboard/events", label: "Events", icon: CalendarDays },
       { href: "/dashboard/notifications", label: "Notifications", icon: Bell, badgeKey: "notifications" }
     ]
   },
@@ -126,7 +128,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="font-bold text-slate-900 text-sm leading-tight">Fox Medical</div>
-          <div className="text-[10px] text-slate-500">CRM v0.7</div>
+          <div className="text-[10px] text-slate-500">CRM v0.8</div>
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
