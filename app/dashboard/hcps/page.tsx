@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Users, Sparkles, Search, Phone, MessageCircle } from "lucide-react";
+import { Users, Sparkles, Search, Phone, MessageCircle, Plus, Pencil } from "lucide-react";
 import type { HCP } from "@/lib/types";
+import EditModal, { type FieldConfig } from "@/components/EditModal";
 
 const SEGMENT_COLORS: Record<string, string> = {
   A: "bg-emerald-100 text-emerald-700",
@@ -13,15 +14,60 @@ const SEGMENT_COLORS: Record<string, string> = {
   KOL: "bg-purple-100 text-purple-700"
 };
 
+const HCP_FIELDS: FieldConfig[] = [
+  { name: "full_name", label: "Full name", type: "text", required: true },
+  { name: "full_name_ar", label: "Name (Arabic)", type: "text", rtl: true },
+  { name: "title", label: "Title", type: "text", placeholder: "Dr." },
+  {
+    name: "specialty",
+    label: "Specialty",
+    type: "select",
+    options: [
+      { value: "Cardiology", label: "Cardiology" },
+      { value: "Endocrinology", label: "Endocrinology" },
+      { value: "General Practice", label: "General Practice" },
+      { value: "Internal Medicine", label: "Internal Medicine" },
+      { value: "Pediatrics", label: "Pediatrics" },
+      { value: "Pulmonology", label: "Pulmonology" },
+      { value: "Gastroenterology", label: "Gastroenterology" },
+      { value: "Neurology", label: "Neurology" },
+      { value: "Oncology", label: "Oncology" },
+      { value: "Orthopedics", label: "Orthopedics" },
+      { value: "Dermatology", label: "Dermatology" },
+      { value: "Other", label: "Other" }
+    ]
+  },
+  { name: "sub_specialty", label: "Sub-specialty", type: "text" },
+  { name: "phone", label: "Phone", type: "tel", placeholder: "+201234567890" },
+  { name: "mobile", label: "Mobile", type: "tel", placeholder: "+201234567890" },
+  { name: "whatsapp", label: "WhatsApp", type: "tel", placeholder: "+201234567890" },
+  { name: "email", label: "Email", type: "email" },
+  {
+    name: "segment",
+    label: "Segment",
+    type: "select",
+    options: [
+      { value: "A", label: "A — High prescriber" },
+      { value: "B", label: "B — Mid prescriber" },
+      { value: "C", label: "C — Low prescriber" },
+      { value: "D", label: "D — Minimal" },
+      { value: "KOL", label: "KOL" }
+    ]
+  },
+  { name: "is_kol", label: "Is KOL (Key Opinion Leader)", type: "checkbox" },
+  { name: "notes", label: "Notes", type: "textarea" },
+  { name: "is_active", label: "Active", type: "checkbox" }
+];
+
 export default function HCPsPage() {
   const [hcps, setHcps] = useState<HCP[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [scoringId, setScoringId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<HCP | null>(null);
+  const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   async function load() {
     setLoading(true);
@@ -65,11 +111,19 @@ export default function HCPsPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
-          <Users className="w-6 h-6" />
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
+            <Users className="w-6 h-6" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">HCPs</h1>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">HCPs</h1>
+        <button
+          onClick={() => setCreating(true)}
+          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+        >
+          <Plus className="w-4 h-4" /> Add HCP
+        </button>
       </div>
       <p className="text-slate-500 mb-6">Healthcare professionals — doctors, pharmacists, nurses</p>
 
@@ -94,7 +148,7 @@ export default function HCPsPage() {
             <div className="text-5xl mb-2">👨‍⚕️</div>
             <p className="text-slate-700 font-medium">No HCPs yet</p>
             <p className="text-sm text-slate-500 mt-1">
-              Add some HCPs from your Supabase or via the import wizard (coming).
+              Click &ldquo;Add HCP&rdquo; to create your first one.
             </p>
           </div>
         ) : (
@@ -136,23 +190,22 @@ export default function HCPsPage() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   {h.mobile && (
-                    <a
-                      href={`tel:${h.mobile}`}
-                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                    >
+                    <a href={`tel:${h.mobile}`} className="p-2 rounded-lg text-slate-500 hover:bg-slate-100">
                       <Phone className="w-4 h-4" />
                     </a>
                   )}
                   {h.whatsapp && (
-                    <a
-                      href={`https://wa.me/${h.whatsapp.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50"
-                    >
+                    <a href={`https://wa.me/${h.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50">
                       <MessageCircle className="w-4 h-4" />
                     </a>
                   )}
+                  <button
+                    onClick={() => setEditing(h)}
+                    className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                    title="Edit"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => aiScore(h.id)}
                     disabled={scoringId === h.id}
@@ -167,6 +220,29 @@ export default function HCPsPage() {
           </div>
         )}
       </div>
+
+      <EditModal
+        open={creating}
+        title="Add HCP"
+        table="hcps"
+        fields={HCP_FIELDS}
+        initialValues={{ title: "Dr.", is_active: true, is_kol: false }}
+        onClose={() => setCreating(false)}
+        onSaved={() => { setCreating(false); load(); }}
+      />
+
+      <EditModal
+        open={!!editing}
+        title="Edit HCP"
+        table="hcps"
+        recordId={editing?.id}
+        fields={HCP_FIELDS}
+        initialValues={editing ? (editing as unknown as Record<string, unknown>) : {}}
+        onClose={() => setEditing(null)}
+        onSaved={() => { setEditing(null); load(); }}
+        onDeleted={() => { setEditing(null); load(); }}
+        allowDelete
+      />
     </div>
   );
 }
