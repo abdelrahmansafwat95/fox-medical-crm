@@ -15,8 +15,11 @@ import {
   MapPin,
   AlertTriangle,
   Package,
-  Plus
+  Plus,
+  ShoppingCart,
+  Pencil
 } from "lucide-react";
+import EditModal, { type FieldConfig } from "@/components/EditModal";
 
 interface VisitFull {
   id: string;
@@ -41,6 +44,7 @@ interface VisitFull {
   next_visit_date: string | null;
   notes: string | null;
   manager_status: string;
+  order_id: string | null;
   samples_given_summary: Record<string, number> | null;
   hcps: { full_name: string; specialty: string | null } | null;
   institutions: { name: string; district: string | null } | null;
@@ -55,17 +59,48 @@ interface SampleTransactionRow {
   products: { name: string; brand_name: string | null } | null;
 }
 
+interface OrderRow {
+  id: string;
+  order_number: string | null;
+  status: string;
+  total: number;
+  currency: string;
+  items: { product_id: string; qty: number; total: number }[];
+}
+
+const VISIT_EDIT_FIELDS: FieldConfig[] = [
+  {
+    name: "doctor_attitude",
+    label: "Doctor attitude",
+    type: "select",
+    options: [
+      { value: "positive", label: "Positive" },
+      { value: "neutral", label: "Neutral" },
+      { value: "skeptical", label: "Skeptical" },
+      { value: "negative", label: "Negative" }
+    ]
+  },
+  { name: "doctor_feedback", label: "Doctor feedback", type: "textarea" },
+  { name: "objections", label: "Objections raised", type: "textarea" },
+  { name: "key_message_delivered", label: "Key message delivered", type: "text" },
+  { name: "next_action", label: "Next action", type: "text" },
+  { name: "next_visit_date", label: "Next visit date", type: "date" },
+  { name: "notes", label: "Additional notes", type: "textarea" }
+];
+
 export default function VisitDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const geo = useGeolocation();
   const [visit, setVisit] = useState<VisitFull | null>(null);
   const [samplesGiven, setSamplesGiven] = useState<SampleTransactionRow[]>([]);
+  const [order, setOrder] = useState<OrderRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [rawNotes, setRawNotes] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
   const [checkOutBusy, setCheckOutBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     if (params.id) load();
@@ -75,7 +110,6 @@ export default function VisitDetailPage() {
   async function load() {
     setLoading(true);
 
-    // Visit
     const { data: vData, error: vErr } = await supabase
       .from("visits")
       .select(`
@@ -83,16 +117,17 @@ export default function VisitDetailPage() {
         check_in_lat, check_in_lng, check_in_distance_m, check_in_within_geofence, check_in_selfie_url,
         ai_summary, ai_quality_score, ai_coaching_notes,
         doctor_attitude, doctor_feedback, objections, key_message_delivered,
-        next_action, next_visit_date, notes, manager_status, samples_given_summary,
+        next_action, next_visit_date, notes, manager_status, order_id, samples_given_summary,
         hcps(full_name, specialty),
         institutions(name, district)
       `)
       .eq("id", params.id)
       .single();
     if (vErr) setError(vErr.message);
-    setVisit((vData ?? null) as unknown as VisitFull | null);
+    const vRow = (vData ?? null) as unknown as VisitFull | null;
+    setVisit(vRow);
 
-    // Samples given during this visit (audit trail)
+    // Samples
     const { data: sData } = await supabase
       .from("samples_transactions")
       .select(`id, quantity, batch_number, hcp_signature_url, created_at,
@@ -101,6 +136,18 @@ export default function VisitDetailPage() {
       .eq("transaction_type", "given_to_hcp")
       .order("created_at", { ascending: false });
     setSamplesGiven((sData ?? []) as unknown as SampleTransactionRow[]);
+
+    // Linked order, if any
+    if (vRow?.order_id) {
+      const { data: oData } = await supabase
+        .from("orders")
+        .select("id, order_number, status, total, currency, items")
+        .eq("id", vRow.order_id)
+        .maybeSingle();
+      setOrder((oData ?? null) as unknown as OrderRow | null);
+    } else {
+      setOrder(null);
+    }
 
     setLoading(false);
   }
@@ -176,6 +223,8 @@ export default function VisitDetailPage() {
 
   const canDistributeSamples =
     visit.status === "in_progress" || visit.status === "completed";
+  const canAddOrder = canDistributeSamples && !visit.order_id;
+  const canEdit = visit.status === "completed" || visit.status === "in_progress";
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -214,6 +263,15 @@ export default function VisitDetailPage() {
                 <AlertTriangle className="w-3 h-3" /> Flagged
               </span>
             )}
+            {canEdit && (
+              <button
+                onClick={() => setEditing(true)}
+                className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
+                title="Edit visit details"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -236,7 +294,6 @@ export default function VisitDetailPage() {
           </span>
         </div>
 
-        {/* Timeline */}
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div>
             <div className="text-xs text-slate-500">Check-in</div>
@@ -266,7 +323,6 @@ export default function VisitDetailPage() {
           )}
         </div>
 
-        {/* Selfie */}
         {visit.check_in_selfie_url && (
           <div className="mt-4">
             <div className="text-xs text-slate-500 mb-1">Verification selfie</div>
@@ -285,20 +341,28 @@ export default function VisitDetailPage() {
         )}
 
         {/* Action buttons */}
-        <div className="mt-4 flex flex-col sm:flex-row gap-2">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
           {canDistributeSamples && (
             <Link
               href={`/dashboard/visits/${visit.id}/give-sample`}
-              className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+              className="bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
             >
               <Package className="w-4 h-4" /> Give sample
+            </Link>
+          )}
+          {canAddOrder && (
+            <Link
+              href={`/dashboard/visits/${visit.id}/add-order`}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+            >
+              <ShoppingCart className="w-4 h-4" /> Add order
             </Link>
           )}
           {visit.status === "in_progress" && (
             <button
               onClick={checkOut}
               disabled={checkOutBusy}
-              className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+              className="bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
             >
               {checkOutBusy ? (
                 <>
@@ -313,6 +377,37 @@ export default function VisitDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Linked order */}
+      {order && (
+        <div className="bg-white rounded-xl border border-emerald-200 shadow-sm p-4 mb-4">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5 text-emerald-600" />
+              <h2 className="font-semibold text-slate-900">Order placed</h2>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                {order.status}
+              </span>
+            </div>
+            <Link
+              href="/dashboard/orders"
+              className="text-xs text-brand-700 underline"
+            >
+              View all orders
+            </Link>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <div className="text-slate-600">
+              Order <span className="font-mono">{order.order_number ?? "—"}</span> ·{" "}
+              {order.items?.length ?? 0} line item
+              {(order.items?.length ?? 0) === 1 ? "" : "s"}
+            </div>
+            <div className="font-bold text-slate-900">
+              {order.total.toLocaleString()} {order.currency}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Samples given during this visit */}
       {samplesGiven.length > 0 && (
@@ -366,7 +461,7 @@ export default function VisitDetailPage() {
         </div>
       )}
 
-      {/* AI summary section */}
+      {/* AI summary */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-5 h-5 text-yellow-600" />
@@ -416,7 +511,7 @@ export default function VisitDetailPage() {
             <textarea
               value={rawNotes}
               onChange={(e) => setRawNotes(e.target.value)}
-              placeholder="e.g. Met Dr. Hassan, discussed Cardia 5mg vs Concor, he was open but worried about pricing for govt insurance patients, took 5 samples, agreed to try with 2 patients next week, follow up Tuesday..."
+              placeholder="e.g. Met Dr. Hassan, discussed Cardia 5mg, he was open but worried about pricing..."
               rows={5}
               className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500 text-sm"
             />
@@ -439,7 +534,6 @@ export default function VisitDetailPage() {
         )}
       </div>
 
-      {/* Map link */}
       {visit.check_in_lat && visit.check_in_lng && (
         <a
           href={`https://www.google.com/maps?q=${visit.check_in_lat},${visit.check_in_lng}`}
@@ -450,6 +544,17 @@ export default function VisitDetailPage() {
           <MapPin className="w-4 h-4" /> View check-in location on Google Maps
         </a>
       )}
+
+      <EditModal
+        open={editing}
+        title="Edit visit details"
+        table="visits"
+        recordId={visit.id}
+        fields={VISIT_EDIT_FIELDS}
+        initialValues={visit as unknown as Record<string, unknown>}
+        onClose={() => setEditing(false)}
+        onSaved={() => { setEditing(false); load(); }}
+      />
     </div>
   );
 }
