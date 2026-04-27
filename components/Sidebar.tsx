@@ -24,7 +24,8 @@ import {
   Sparkles,
   Receipt,
   UserCircle,
-  Inbox
+  Inbox,
+  TrendingUp
 } from "lucide-react";
 
 interface NavItem {
@@ -55,7 +56,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard/hcps", label: "HCPs", icon: Users },
       { href: "/dashboard/institutions", label: "Institutions", icon: Building2 },
-      { href: "/dashboard/coverage", label: "Coverage", icon: UserCircle }
+      { href: "/dashboard/coverage", label: "Coverage", icon: UserCircle },
+      { href: "/dashboard/frequency", label: "Frequency", icon: TrendingUp }
     ]
   },
   {
@@ -98,7 +100,6 @@ export default function Sidebar() {
 
   useEffect(() => {
     loadCounts();
-    // Refresh every 30 seconds
     const id = setInterval(loadCounts, 30_000);
     return () => clearInterval(id);
   }, [pathname]);
@@ -125,7 +126,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="font-bold text-slate-900 text-sm leading-tight">Fox Medical</div>
-          <div className="text-[10px] text-slate-500">CRM v0.4</div>
+          <div className="text-[10px] text-slate-500">CRM v0.7</div>
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
