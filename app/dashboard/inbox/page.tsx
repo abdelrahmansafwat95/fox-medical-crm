@@ -130,14 +130,14 @@ export default function InboxPage() {
 
     const tpRes = supabase
       .from("tour_plans")
-      .select("id, rep_id, plan_date, planned_hcps, notes, submitted_at, profiles(full_name)")
+      .select("id, rep_id, plan_date, planned_hcps, notes, submitted_at, profiles!tour_plans_rep_id_fkey(full_name)")
       .eq("status", "submitted")
       .order("plan_date", { ascending: true });
 
     const fvRes = supabase
       .from("visits")
       .select(
-        "id, rep_id, check_in_at, duration_minutes, check_in_within_geofence, check_in_distance_m, visit_type, ai_quality_score, profiles(full_name), hcps(full_name), institutions(name)"
+        "id, rep_id, check_in_at, duration_minutes, check_in_within_geofence, check_in_distance_m, visit_type, ai_quality_score, profiles!visits_rep_id_fkey(full_name), hcps(full_name), institutions(name)"
       )
       .eq("manager_status", "flagged")
       .order("check_in_at", { ascending: false })
@@ -146,14 +146,14 @@ export default function InboxPage() {
     const exRes = supabase
       .from("expenses")
       .select(
-        "id, rep_id, expense_date, category, amount, currency, description, receipt_photo_url, profiles(full_name)"
+        "id, rep_id, expense_date, category, amount, currency, description, receipt_photo_url, profiles!expenses_rep_id_fkey(full_name)"
       )
       .eq("status", "submitted")
       .order("expense_date", { ascending: false });
 
     const alRes = supabase
       .from("compliance_alerts")
-      .select("id, rep_id, alert_type, severity, detected_at, evidence, profiles(full_name)")
+      .select("id, rep_id, alert_type, severity, detected_at, evidence, profiles!compliance_alerts_rep_id_fkey(full_name)")
       .eq("status", "open")
       .in("severity", ["high", "critical"])
       .order("detected_at", { ascending: false })

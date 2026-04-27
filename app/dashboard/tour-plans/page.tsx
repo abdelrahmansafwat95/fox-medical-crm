@@ -52,7 +52,7 @@ export default function TourPlansPage() {
     const [plansRes, hcpsRes] = await Promise.all([
       supabase
         .from("tour_plans")
-        .select("*, profiles(full_name)")
+        .select("*, profiles!tour_plans_rep_id_fkey(full_name)")
         .order("plan_date", { ascending: false })
         .limit(30),
       supabase

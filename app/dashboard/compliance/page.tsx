@@ -34,7 +34,7 @@ export default function CompliancePage() {
     setLoading(true);
     const { data } = await supabase
       .from("compliance_alerts")
-      .select("*, profiles(full_name)")
+      .select("*, profiles!compliance_alerts_rep_id_fkey(full_name)")
       .order("detected_at", { ascending: false })
       .limit(100);
     setAlerts((data ?? []) as unknown as (ComplianceAlert & { profiles: { full_name: string | null } | null })[]);
