@@ -17,7 +17,8 @@ import {
   Package,
   ShoppingCart,
   Shield,
-  Pencil
+  Pencil,
+  CalendarDays
 } from "lucide-react";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 
@@ -97,12 +98,30 @@ interface AlertItem {
   related_visit_id: string | null;
 }
 
+interface EventInviteItem {
+  id: string;
+  rsvp_status: string;
+  attendance_status: string;
+  is_speaker: boolean;
+  invited_at: string;
+  rsvp_at: string | null;
+  events: {
+    id: string;
+    title: string;
+    event_type: string;
+    starts_at: string;
+    venue_name: string | null;
+    is_virtual: boolean;
+  } | null;
+}
+
 type TimelineEvent =
   | ({ kind: "visit"; date: string } & VisitItem)
   | ({ kind: "sample"; date: string } & SampleTx)
   | ({ kind: "order"; date: string } & OrderItem)
   | ({ kind: "whatsapp"; date: string } & WAMessage)
-  | ({ kind: "alert"; date: string } & AlertItem);
+  | ({ kind: "alert"; date: string } & AlertItem)
+  | ({ kind: "event"; date: string } & EventInviteItem);
 
 const SEGMENT_COLORS: Record<string, string> = {
   A: "bg-emerald-100 text-emerald-700",
@@ -185,7 +204,7 @@ export default function HCPDetailPage() {
     }
 
     // 2. All related events in parallel
-    const [visitsRes, samplesRes, ordersRes, waRes] = await Promise.all([
+    const [visitsRes, samplesRes, ordersRes, waRes, eventsRes] = await Promise.all([
       supabase
         .from("visits")
         .select(
@@ -223,7 +242,17 @@ export default function HCPDetailPage() {
         .select(`id, message, direction, created_at, profiles(full_name)`)
         .eq("hcp_id", params.id)
         .order("created_at", { ascending: false })
-        .limit(50)
+        .limit(50),
+
+      supabase
+        .from("event_invitees")
+        .select(
+          `id, rsvp_status, attendance_status, is_speaker, invited_at, rsvp_at,
+           events(id, title, event_type, starts_at, venue_name, is_virtual)`
+        )
+        .eq("hcp_id", params.id)
+        .order("invited_at", { ascending: false })
+        .limit(30)
     ]);
 
     // Compliance alerts: query separately using visit IDs we just loaded
@@ -267,6 +296,13 @@ export default function HCPDetailPage() {
     (alertsRows ?? []).forEach((a: unknown) => {
       const r = a as AlertItem;
       merged.push({ kind: "alert", date: r.detected_at, ...r });
+    });
+
+    (eventsRes.data ?? []).forEach((e: unknown) => {
+      const r = e as EventInviteItem;
+      // Use rsvp_at if present, else invited_at — most recent action wins
+      const date = r.rsvp_at ?? r.invited_at;
+      merged.push({ kind: "event", date, ...r });
     });
 
     merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -328,7 +364,9 @@ export default function HCPDetailPage() {
       0
     ),
     orders: events.filter((e) => e.kind === "order").length,
-    alerts: events.filter((e) => e.kind === "alert").length
+    eventsAttended: events.filter(
+      (e) => e.kind === "event" && (e as TimelineEvent & { kind: "event" }).attendance_status === "attended"
+    ).length
   };
 
   return (
@@ -448,10 +486,10 @@ export default function HCPDetailPage() {
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <StatCard icon={ClipboardList} value={stats.visits}      label="Visits"        cls="bg-brand-50 text-brand-700" />
-        <StatCard icon={Package}       value={stats.samplesGiven} label="Sample units"  cls="bg-amber-50 text-amber-700" />
-        <StatCard icon={ShoppingCart}  value={stats.orders}      label="Orders"        cls="bg-emerald-50 text-emerald-700" />
-        <StatCard icon={Shield}        value={stats.alerts}      label="Alerts"        cls={stats.alerts > 0 ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-500"} />
+        <StatCard icon={ClipboardList} value={stats.visits}         label="Visits"         cls="bg-brand-50 text-brand-700" />
+        <StatCard icon={Package}       value={stats.samplesGiven}    label="Sample units"   cls="bg-amber-50 text-amber-700" />
+        <StatCard icon={ShoppingCart}  value={stats.orders}         label="Orders"         cls="bg-emerald-50 text-emerald-700" />
+        <StatCard icon={CalendarDays}  value={stats.eventsAttended} label="Events attended" cls="bg-purple-50 text-purple-700" />
       </div>
 
       {/* Timeline */}
@@ -526,6 +564,7 @@ function TimelineRow({ event }: { event: TimelineEvent }) {
   if (event.kind === "order") return <OrderRow o={event} />;
   if (event.kind === "whatsapp") return <WARow w={event} />;
   if (event.kind === "alert") return <AlertRow a={event} />;
+  if (event.kind === "event") return <EventRow e={event} />;
   return null;
 }
 
@@ -713,6 +752,66 @@ function AlertRow({ a }: { a: TimelineEvent & { kind: "alert" } }) {
           <div className="text-xs text-slate-500 mt-0.5">Compliance alert</div>
         </div>
         <div className="text-xs text-slate-400 shrink-0">{timeAgo(a.date)}</div>
+      </div>
+    </Link>
+  );
+}
+
+function EventRow({ e }: { e: TimelineEvent & { kind: "event" } }) {
+  const ev = e.events;
+  if (!ev) return null;
+
+  const eventDate = new Date(ev.starts_at);
+  const isPast = eventDate.getTime() < Date.now();
+
+  // Determine the action verb based on RSVP / attendance status
+  let verb = "Invited to";
+  let badgeCls = "bg-purple-100 text-purple-700";
+
+  if (e.attendance_status === "attended") {
+    verb = "Attended";
+    badgeCls = "bg-emerald-100 text-emerald-700";
+  } else if (e.attendance_status === "no_show" && isPast) {
+    verb = "No-show at";
+    badgeCls = "bg-red-100 text-red-700";
+  } else if (e.rsvp_status === "accepted") {
+    verb = "Accepted invite to";
+    badgeCls = "bg-emerald-100 text-emerald-700";
+  } else if (e.rsvp_status === "declined") {
+    verb = "Declined invite to";
+    badgeCls = "bg-red-100 text-red-700";
+  }
+
+  return (
+    <Link
+      href={`/dashboard/events/${ev.id}`}
+      className="block p-4 hover:bg-slate-50 transition"
+    >
+      <div className="flex items-start gap-3">
+        <div className="p-1.5 rounded-lg bg-purple-50 text-purple-700 shrink-0 mt-0.5">
+          <CalendarDays className="w-4 h-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-medium text-slate-900 text-sm">
+              {verb} <span className="text-brand-700">{ev.title}</span>
+            </span>
+            {e.is_speaker && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
+                🎤 SPEAKER
+              </span>
+            )}
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeCls} capitalize`}>
+              {e.rsvp_status}
+            </span>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5">
+            {ev.event_type.replaceAll("_", " ")} ·{" "}
+            {eventDate.toLocaleDateString("en-EG", { month: "short", day: "numeric", year: "numeric" })}
+            {ev.is_virtual ? " · Virtual" : ev.venue_name ? ` · ${ev.venue_name}` : ""}
+          </div>
+        </div>
+        <div className="text-xs text-slate-400 shrink-0">{timeAgo(e.date)}</div>
       </div>
     </Link>
   );
