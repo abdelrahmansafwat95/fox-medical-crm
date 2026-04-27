@@ -13,7 +13,9 @@ import {
   Loader2,
   LogOut,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  Package,
+  Plus
 } from "lucide-react";
 
 interface VisitFull {
@@ -39,8 +41,18 @@ interface VisitFull {
   next_visit_date: string | null;
   notes: string | null;
   manager_status: string;
+  samples_given_summary: Record<string, number> | null;
   hcps: { full_name: string; specialty: string | null } | null;
   institutions: { name: string; district: string | null } | null;
+}
+
+interface SampleTransactionRow {
+  id: string;
+  quantity: number;
+  batch_number: string | null;
+  hcp_signature_url: string | null;
+  created_at: string;
+  products: { name: string; brand_name: string | null } | null;
 }
 
 export default function VisitDetailPage() {
@@ -48,6 +60,7 @@ export default function VisitDetailPage() {
   const router = useRouter();
   const geo = useGeolocation();
   const [visit, setVisit] = useState<VisitFull | null>(null);
+  const [samplesGiven, setSamplesGiven] = useState<SampleTransactionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [rawNotes, setRawNotes] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
@@ -61,21 +74,34 @@ export default function VisitDetailPage() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
+
+    // Visit
+    const { data: vData, error: vErr } = await supabase
       .from("visits")
       .select(`
         id, status, visit_type, check_in_at, check_out_at, duration_minutes,
         check_in_lat, check_in_lng, check_in_distance_m, check_in_within_geofence, check_in_selfie_url,
         ai_summary, ai_quality_score, ai_coaching_notes,
         doctor_attitude, doctor_feedback, objections, key_message_delivered,
-        next_action, next_visit_date, notes, manager_status,
+        next_action, next_visit_date, notes, manager_status, samples_given_summary,
         hcps(full_name, specialty),
         institutions(name, district)
       `)
       .eq("id", params.id)
       .single();
-    if (error) setError(error.message);
-    setVisit((data ?? null) as unknown as VisitFull | null);
+    if (vErr) setError(vErr.message);
+    setVisit((vData ?? null) as unknown as VisitFull | null);
+
+    // Samples given during this visit (audit trail)
+    const { data: sData } = await supabase
+      .from("samples_transactions")
+      .select(`id, quantity, batch_number, hcp_signature_url, created_at,
+               products(name, brand_name)`)
+      .eq("visit_id", params.id)
+      .eq("transaction_type", "given_to_hcp")
+      .order("created_at", { ascending: false });
+    setSamplesGiven((sData ?? []) as unknown as SampleTransactionRow[]);
+
     setLoading(false);
   }
 
@@ -148,6 +174,9 @@ export default function VisitDetailPage() {
       </div>
     );
 
+  const canDistributeSamples =
+    visit.status === "in_progress" || visit.status === "completed";
+
   return (
     <div className="max-w-3xl mx-auto">
       <Link
@@ -202,8 +231,7 @@ export default function VisitDetailPage() {
             <AlertTriangle className="w-4 h-4" />
           )}
           <span>
-            {visit.check_in_within_geofence ? "GPS-verified" : "Outside geofence"} ·
-            {" "}
+            {visit.check_in_within_geofence ? "GPS-verified" : "Outside geofence"} ·{" "}
             {visit.check_in_distance_m?.toFixed(0)}m from anchor
           </span>
         </div>
@@ -256,25 +284,87 @@ export default function VisitDetailPage() {
           </div>
         )}
 
-        {/* Check-out button */}
-        {visit.status === "in_progress" && (
-          <button
-            onClick={checkOut}
-            disabled={checkOutBusy}
-            className="mt-4 w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
-          >
-            {checkOutBusy ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Checking out…
-              </>
-            ) : (
-              <>
-                <LogOut className="w-4 h-4" /> Check out & complete visit
-              </>
-            )}
-          </button>
-        )}
+        {/* Action buttons */}
+        <div className="mt-4 flex flex-col sm:flex-row gap-2">
+          {canDistributeSamples && (
+            <Link
+              href={`/dashboard/visits/${visit.id}/give-sample`}
+              className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+            >
+              <Package className="w-4 h-4" /> Give sample
+            </Link>
+          )}
+          {visit.status === "in_progress" && (
+            <button
+              onClick={checkOut}
+              disabled={checkOutBusy}
+              className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+            >
+              {checkOutBusy ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Checking out…
+                </>
+              ) : (
+                <>
+                  <LogOut className="w-4 h-4" /> Check out
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Samples given during this visit */}
+      {samplesGiven.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-amber-600" />
+              <h2 className="font-semibold text-slate-900">
+                Samples given ({samplesGiven.reduce((s, t) => s + t.quantity, 0)} units)
+              </h2>
+            </div>
+            {canDistributeSamples && (
+              <Link
+                href={`/dashboard/visits/${visit.id}/give-sample`}
+                className="text-xs text-brand-700 hover:underline inline-flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" /> Give more
+              </Link>
+            )}
+          </div>
+          <div className="divide-y divide-slate-100">
+            {samplesGiven.map((tx) => (
+              <div key={tx.id} className="py-2 flex items-center gap-3 text-sm">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-slate-900">
+                    {tx.products?.brand_name ?? tx.products?.name ?? "—"}
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Batch {tx.batch_number ?? "—"} ·{" "}
+                    {new Date(tx.created_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })}
+                  </div>
+                </div>
+                {tx.hcp_signature_url && (
+                  <a
+                    href={tx.hcp_signature_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="View signature"
+                    className="text-xs text-emerald-700"
+                  >
+                    ✍️ signed
+                  </a>
+                )}
+                <div className="font-bold text-slate-900 shrink-0">×{tx.quantity}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* AI summary section */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
