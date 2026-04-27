@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Building2, MapPin, Search } from "lucide-react";
+import { Building2, MapPin, Search, Plus, Pencil } from "lucide-react";
 import type { Institution } from "@/lib/types";
+import EditModal, { type FieldConfig } from "@/components/EditModal";
 
 const TYPE_LABELS: Record<string, string> = {
   private_clinic: "Private Clinic",
@@ -20,22 +21,46 @@ const TYPE_LABELS: Record<string, string> = {
   warehouse: "Warehouse"
 };
 
+const INST_FIELDS: FieldConfig[] = [
+  { name: "name", label: "Name", type: "text", required: true },
+  { name: "name_ar", label: "Name (Arabic)", type: "text", rtl: true },
+  {
+    name: "type",
+    label: "Type",
+    type: "select",
+    required: true,
+    options: Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }))
+  },
+  { name: "latitude", label: "Latitude", type: "number", required: true, step: 0.000001, helpText: "From Google Maps — right-click → 'What's here?'" },
+  { name: "longitude", label: "Longitude", type: "number", required: true, step: 0.000001 },
+  { name: "geofence_radius_m", label: "Geofence radius (meters)", type: "number", min: 25, max: 1000, helpText: "Default 100m. Lower = stricter check-in." },
+  { name: "address", label: "Address", type: "text" },
+  { name: "city", label: "City", type: "text", placeholder: "Cairo" },
+  { name: "district", label: "District", type: "text", placeholder: "Maadi, Heliopolis, …" },
+  { name: "governorate", label: "Governorate", type: "text", placeholder: "Cairo, Giza, …" },
+  { name: "phone", label: "Phone", type: "tel" },
+  { name: "is_active", label: "Active", type: "checkbox" }
+];
+
 export default function InstitutionsPage() {
   const [items, setItems] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState<Institution | null>(null);
+  const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("institutions")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
-      setItems((data ?? []) as Institution[]);
-      setLoading(false);
-    })();
-  }, []);
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase
+      .from("institutions")
+      .select("*")
+      .eq("is_active", true)
+      .order("name");
+    setItems((data ?? []) as Institution[]);
+    setLoading(false);
+  }
 
   const filtered = items.filter(
     (i) =>
@@ -45,11 +70,19 @@ export default function InstitutionsPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
-          <Building2 className="w-6 h-6" />
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
+            <Building2 className="w-6 h-6" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Institutions</h1>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Institutions</h1>
+        <button
+          onClick={() => setCreating(true)}
+          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+        >
+          <Plus className="w-4 h-4" /> Add institution
+        </button>
       </div>
       <p className="text-slate-500 mb-6">
         Clinics, hospitals, pharmacies, distributors. Each has a GPS-anchored geofence.
@@ -82,15 +115,24 @@ export default function InstitutionsPage() {
                   {i.name_ar && <div className="text-sm text-slate-600" dir="rtl">{i.name_ar}</div>}
                   <div className="text-xs text-slate-500 mt-1">{TYPE_LABELS[i.type] ?? i.type}</div>
                 </div>
-                <a
-                  href={`https://www.google.com/maps?q=${i.latitude},${i.longitude}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 shrink-0"
-                  title="Open in Google Maps"
-                >
-                  <MapPin className="w-4 h-4" />
-                </a>
+                <div className="flex items-center gap-1 shrink-0">
+                  <a
+                    href={`https://www.google.com/maps?q=${i.latitude},${i.longitude}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 rounded-lg text-blue-600 hover:bg-blue-50"
+                    title="Open in Google Maps"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </a>
+                  <button
+                    onClick={() => setEditing(i)}
+                    className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                    title="Edit"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <div className="mt-3 text-xs text-slate-500 space-y-0.5">
                 {i.address && <div>📍 {i.address}</div>}
@@ -108,6 +150,29 @@ export default function InstitutionsPage() {
           ))}
         </div>
       )}
+
+      <EditModal
+        open={creating}
+        title="Add institution"
+        table="institutions"
+        fields={INST_FIELDS}
+        initialValues={{ type: "private_clinic", is_active: true, geofence_radius_m: 100, latitude: 30.0444, longitude: 31.2357 }}
+        onClose={() => setCreating(false)}
+        onSaved={() => { setCreating(false); load(); }}
+      />
+
+      <EditModal
+        open={!!editing}
+        title="Edit institution"
+        table="institutions"
+        recordId={editing?.id}
+        fields={INST_FIELDS}
+        initialValues={editing ? (editing as unknown as Record<string, unknown>) : {}}
+        onClose={() => setEditing(null)}
+        onSaved={() => { setEditing(null); load(); }}
+        onDeleted={() => { setEditing(null); load(); }}
+        allowDelete
+      />
     </div>
   );
 }
