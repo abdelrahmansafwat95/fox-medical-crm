@@ -27,7 +27,8 @@ import {
   Inbox,
   TrendingUp,
   CalendarDays,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Bug
 } from "lucide-react";
 
 interface NavItem {
@@ -90,6 +91,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/compliance", label: "Compliance", icon: Shield },
       { href: "/dashboard/team", label: "Team", icon: Users },
       { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet },
+      { href: "/dashboard/admin/test-fake-checkin", label: "Test Fake Check-in", icon: Bug },
       { href: "/dashboard/settings", label: "Settings", icon: Settings }
     ]
   }
@@ -130,7 +132,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="font-bold text-slate-900 text-sm leading-tight">Fox Medical</div>
-          <div className="text-[10px] text-slate-500">CRM v0.9</div>
+          <div className="text-[10px] text-slate-500">CRM v0.12</div>
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
