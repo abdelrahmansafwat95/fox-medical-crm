@@ -26,6 +26,7 @@ import EditModal, { type FieldConfig } from "@/components/EditModal";
 
 interface HCPDetail {
   id: string;
+  code: string | null;
   full_name: string;
   full_name_ar: string | null;
   title: string | null;
@@ -389,6 +390,11 @@ export default function HCPDetailPage() {
               <h1 className="text-xl font-bold text-slate-900">
                 {hcp.title ?? "Dr."} {hcp.full_name}
               </h1>
+              {hcp.code && (
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                  {hcp.code}
+                </span>
+              )}
               {segmentKey && (
                 <span
                   className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${

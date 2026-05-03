@@ -62,11 +62,14 @@ export default function InstitutionsPage() {
     setLoading(false);
   }
 
-  const filtered = items.filter(
-    (i) =>
-      i.name.toLowerCase().includes(search.toLowerCase()) ||
-      (i.district?.toLowerCase().includes(search.toLowerCase()) ?? false)
-  );
+  const filtered = items.filter((i) => {
+    const q = search.toLowerCase();
+    return (
+      i.name.toLowerCase().includes(q) ||
+      (i.district?.toLowerCase().includes(q) ?? false) ||
+      ((i as { code?: string }).code?.toLowerCase().includes(q) ?? false)
+    );
+  });
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -95,7 +98,7 @@ export default function InstitutionsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or district…"
+            placeholder="Search by name, code (H-00042), or district…"
             className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
@@ -111,7 +114,14 @@ export default function InstitutionsPage() {
             <div key={i.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-slate-900">{i.name}</h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-slate-900">{i.name}</h3>
+                    {(i as { code?: string }).code && (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                        {(i as { code?: string }).code}
+                      </span>
+                    )}
+                  </div>
                   {i.name_ar && <div className="text-sm text-slate-600" dir="rtl">{i.name_ar}</div>}
                   <div className="text-xs text-slate-500 mt-1">{TYPE_LABELS[i.type] ?? i.type}</div>
                 </div>

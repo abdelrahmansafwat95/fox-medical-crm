@@ -113,10 +113,14 @@ export default function HCPsPage() {
     setEditing(h);
   }
 
-  const filtered = hcps.filter((h) =>
-    h.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    (h.specialty?.toLowerCase().includes(search.toLowerCase()) ?? false)
-  );
+  const filtered = hcps.filter((h) => {
+    const q = search.toLowerCase();
+    return (
+      h.full_name.toLowerCase().includes(q) ||
+      (h.specialty?.toLowerCase().includes(q) ?? false) ||
+      ((h as { code?: string }).code?.toLowerCase().includes(q) ?? false)
+    );
+  });
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -145,7 +149,7 @@ export default function HCPsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or specialty…"
+            placeholder="Search by name, code (D-00042), or specialty…"
             className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
@@ -178,6 +182,11 @@ export default function HCPsPage() {
                     <span className="font-semibold text-slate-900">
                       {h.title ?? "Dr."} {h.full_name}
                     </span>
+                    {(h as { code?: string }).code && (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                        {(h as { code?: string }).code}
+                      </span>
+                    )}
                     {h.segment && (
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${SEGMENT_COLORS[h.segment]}`}>
                         {h.segment}

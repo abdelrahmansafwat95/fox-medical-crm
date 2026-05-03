@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
-import { Users, Mail, Phone } from "lucide-react";
+import { Users, Mail, Phone, Search } from "lucide-react";
 
 interface ProfileRow {
   id: string;
+  code: string | null;
   full_name: string | null;
   email: string | null;
   phone: string | null;
@@ -27,6 +28,7 @@ const ROLE_COLORS: Record<string, string> = {
 export default function TeamPage() {
   const [team, setTeam] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -34,11 +36,23 @@ export default function TeamPage() {
         .from("profiles")
         .select("*")
         .order("role")
-        .order("full_name");
+        .order("code");
       setTeam((data ?? []) as ProfileRow[]);
       setLoading(false);
     })();
   }, []);
+
+  const filtered = useMemo(() => {
+    if (!search) return team;
+    const q = search.toLowerCase();
+    return team.filter(
+      (m) =>
+        m.full_name?.toLowerCase().includes(q) ||
+        m.email?.toLowerCase().includes(q) ||
+        m.code?.toLowerCase().includes(q) ||
+        m.product_line?.toLowerCase().includes(q)
+    );
+  }, [team, search]);
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -52,31 +66,63 @@ export default function TeamPage() {
         Add new reps via Supabase Auth → Users, then update their role and product line in the profiles table.
       </p>
 
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, code (R-0001), email, or product line…"
+            className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
+          />
+        </div>
+      </div>
+
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
-      ) : team.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          No team members yet.
+          Loading…
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
+          {search ? "No team members match your search." : "No team members yet."}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
-          {team.map((m) => (
+          {filtered.map((m) => (
             <div key={m.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="font-semibold text-slate-900 truncate">{m.full_name ?? "Unknown"}</div>
-                  <div className="text-xs text-slate-500">{m.product_line ?? "—"}</div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="font-semibold text-slate-900 truncate">
+                      {m.full_name ?? "Unknown"}
+                    </div>
+                    {m.code && (
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                        {m.code}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-0.5">{m.product_line ?? "—"}</div>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded ${ROLE_COLORS[m.role] ?? "bg-slate-100 text-slate-700"} shrink-0`}>
+                <span
+                  className={`text-[10px] font-bold px-2 py-1 rounded ${
+                    ROLE_COLORS[m.role] ?? "bg-slate-100 text-slate-700"
+                  } shrink-0`}
+                >
                   {m.role.replaceAll("_", " ")}
                 </span>
               </div>
               <div className="mt-2 space-y-1 text-xs text-slate-600">
                 {m.email && (
-                  <div className="flex items-center gap-1.5"><Mail className="w-3 h-3" /> {m.email}</div>
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="w-3 h-3" /> {m.email}
+                  </div>
                 )}
                 {m.phone && (
-                  <div className="flex items-center gap-1.5"><Phone className="w-3 h-3" /> {m.phone}</div>
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="w-3 h-3" /> {m.phone}
+                  </div>
                 )}
               </div>
             </div>
