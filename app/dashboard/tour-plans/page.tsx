@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRole, isManager } from "@/lib/roles";
+import { notifyUser } from "@/lib/notify";
 import { Calendar, Plus, Loader2 } from "lucide-react";
 
 interface TourPlanRow {
@@ -93,20 +94,34 @@ export default function TourPlansPage() {
   }
 
   async function approve(id: string) {
+    const plan = plans.find((p) => p.id === id);
     await supabase
       .from("tour_plans")
       .update({ status: "approved", approved_at: new Date().toISOString() })
       .eq("id", id);
+    await notifyUser(plan?.rep_id, {
+      type: "tour_plan",
+      title: "Tour plan approved",
+      body: `Your plan for ${plan?.plan_date ?? ""} was approved.`,
+      link_url: "/dashboard/tour-plans"
+    });
     load();
   }
 
   async function reject(id: string) {
     const reason = prompt("Reason for rejection?");
     if (reason === null) return;
+    const plan = plans.find((p) => p.id === id);
     await supabase
       .from("tour_plans")
       .update({ status: "rejected", manager_notes: reason })
       .eq("id", id);
+    await notifyUser(plan?.rep_id, {
+      type: "tour_plan",
+      title: "Tour plan rejected",
+      body: reason || undefined,
+      link_url: "/dashboard/tour-plans"
+    });
     load();
   }
 

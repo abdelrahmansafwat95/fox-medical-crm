@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import { Users, Mail, Phone, Search } from "lucide-react";
 
 interface ProfileRow {
@@ -26,6 +27,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function TeamPage() {
+  const { checking } = useRequireManager();
   const [team, setTeam] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -53,6 +55,10 @@ export default function TeamPage() {
         m.product_line?.toLowerCase().includes(q)
     );
   }, [team, search]);
+
+  if (checking) {
+    return <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
+  }
 
   return (
     <div className="max-w-5xl mx-auto">

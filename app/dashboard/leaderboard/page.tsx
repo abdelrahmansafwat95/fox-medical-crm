@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import { Trophy, Medal, Award, Sparkles, Loader2 } from "lucide-react";
 
 interface Performer {
@@ -17,6 +18,7 @@ interface Performer {
 }
 
 export default function LeaderboardPage() {
+  const { checking } = useRequireManager();
   const [reps, setReps] = useState<Performer[]>([]);
   const [loading, setLoading] = useState(true);
   const [coachingFor, setCoachingFor] = useState<string | null>(null);
@@ -56,6 +58,10 @@ export default function LeaderboardPage() {
     } else {
       setCoachingText("Failed to generate coaching: " + (j.error ?? "unknown"));
     }
+  }
+
+  if (checking) {
+    return <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
   }
 
   return (

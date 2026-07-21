@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useRequireManager } from "@/lib/roles";
+import { notifyUser } from "@/lib/notify";
 import {
   Inbox,
   Calendar,
@@ -191,10 +192,17 @@ export default function InboxPage() {
 
   async function approveTourPlan(id: string) {
     setBusyId(id);
+    const plan = tourPlans.find((p) => p.id === id);
     await supabase
       .from("tour_plans")
       .update({ status: "approved", approved_at: new Date().toISOString() })
       .eq("id", id);
+    await notifyUser(plan?.rep_id, {
+      type: "tour_plan",
+      title: "Tour plan approved",
+      body: `Your plan for ${plan?.plan_date ?? ""} was approved.`,
+      link_url: "/dashboard/tour-plans"
+    });
     setTourPlans((prev) => prev.filter((p) => p.id !== id));
     setBusyId(null);
   }
@@ -203,17 +211,31 @@ export default function InboxPage() {
     const reason = prompt("Reason for rejection?");
     if (reason === null) return;
     setBusyId(id);
+    const plan = tourPlans.find((p) => p.id === id);
     await supabase
       .from("tour_plans")
       .update({ status: "rejected", manager_notes: reason })
       .eq("id", id);
+    await notifyUser(plan?.rep_id, {
+      type: "tour_plan",
+      title: "Tour plan rejected",
+      body: reason || undefined,
+      link_url: "/dashboard/tour-plans"
+    });
     setTourPlans((prev) => prev.filter((p) => p.id !== id));
     setBusyId(null);
   }
 
   async function approveVisit(id: string) {
     setBusyId(id);
+    const v = flaggedVisits.find((x) => x.id === id);
     await supabase.from("visits").update({ manager_status: "approved" }).eq("id", id);
+    await notifyUser(v?.rep_id, {
+      type: "visit",
+      title: "Visit approved",
+      body: "Your visit was reviewed and approved.",
+      link_url: `/dashboard/visits/${id}`
+    });
     setFlaggedVisits((prev) => prev.filter((v) => v.id !== id));
     setBusyId(null);
   }
@@ -222,16 +244,24 @@ export default function InboxPage() {
     const reason = prompt("Reason for rejection?");
     if (reason === null) return;
     setBusyId(id);
+    const v = flaggedVisits.find((x) => x.id === id);
     await supabase
       .from("visits")
       .update({ manager_status: "rejected", manager_notes: reason })
       .eq("id", id);
+    await notifyUser(v?.rep_id, {
+      type: "visit",
+      title: "Visit rejected",
+      body: reason || undefined,
+      link_url: `/dashboard/visits/${id}`
+    });
     setFlaggedVisits((prev) => prev.filter((v) => v.id !== id));
     setBusyId(null);
   }
 
   async function approveExpense(id: string) {
     setBusyId(id);
+    const ex = expenses.find((x) => x.id === id);
     const { data: u } = await supabase.auth.getUser();
     await supabase
       .from("expenses")
@@ -241,6 +271,12 @@ export default function InboxPage() {
         approved_at: new Date().toISOString()
       })
       .eq("id", id);
+    await notifyUser(ex?.rep_id, {
+      type: "expense",
+      title: "Expense approved",
+      body: ex ? `${ex.amount.toLocaleString()} ${ex.currency} approved.` : undefined,
+      link_url: "/dashboard/expenses"
+    });
     setExpenses((prev) => prev.filter((e) => e.id !== id));
     setBusyId(null);
   }
@@ -249,10 +285,17 @@ export default function InboxPage() {
     const reason = prompt("Reason for rejection?");
     if (reason === null) return;
     setBusyId(id);
+    const ex = expenses.find((x) => x.id === id);
     await supabase
       .from("expenses")
       .update({ status: "rejected", rejection_reason: reason })
       .eq("id", id);
+    await notifyUser(ex?.rep_id, {
+      type: "expense",
+      title: "Expense rejected",
+      body: reason || undefined,
+      link_url: "/dashboard/expenses"
+    });
     setExpenses((prev) => prev.filter((e) => e.id !== id));
     setBusyId(null);
   }
@@ -275,12 +318,24 @@ export default function InboxPage() {
     setBusyId("bulk-" + section);
 
     if (section === "tour_plans") {
+      const affected = tourPlans.filter((p) => ids.includes(p.id));
       await supabase
         .from("tour_plans")
         .update({ status: "approved", approved_at: new Date().toISOString() })
         .in("id", ids);
+      await Promise.all(
+        affected.map((p) =>
+          notifyUser(p.rep_id, {
+            type: "tour_plan",
+            title: "Tour plan approved",
+            body: `Your plan for ${p.plan_date} was approved.`,
+            link_url: "/dashboard/tour-plans"
+          })
+        )
+      );
       setTourPlans((prev) => prev.filter((p) => !ids.includes(p.id)));
     } else if (section === "expenses") {
+      const affected = expenses.filter((e) => ids.includes(e.id));
       const { data: u } = await supabase.auth.getUser();
       await supabase
         .from("expenses")
@@ -290,6 +345,16 @@ export default function InboxPage() {
           approved_at: new Date().toISOString()
         })
         .in("id", ids);
+      await Promise.all(
+        affected.map((e) =>
+          notifyUser(e.rep_id, {
+            type: "expense",
+            title: "Expense approved",
+            body: `${e.amount.toLocaleString()} ${e.currency} approved.`,
+            link_url: "/dashboard/expenses"
+          })
+        )
+      );
       setExpenses((prev) => prev.filter((e) => !ids.includes(e.id)));
     }
 

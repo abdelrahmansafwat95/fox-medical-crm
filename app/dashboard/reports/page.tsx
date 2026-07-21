@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import { BarChart3, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { exportToExcel, exportToPDF } from "@/lib/export";
 
@@ -21,6 +22,7 @@ interface InternalReportRow extends ReportRow {
 }
 
 export default function ReportsPage() {
+  const { checking } = useRequireManager();
   const [data, setData] = useState<ReportRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
@@ -121,6 +123,10 @@ export default function ReportsPage() {
       ]),
       filename: `fox-medical-report-${days}d.pdf`
     });
+  }
+
+  if (checking) {
+    return <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
   }
 
   return (

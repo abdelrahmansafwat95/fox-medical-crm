@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import { MapPin, Users, RefreshCw, AlertCircle } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -19,6 +20,7 @@ interface RepLatest {
 const CAIRO_CENTER: [number, number] = [31.2357, 30.0444];
 
 export default function LiveTrackingPage() {
+  const { checking } = useRequireManager();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
@@ -164,6 +166,10 @@ export default function LiveTrackingPage() {
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenMissing]);
+
+  if (checking) {
+    return <div className="max-w-7xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-180px)]">
