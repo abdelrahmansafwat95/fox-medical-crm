@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, User } from "lucide-react";
+import { Bell, User, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -34,6 +34,20 @@ export default function Topbar() {
       <div className="hidden md:block" />
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={() => window.dispatchEvent(new Event("foxmed:search"))}
+          className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 text-xs"
+        >
+          <Search className="w-4 h-4" /> Search
+          <kbd className="ml-1 text-[10px] bg-slate-100 rounded px-1 border border-slate-200">⌘K</kbd>
+        </button>
+        <button
+          onClick={() => window.dispatchEvent(new Event("foxmed:search"))}
+          aria-label="Search"
+          className="sm:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+        >
+          <Search className="w-5 h-5" />
+        </button>
         <ThemeToggle variant="icon" />
         <button
           aria-label="Notifications"

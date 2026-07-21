@@ -27,6 +27,7 @@ import {
   Inbox,
   TrendingUp,
   CalendarDays,
+  CalendarCheck,
   FileSpreadsheet
 } from "lucide-react";
 import { useRole, isManager } from "@/lib/roles";
@@ -51,6 +52,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Daily",
     items: [
       { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+      { href: "/dashboard/my-day", label: "My Day", icon: CalendarCheck },
       { href: "/dashboard/visits", label: "Visits", icon: ClipboardList },
       { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin },
       { href: "/dashboard/tour-plans", label: "Tour Plans", icon: Calendar },

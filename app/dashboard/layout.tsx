@@ -8,6 +8,7 @@ import { flushQueue } from "@/lib/offlineQueue";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import Topbar from "@/components/Topbar";
+import GlobalSearch from "@/components/GlobalSearch";
 
 export default function DashboardLayout({
   children
@@ -69,6 +70,7 @@ export default function DashboardLayout({
         <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6">{children}</main>
       </div>
       <MobileNav />
+      <GlobalSearch />
     </div>
   );
 }

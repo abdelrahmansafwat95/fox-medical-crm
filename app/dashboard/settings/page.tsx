@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Settings, User, BellRing, Loader2, Check } from "lucide-react";
+import { Settings, User, BellRing, Loader2, Check, Database } from "lucide-react";
 import { usePushNotifications } from "@/lib/usePushNotifications";
+import { useRole } from "@/lib/roles";
+import { seedDemoData } from "@/lib/demoSeed";
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<{
@@ -16,6 +18,23 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const push = usePushNotifications();
+  const { role } = useRole();
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState<string | null>(null);
+
+  async function loadDemo() {
+    if (!confirm("Load a demo dataset (8 institutions, 20 HCPs, 8 products, ~24 visits)? This adds records to your database.")) return;
+    setSeeding(true);
+    setSeedMsg(null);
+    try {
+      const r = await seedDemoData();
+      setSeedMsg(`Added ${r.institutions} institutions, ${r.hcps} HCPs, ${r.products} products, ${r.visits} visits.`);
+    } catch (e) {
+      setSeedMsg("Failed: " + (e instanceof Error ? e.message : "unknown error"));
+    } finally {
+      setSeeding(false);
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -141,6 +160,33 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {role === "admin" && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Database className="w-4 h-4 text-slate-500" />
+            <h2 className="font-semibold text-slate-900">Demo data</h2>
+          </div>
+          <p className="text-sm text-slate-600 mb-3">
+            Populate this instance with realistic sample institutions, HCPs, products, and
+            visits so you can explore or demo the app on a fresh database.
+          </p>
+          <button
+            onClick={loadDemo}
+            disabled={seeding}
+            className="text-sm bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2"
+          >
+            {seeding ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+              </>
+            ) : (
+              "Load demo data"
+            )}
+          </button>
+          {seedMsg && <p className="text-xs text-slate-600 mt-2">{seedMsg}</p>}
+        </div>
+      )}
     </div>
   );
 }
