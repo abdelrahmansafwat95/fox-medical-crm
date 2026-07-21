@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { CalendarCheck, MapPin, CheckCircle2, Circle, Loader2, ClipboardList } from "lucide-react";
+import { CalendarCheck, MapPin, CheckCircle2, Circle, Loader2, ClipboardList, Sparkles, Navigation } from "lucide-react";
 
 interface HCPLite {
   id: string;
@@ -24,6 +24,32 @@ export default function MyDayPage() {
   const [planStatus, setPlanStatus] = useState<string | null>(null);
   const [planned, setPlanned] = useState<HCPLite[]>([]);
   const [visits, setVisits] = useState<VisitLite[]>([]);
+  const [optimizing, setOptimizing] = useState(false);
+  const [routeResult, setRouteResult] = useState<{
+    order: string[];
+    reasoning?: string;
+    estimated_total_minutes?: number;
+    tips?: string[];
+    hcps?: { id: string; name: string; institution?: string; district?: string }[];
+  } | null>(null);
+
+  async function optimizeRoute() {
+    setOptimizing(true);
+    setRouteResult(null);
+    const { data: sess } = await supabase.auth.getSession();
+    const res = await fetch("/api/ai/optimize-route", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sess.session?.access_token}`
+      },
+      body: JSON.stringify({ hcp_ids: planned.map((h) => h.id) })
+    });
+    const j = await res.json();
+    setOptimizing(false);
+    if (j.ok) setRouteResult(j);
+    else alert("Route optimization failed: " + (j.error ?? "unknown"));
+  }
 
   useEffect(() => {
     (async () => {
@@ -126,7 +152,20 @@ export default function MyDayPage() {
       {/* Planned HCPs */}
       {planned.length > 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-3 border-b border-slate-100 text-sm font-semibold text-slate-700">Planned HCPs</div>
+          <div className="p-3 border-b border-slate-100 flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-slate-700">Planned HCPs</span>
+            <button
+              onClick={optimizeRoute}
+              disabled={optimizing}
+              className="text-xs bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 font-medium"
+            >
+              {optimizing ? (
+                <><Loader2 className="w-3 h-3 animate-spin" /> Optimizing…</>
+              ) : (
+                <><Sparkles className="w-3 h-3" /> Optimize route</>
+              )}
+            </button>
+          </div>
           <div className="divide-y divide-slate-100">
             {planned.map((h) => {
               const done = visitedIds.has(h.id);
@@ -164,6 +203,50 @@ export default function MyDayPage() {
             </Link>{" "}
             to line up your visits, or just check in on the go.
           </p>
+        </div>
+      )}
+
+      {/* AI-optimized route */}
+      {routeResult && (
+        <div className="bg-white rounded-xl border border-brand-200 shadow-sm overflow-hidden">
+          <div className="p-3 border-b border-slate-100 flex items-center gap-2 bg-brand-50">
+            <Navigation className="w-4 h-4 text-brand-700" />
+            <span className="text-sm font-semibold text-brand-900">AI-optimized route</span>
+            {routeResult.estimated_total_minutes ? (
+              <span className="ml-auto text-xs text-brand-700">
+                ≈ {Math.round((routeResult.estimated_total_minutes / 60) * 10) / 10}h
+              </span>
+            ) : null}
+          </div>
+          <ol className="divide-y divide-slate-100">
+            {routeResult.order.map((id, i) => {
+              const optH = routeResult.hcps?.find((x) => x.id === id);
+              const planH = planned.find((p) => p.id === id);
+              const name = optH?.name ?? planH?.full_name ?? "HCP";
+              const inst = optH?.institution ?? "";
+              return (
+                <li key={id} className="p-3 flex items-center gap-3 text-sm">
+                  <span className="w-6 h-6 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-slate-900 truncate">{name}</div>
+                    {inst && <div className="text-xs text-slate-500 truncate">{inst}</div>}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+          {routeResult.reasoning && (
+            <div className="p-3 text-xs text-slate-600 border-t border-slate-100">{routeResult.reasoning}</div>
+          )}
+          {routeResult.tips && routeResult.tips.length > 0 && (
+            <ul className="px-3 pb-3 text-xs text-slate-600 space-y-1">
+              {routeResult.tips.map((t, i) => (
+                <li key={i}>💡 {t}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

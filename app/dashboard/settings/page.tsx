@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Settings, User, BellRing, Loader2, Check, Database } from "lucide-react";
+import { Settings, User, BellRing, Loader2, Check, Database, Lock } from "lucide-react";
 import { usePushNotifications } from "@/lib/usePushNotifications";
 import { useRole } from "@/lib/roles";
 import { seedDemoData } from "@/lib/demoSeed";
@@ -21,6 +21,32 @@ export default function SettingsPage() {
   const { role } = useRole();
   const [seeding, setSeeding] = useState(false);
   const [seedMsg, setSeedMsg] = useState<string | null>(null);
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState<string | null>(null);
+
+  async function changePassword() {
+    setPwMsg(null);
+    if (newPass.length < 8) {
+      setPwMsg("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPass !== confirmPass) {
+      setPwMsg("Passwords don't match.");
+      return;
+    }
+    setPwSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    setPwSaving(false);
+    if (error) {
+      setPwMsg("Failed: " + error.message);
+      return;
+    }
+    setNewPass("");
+    setConfirmPass("");
+    setPwMsg("Password updated.");
+  }
 
   async function loadDemo() {
     if (!confirm("Load a demo dataset (8 institutions, 20 HCPs, 8 products, ~24 visits)? This adds records to your database.")) return;
@@ -159,6 +185,39 @@ export default function SettingsPage() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Lock className="w-4 h-4 text-slate-500" />
+          <h2 className="font-semibold text-slate-900">Change password</h2>
+        </div>
+        <div className="space-y-3 max-w-sm">
+          <input
+            type="password"
+            value={newPass}
+            onChange={(e) => setNewPass(e.target.value)}
+            placeholder="New password"
+            className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+          />
+          <input
+            type="password"
+            value={confirmPass}
+            onChange={(e) => setConfirmPass(e.target.value)}
+            placeholder="Confirm new password"
+            className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={changePassword}
+              disabled={pwSaving || !newPass}
+              className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-5 py-2 rounded-lg inline-flex items-center gap-2 text-sm"
+            >
+              {pwSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating…</> : "Update password"}
+            </button>
+            {pwMsg && <span className="text-xs text-slate-600">{pwMsg}</span>}
+          </div>
+        </div>
       </div>
 
       {role === "admin" && (

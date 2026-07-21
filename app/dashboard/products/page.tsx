@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Pill, ChevronDown, ChevronUp, Plus, Pencil } from "lucide-react";
+import { Pill, ChevronDown, ChevronUp, Plus, Pencil, Download, MessageSquare, Save, X, Loader2, Trash2 } from "lucide-react";
 import type { Product } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
+import { downloadCsv } from "@/lib/csv";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Rx: "bg-red-50 text-red-700",
@@ -62,6 +63,23 @@ export default function ProductsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [editing, setEditing] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
+  const [msgEditing, setMsgEditing] = useState<Product | null>(null);
+  const [msgs, setMsgs] = useState<{ title: string; message: string; evidence_label?: string | null }[]>([]);
+  const [msgSaving, setMsgSaving] = useState(false);
+
+  function openMessages(p: Product) {
+    setMsgEditing(p);
+    setMsgs(((p.key_messages ?? []) as { title: string; message: string; evidence_label?: string | null }[]).map((m) => ({ ...m })));
+  }
+  async function saveMessages() {
+    if (!msgEditing) return;
+    setMsgSaving(true);
+    const clean = msgs.filter((m) => m.title.trim() || m.message.trim());
+    await supabase.from("products").update({ key_messages: clean }).eq("id", msgEditing.id);
+    setMsgSaving(false);
+    setMsgEditing(null);
+    load();
+  }
 
   useEffect(() => { load(); }, []);
 
@@ -85,14 +103,37 @@ export default function ProductsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
         </div>
-        {can("products", "create") && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setCreating(true)}
-            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+            onClick={() =>
+              downloadCsv(
+                "products",
+                products.map((p) => ({
+                  Name: p.name,
+                  Brand: p.brand_name ?? "",
+                  Generic: p.generic_name ?? "",
+                  Category: p.category,
+                  "Therapy Area": p.therapy_area ?? "",
+                  Strength: p.strength ?? "",
+                  "Pack Size": p.pack_size ?? "",
+                  "List Price": p.list_price ?? "",
+                  Currency: p.currency ?? ""
+                }))
+              )
+            }
+            className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
           >
-            <Plus className="w-4 h-4" /> Add product
+            <Download className="w-4 h-4" /> Export
           </button>
-        )}
+          {can("products", "create") && (
+            <button
+              onClick={() => setCreating(true)}
+              className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+            >
+              <Plus className="w-4 h-4" /> Add product
+            </button>
+          )}
+        </div>
       </div>
       <p className="text-slate-500 mb-6">
         Drug & device catalog with key messages for detailing.
@@ -138,6 +179,15 @@ export default function ProductsPage() {
                   </button>
                   {can("products", "edit") && (
                     <button
+                      onClick={() => openMessages(p)}
+                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                      title="Edit key messages"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                    </button>
+                  )}
+                  {can("products", "edit") && (
+                    <button
                       onClick={() => setEditing(p)}
                       className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
                       title="Edit"
@@ -176,6 +226,78 @@ export default function ProductsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {msgEditing && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setMsgEditing(null)}
+        >
+          <div
+            className="bg-white rounded-t-2xl sm:rounded-xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <h2 className="font-semibold text-slate-900">
+                Key messages — {msgEditing.brand_name ?? msgEditing.name}
+              </h2>
+              <button onClick={() => setMsgEditing(null)} className="p-1 text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {msgs.length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-4">No messages yet. Add one below.</p>
+              )}
+              {msgs.map((m, idx) => (
+                <div key={idx} className="border border-slate-200 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={m.title}
+                      onChange={(e) => setMsgs((a) => a.map((x, i) => (i === idx ? { ...x, title: e.target.value } : x)))}
+                      placeholder="Title (e.g. Once-daily dosing)"
+                      className="flex-1 p-2 border border-slate-300 rounded text-sm font-medium"
+                    />
+                    <button onClick={() => setMsgs((a) => a.filter((_, i) => i !== idx))} className="p-1 text-slate-400 hover:text-red-600">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <textarea
+                    value={m.message}
+                    onChange={(e) => setMsgs((a) => a.map((x, i) => (i === idx ? { ...x, message: e.target.value } : x)))}
+                    placeholder="The detailing message"
+                    rows={2}
+                    className="w-full p-2 border border-slate-300 rounded text-sm"
+                  />
+                  <input
+                    value={m.evidence_label ?? ""}
+                    onChange={(e) => setMsgs((a) => a.map((x, i) => (i === idx ? { ...x, evidence_label: e.target.value } : x)))}
+                    placeholder="Evidence label (optional, e.g. NEJM 2023)"
+                    className="w-full p-2 border border-slate-300 rounded text-sm"
+                  />
+                </div>
+              ))}
+              <button
+                onClick={() => setMsgs((a) => [...a, { title: "", message: "", evidence_label: "" }])}
+                className="w-full border border-dashed border-slate-300 rounded-lg py-2 text-sm text-slate-600 hover:bg-slate-50 inline-flex items-center justify-center gap-1"
+              >
+                <Plus className="w-4 h-4" /> Add message
+              </button>
+            </div>
+            <div className="p-4 border-t border-slate-200 flex gap-2">
+              <button onClick={() => setMsgEditing(null)} className="ml-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50">
+                Cancel
+              </button>
+              <button
+                onClick={saveMessages}
+                disabled={msgSaving}
+                className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-4 py-2 rounded-lg inline-flex items-center gap-2"
+              >
+                {msgSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

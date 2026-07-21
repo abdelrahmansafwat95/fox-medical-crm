@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { Users, Sparkles, Search, Phone, MessageCircle, Plus, Pencil } from "lucide-react";
+import { Users, Sparkles, Search, Phone, MessageCircle, Plus, Pencil, Download } from "lucide-react";
 import type { HCP } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
+import { downloadCsv } from "@/lib/csv";
 
 const SEGMENT_COLORS: Record<string, string> = {
   A: "bg-emerald-100 text-emerald-700",
@@ -141,14 +142,37 @@ export default function HCPsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">HCPs</h1>
         </div>
-        {can("hcps", "create") && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setCreating(true)}
-            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+            onClick={() =>
+              downloadCsv(
+                "hcps",
+                filtered.map((h) => ({
+                  Name: h.full_name,
+                  Specialty: h.specialty ?? "",
+                  Segment: h.segment ?? "",
+                  Phone: h.phone ?? "",
+                  Mobile: h.mobile ?? "",
+                  WhatsApp: h.whatsapp ?? "",
+                  Email: h.email ?? "",
+                  KOL: h.is_kol ? "Yes" : "No",
+                  "AI Score": h.ai_score ?? ""
+                }))
+              )
+            }
+            className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
           >
-            <Plus className="w-4 h-4" /> Add HCP
+            <Download className="w-4 h-4" /> Export
           </button>
-        )}
+          {can("hcps", "create") && (
+            <button
+              onClick={() => setCreating(true)}
+              className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+            >
+              <Plus className="w-4 h-4" /> Add HCP
+            </button>
+          )}
+        </div>
       </div>
       <p className="text-slate-500 mb-6">
         Healthcare professionals — tap any HCP to see their full activity timeline.

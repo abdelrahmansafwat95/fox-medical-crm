@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, X, Save, AlertTriangle, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { normalizePhone } from "@/lib/phone";
 
 export type FieldType = "text" | "textarea" | "number" | "select" | "checkbox" | "tel" | "email" | "date";
 
@@ -95,6 +96,8 @@ export default function EditModal({
         payload[f.name] = v === "" || v === null ? null : Number(v);
       } else if (f.type === "checkbox") {
         payload[f.name] = !!v;
+      } else if (f.type === "tel") {
+        payload[f.name] = v === "" || v === null ? null : normalizePhone(v);
       } else {
         payload[f.name] = v === "" ? null : v;
       }

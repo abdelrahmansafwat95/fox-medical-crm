@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Building2, MapPin, Search, Plus, Pencil } from "lucide-react";
+import { Building2, MapPin, Search, Plus, Pencil, Download } from "lucide-react";
 import type { Institution } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
+import { downloadCsv } from "@/lib/csv";
 
 const TYPE_LABELS: Record<string, string> = {
   private_clinic: "Private Clinic",
@@ -82,14 +83,37 @@ export default function InstitutionsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Institutions</h1>
         </div>
-        {can("institutions", "create") && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setCreating(true)}
-            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+            onClick={() =>
+              downloadCsv(
+                "institutions",
+                filtered.map((i) => ({
+                  Name: i.name,
+                  Type: i.type,
+                  City: i.city ?? "",
+                  District: i.district ?? "",
+                  Governorate: i.governorate ?? "",
+                  Latitude: i.latitude,
+                  Longitude: i.longitude,
+                  "Geofence (m)": i.geofence_radius_m ?? "",
+                  Phone: i.phone ?? ""
+                }))
+              )
+            }
+            className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
           >
-            <Plus className="w-4 h-4" /> Add institution
+            <Download className="w-4 h-4" /> Export
           </button>
-        )}
+          {can("institutions", "create") && (
+            <button
+              onClick={() => setCreating(true)}
+              className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+            >
+              <Plus className="w-4 h-4" /> Add institution
+            </button>
+          )}
+        </div>
       </div>
       <p className="text-slate-500 mb-6">
         Clinics, hospitals, pharmacies, distributors. Each has a GPS-anchored geofence.
