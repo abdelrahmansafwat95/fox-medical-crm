@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { Trophy, Medal, Award, Sparkles, Loader2 } from "lucide-react";
 
 interface Performer {
@@ -18,7 +18,7 @@ interface Performer {
 }
 
 export default function LeaderboardPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("leaderboard");
   const [reps, setReps] = useState<Performer[]>([]);
   const [loading, setLoading] = useState(true);
   const [coachingFor, setCoachingFor] = useState<string | null>(null);

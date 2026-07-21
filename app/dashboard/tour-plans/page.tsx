@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRole, isManager } from "@/lib/roles";
+import { usePerms } from "@/lib/permissions";
 import { notifyUser } from "@/lib/notify";
 import { Calendar, Plus, Loader2 } from "lucide-react";
 
@@ -35,8 +35,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function TourPlansPage() {
-  const { role } = useRole();
-  const manager = isManager(role);
+  const { can } = usePerms();
+  const canApprove = can("tour_plans", "approve");
   const [plans, setPlans] = useState<TourPlanRow[]>([]);
   const [hcps, setHcps] = useState<HCPOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,7 +238,7 @@ export default function TourPlansPage() {
               {p.manager_notes && (
                 <div className="text-sm text-red-700 mt-2 italic">Manager: {p.manager_notes}</div>
               )}
-              {manager && p.status === "submitted" && (
+              {canApprove && p.status === "submitted" && (
                 <div className="flex gap-2 mt-3">
                   <button
                     onClick={() => approve(p.id)}

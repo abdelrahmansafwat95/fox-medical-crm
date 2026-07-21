@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRole, isManager } from "@/lib/roles";
+import { usePerms } from "@/lib/permissions";
 import { Package, AlertTriangle, Plus, X, Loader2 } from "lucide-react";
 
 interface InventoryRow {
@@ -25,8 +25,8 @@ interface TransactionRow {
 }
 
 export default function SamplesPage() {
-  const { role } = useRole();
-  const manager = isManager(role);
+  const { can } = usePerms();
+  const canIssue = can("samples", "issue");
 
   const [inventory, setInventory] = useState<InventoryRow[]>([]);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
@@ -71,7 +71,7 @@ export default function SamplesPage() {
   }, []);
 
   useEffect(() => {
-    if (!manager) return;
+    if (!canIssue) return;
     (async () => {
       const [r, p] = await Promise.all([
         supabase
@@ -89,7 +89,7 @@ export default function SamplesPage() {
       setReps((r.data ?? []) as { id: string; full_name: string | null }[]);
       setProducts((p.data ?? []) as { id: string; name: string; brand_name: string | null }[]);
     })();
-  }, [manager]);
+  }, [canIssue]);
 
   async function issueStock() {
     setIssueErr(null);
@@ -143,7 +143,7 @@ export default function SamplesPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Samples</h1>
         </div>
-        {manager && (
+        {canIssue && (
           <button
             onClick={() => { setIssueErr(null); setShowIssue(true); }}
             className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
@@ -154,7 +154,7 @@ export default function SamplesPage() {
       </div>
       <p className="text-slate-500 mb-4">
         Track sample stock with full audit trail.
-        {manager ? " Issue stock to a rep to replenish their bag." : ""}
+        {canIssue ? " Issue stock to a rep to replenish their bag." : ""}
       </p>
 
       {expiringSoon.length > 0 && (

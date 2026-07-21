@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Building2, MapPin, Search, Plus, Pencil } from "lucide-react";
 import type { Institution } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
+import { usePerms } from "@/lib/permissions";
 
 const TYPE_LABELS: Record<string, string> = {
   private_clinic: "Private Clinic",
@@ -43,6 +44,7 @@ const INST_FIELDS: FieldConfig[] = [
 ];
 
 export default function InstitutionsPage() {
+  const { can } = usePerms();
   const [items, setItems] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -80,12 +82,14 @@ export default function InstitutionsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Institutions</h1>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
-        >
-          <Plus className="w-4 h-4" /> Add institution
-        </button>
+        {can("institutions", "create") && (
+          <button
+            onClick={() => setCreating(true)}
+            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+          >
+            <Plus className="w-4 h-4" /> Add institution
+          </button>
+        )}
       </div>
       <p className="text-slate-500 mb-6">
         Clinics, hospitals, pharmacies, distributors. Each has a GPS-anchored geofence.
@@ -135,13 +139,15 @@ export default function InstitutionsPage() {
                   >
                     <MapPin className="w-4 h-4" />
                   </a>
-                  <button
-                    onClick={() => setEditing(i)}
-                    className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                    title="Edit"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
+                  {can("institutions", "edit") && (
+                    <button
+                      onClick={() => setEditing(i)}
+                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                      title="Edit"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="mt-3 text-xs text-slate-500 space-y-0.5">
@@ -193,7 +199,7 @@ export default function InstitutionsPage() {
         onClose={() => setEditing(null)}
         onSaved={() => { setEditing(null); load(); }}
         onDeleted={() => { setEditing(null); load(); }}
-        allowDelete
+        allowDelete={can("institutions", "delete")}
       />
     </div>
   );

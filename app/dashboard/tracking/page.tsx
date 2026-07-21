@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { MapPin, Users, RefreshCw, AlertCircle } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -20,7 +20,7 @@ interface RepLatest {
 const CAIRO_CENTER: [number, number] = [31.2357, 30.0444];
 
 export default function LiveTrackingPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("tracking");
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Record<string, mapboxgl.Marker>>({});

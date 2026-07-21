@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { Users, Mail, Phone, Search } from "lucide-react";
 
 interface ProfileRow {
@@ -27,7 +27,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function TeamPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("team");
   const [team, setTeam] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

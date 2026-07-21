@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Users, Sparkles, Search, Phone, MessageCircle, Plus, Pencil } from "lucide-react";
 import type { HCP } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
+import { usePerms } from "@/lib/permissions";
 
 const SEGMENT_COLORS: Record<string, string> = {
   A: "bg-emerald-100 text-emerald-700",
@@ -61,6 +62,7 @@ const HCP_FIELDS: FieldConfig[] = [
 ];
 
 export default function HCPsPage() {
+  const { can } = usePerms();
   const [hcps, setHcps] = useState<HCP[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -139,12 +141,14 @@ export default function HCPsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">HCPs</h1>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
-        >
-          <Plus className="w-4 h-4" /> Add HCP
-        </button>
+        {can("hcps", "create") && (
+          <button
+            onClick={() => setCreating(true)}
+            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+          >
+            <Plus className="w-4 h-4" /> Add HCP
+          </button>
+        )}
       </div>
       <p className="text-slate-500 mb-6">
         Healthcare professionals — tap any HCP to see their full activity timeline.
@@ -297,7 +301,7 @@ export default function HCPsPage() {
         onClose={() => setEditing(null)}
         onSaved={() => { setEditing(null); load(); }}
         onDeleted={() => { setEditing(null); load(); }}
-        allowDelete
+        allowDelete={can("hcps", "delete")}
       />
     </div>
   );

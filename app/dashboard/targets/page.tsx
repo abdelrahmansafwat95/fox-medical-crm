@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { Target, Save, Loader2 } from "lucide-react";
 
 interface RepRow {
@@ -21,7 +21,7 @@ interface TargetRow {
 }
 
 export default function TargetsPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("targets");
   const [reps, setReps] = useState<RepRow[]>([]);
   const [targets, setTargets] = useState<Record<string, TargetRow>>({});
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));

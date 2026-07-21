@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { useRole, isManager } from "@/lib/roles";
+import { usePerms } from "@/lib/permissions";
 import { Home, MapPin, Inbox, Sparkles, ClipboardList, Users } from "lucide-react";
 
 const baseItems = [
@@ -19,8 +19,8 @@ const aiItem = { href: "/dashboard/assistant", label: "AI", icon: Sparkles, badg
 
 export default function MobileNav() {
   const pathname = usePathname();
-  const { role } = useRole();
-  const items = [...baseItems, isManager(role) ? managerItem : repItem, aiItem];
+  const { can } = usePerms();
+  const items = [...baseItems, can("inbox", "view") ? managerItem : repItem, aiItem];
   const [inboxCount, setInboxCount] = useState(0);
 
   useEffect(() => {

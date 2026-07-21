@@ -4,7 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import * as XLSX from "xlsx";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import {
   Upload,
   Download,
@@ -266,7 +266,7 @@ interface ParsedRow {
 // =====================================================================
 
 export default function ImportPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("import");
   const [schemaKey, setSchemaKey] = useState<SchemaDef["key"]>("hcps");
   const schema = useMemo(() => SCHEMAS.find((s) => s.key === schemaKey)!, [schemaKey]);
 

@@ -28,87 +28,89 @@ import {
   TrendingUp,
   CalendarDays,
   CalendarCheck,
-  FileSpreadsheet
+  FileSpreadsheet,
+  KeyRound
 } from "lucide-react";
-import { useRole, isManager } from "@/lib/roles";
+import { usePerms } from "@/lib/permissions";
 import ThemeToggle from "@/components/ThemeToggle";
 
 interface NavItem {
   href: string;
   label: string;
   icon: typeof LayoutDashboard;
+  /** Permission resource gating this item's visibility (view). */
+  resource: string;
   badgeKey?: "inbox" | "notifications";
 }
 
 interface NavGroup {
   title: string;
   items: NavItem[];
-  /** Only shown to manager roles (admin / country / sales / regional / district). */
-  managerOnly?: boolean;
 }
 
 const NAV_GROUPS: NavGroup[] = [
   {
     title: "Daily",
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-      { href: "/dashboard/my-day", label: "My Day", icon: CalendarCheck },
-      { href: "/dashboard/visits", label: "Visits", icon: ClipboardList },
-      { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin },
-      { href: "/dashboard/tour-plans", label: "Tour Plans", icon: Calendar },
-      { href: "/dashboard/events", label: "Events", icon: CalendarDays },
-      { href: "/dashboard/notifications", label: "Notifications", icon: Bell, badgeKey: "notifications" }
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard, resource: "dashboard" },
+      { href: "/dashboard/my-day", label: "My Day", icon: CalendarCheck, resource: "my_day" },
+      { href: "/dashboard/visits", label: "Visits", icon: ClipboardList, resource: "visits" },
+      { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin, resource: "check_in" },
+      { href: "/dashboard/tour-plans", label: "Tour Plans", icon: Calendar, resource: "tour_plans" },
+      { href: "/dashboard/events", label: "Events", icon: CalendarDays, resource: "events" },
+      { href: "/dashboard/notifications", label: "Notifications", icon: Bell, resource: "notifications", badgeKey: "notifications" }
     ]
   },
   {
     title: "Customers",
     items: [
-      { href: "/dashboard/hcps", label: "HCPs", icon: Users },
-      { href: "/dashboard/institutions", label: "Institutions", icon: Building2 },
-      { href: "/dashboard/coverage", label: "Coverage", icon: UserCircle },
-      { href: "/dashboard/frequency", label: "Frequency", icon: TrendingUp }
+      { href: "/dashboard/hcps", label: "HCPs", icon: Users, resource: "hcps" },
+      { href: "/dashboard/institutions", label: "Institutions", icon: Building2, resource: "institutions" },
+      { href: "/dashboard/coverage", label: "Coverage", icon: UserCircle, resource: "coverage" },
+      { href: "/dashboard/frequency", label: "Frequency", icon: TrendingUp, resource: "frequency" }
     ]
   },
   {
     title: "Products & Sales",
     items: [
-      { href: "/dashboard/products", label: "Products", icon: Pill },
-      { href: "/dashboard/samples", label: "Samples", icon: Package },
-      { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
-      { href: "/dashboard/expenses", label: "Expenses", icon: Receipt }
+      { href: "/dashboard/products", label: "Products", icon: Pill, resource: "products" },
+      { href: "/dashboard/samples", label: "Samples", icon: Package, resource: "samples" },
+      { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart, resource: "orders" },
+      { href: "/dashboard/expenses", label: "Expenses", icon: Receipt, resource: "expenses" }
     ]
   },
   {
     title: "AI & Communication",
     items: [
-      { href: "/dashboard/assistant", label: "AI Assistant", icon: Sparkles },
-      { href: "/dashboard/whatsapp", label: "WhatsApp", icon: MessageCircle }
+      { href: "/dashboard/assistant", label: "AI Assistant", icon: Sparkles, resource: "assistant" },
+      { href: "/dashboard/whatsapp", label: "WhatsApp", icon: MessageCircle, resource: "whatsapp" }
     ]
   },
   {
     title: "Manager",
-    managerOnly: true,
     items: [
-      { href: "/dashboard/inbox", label: "Approval Inbox", icon: Inbox, badgeKey: "inbox" },
-      { href: "/dashboard/tracking", label: "Live Tracking", icon: MapPin },
-      { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
-      { href: "/dashboard/leaderboard", label: "Leaderboard", icon: Trophy },
-      { href: "/dashboard/targets", label: "Targets", icon: TargetIcon },
-      { href: "/dashboard/compliance", label: "Compliance", icon: Shield },
-      { href: "/dashboard/team", label: "Team", icon: Users },
-      { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet }
+      { href: "/dashboard/inbox", label: "Approval Inbox", icon: Inbox, resource: "inbox", badgeKey: "inbox" },
+      { href: "/dashboard/tracking", label: "Live Tracking", icon: MapPin, resource: "tracking" },
+      { href: "/dashboard/reports", label: "Reports", icon: BarChart3, resource: "reports" },
+      { href: "/dashboard/leaderboard", label: "Leaderboard", icon: Trophy, resource: "leaderboard" },
+      { href: "/dashboard/targets", label: "Targets", icon: TargetIcon, resource: "targets" },
+      { href: "/dashboard/compliance", label: "Compliance", icon: Shield, resource: "compliance" },
+      { href: "/dashboard/team", label: "Team", icon: Users, resource: "team" },
+      { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet, resource: "import" }
     ]
   },
   {
     title: "Account",
-    items: [{ href: "/dashboard/settings", label: "Settings", icon: Settings }]
+    items: [
+      { href: "/dashboard/settings", label: "Settings", icon: Settings, resource: "settings" },
+      { href: "/dashboard/permissions", label: "Permissions", icon: KeyRound, resource: "permissions" }
+    ]
   }
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { role } = useRole();
-  const manager = isManager(role);
+  const { can } = usePerms();
   const [counts, setCounts] = useState<{ inbox: number; notifications: number }>({
     inbox: 0,
     notifications: 0
@@ -147,12 +149,15 @@ export default function Sidebar() {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
-        {NAV_GROUPS.filter((group) => !group.managerOnly || manager).map((group) => (
+        {NAV_GROUPS.map((group) => {
+          const items = group.items.filter((item) => can(item.resource, "view"));
+          if (items.length === 0) return null;
+          return (
           <div key={group.title} className="mb-3">
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1">
               {group.title}
             </div>
-            {group.items.map((item) => {
+            {items.map((item) => {
               const Icon = item.icon;
               const active =
                 item.href === "/dashboard"
@@ -180,7 +185,8 @@ export default function Sidebar() {
               );
             })}
           </div>
-        ))}
+          );
+        })}
       </nav>
       <div className="p-2 border-t border-white/10">
         <ThemeToggle />

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { notifyUser } from "@/lib/notify";
 import {
   Inbox,
@@ -93,7 +93,7 @@ const SEVERITY_BADGE: Record<string, string> = {
 // ----------- Page -----------------------------------------------------
 
 export default function InboxPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("inbox");
   const [tourPlans, setTourPlans] = useState<TourPlanItem[]>([]);
   const [flaggedVisits, setFlaggedVisits] = useState<FlaggedVisitItem[]>([]);
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);

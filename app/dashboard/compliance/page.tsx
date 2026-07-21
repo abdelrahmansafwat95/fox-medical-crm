@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { Shield, AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
 import type { ComplianceAlert } from "@/lib/types";
 
@@ -25,7 +25,7 @@ const ALERT_LABELS: Record<string, string> = {
 };
 
 export default function CompliancePage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("compliance");
   const [alerts, setAlerts] = useState<(ComplianceAlert & { profiles: { full_name: string | null } | null })[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);

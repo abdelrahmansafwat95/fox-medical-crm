@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Pill, ChevronDown, ChevronUp, Plus, Pencil } from "lucide-react";
 import type { Product } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
+import { usePerms } from "@/lib/permissions";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Rx: "bg-red-50 text-red-700",
@@ -55,6 +56,7 @@ const PRODUCT_FIELDS: FieldConfig[] = [
 ];
 
 export default function ProductsPage() {
+  const { can } = usePerms();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -83,12 +85,14 @@ export default function ProductsPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
-        >
-          <Plus className="w-4 h-4" /> Add product
-        </button>
+        {can("products", "create") && (
+          <button
+            onClick={() => setCreating(true)}
+            className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
+          >
+            <Plus className="w-4 h-4" /> Add product
+          </button>
+        )}
       </div>
       <p className="text-slate-500 mb-6">
         Drug & device catalog with key messages for detailing.
@@ -132,13 +136,15 @@ export default function ProductsPage() {
                       <div className="text-xs text-slate-500">{p.pack_size}</div>
                     </div>
                   </button>
-                  <button
-                    onClick={() => setEditing(p)}
-                    className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                    title="Edit"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
+                  {can("products", "edit") && (
+                    <button
+                      onClick={() => setEditing(p)}
+                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                      title="Edit"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => setExpanded(isOpen ? null : p.id)}
                     className="text-slate-400"
@@ -193,7 +199,7 @@ export default function ProductsPage() {
         onClose={() => setEditing(null)}
         onSaved={() => { setEditing(null); load(); }}
         onDeleted={() => { setEditing(null); load(); }}
-        allowDelete
+        allowDelete={can("products", "delete")}
       />
     </div>
   );

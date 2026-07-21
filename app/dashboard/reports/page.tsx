@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRequireManager } from "@/lib/roles";
+import { useRequirePermission } from "@/lib/permissions";
 import { BarChart3, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { exportToExcel, exportToPDF } from "@/lib/export";
 
@@ -22,7 +22,7 @@ interface InternalReportRow extends ReportRow {
 }
 
 export default function ReportsPage() {
-  const { checking } = useRequireManager();
+  const { checking } = useRequirePermission("reports");
   const [data, setData] = useState<ReportRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
