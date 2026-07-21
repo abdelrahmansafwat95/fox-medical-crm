@@ -64,6 +64,7 @@ const HCP_FIELDS: FieldConfig[] = [
 
 export default function HCPsPage() {
   const { can } = usePerms();
+  const canAssign = can("hcps", "assign");
   const [hcps, setHcps] = useState<HCP[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -71,6 +72,10 @@ export default function HCPsPage() {
   const [editing, setEditing] = useState<HCP | null>(null);
   const [creating, setCreating] = useState(false);
   const [uid, setUid] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [reps, setReps] = useState<{ id: string; full_name: string | null }[]>([]);
+  const [assignRep, setAssignRep] = useState("");
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -80,6 +85,42 @@ export default function HCPsPage() {
       setUid(u.user?.id ?? null);
     })();
   }, []);
+
+  useEffect(() => {
+    if (!canAssign) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("role", ["medical_rep", "medical_rep_senior"])
+        .eq("is_active", true)
+        .order("full_name");
+      setReps((data ?? []) as { id: string; full_name: string | null }[]);
+    })();
+  }, [canAssign]);
+
+  function toggleSel(id: string) {
+    setSelected((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  }
+
+  async function assignSelected() {
+    if (!assignRep || selected.size === 0) return;
+    setAssigning(true);
+    const { error } = await supabase.from("hcps").update({ assigned_rep_id: assignRep }).in("id", Array.from(selected));
+    setAssigning(false);
+    if (error) {
+      alert("Assign failed: " + error.message);
+      return;
+    }
+    setSelected(new Set());
+    setAssignRep("");
+    load();
+  }
 
   async function load() {
     setLoading(true);
@@ -191,6 +232,32 @@ export default function HCPsPage() {
         </div>
       </div>
 
+      {canAssign && selected.size > 0 && (
+        <div className="bg-brand-50 border border-brand-200 rounded-xl p-3 mb-4 flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-medium text-brand-900">{selected.size} selected</span>
+          <select
+            value={assignRep}
+            onChange={(e) => setAssignRep(e.target.value)}
+            className="text-sm p-2 border border-slate-300 rounded-lg"
+          >
+            <option value="">— assign to rep —</option>
+            {reps.map((r) => (
+              <option key={r.id} value={r.id}>{r.full_name ?? "Rep"}</option>
+            ))}
+          </select>
+          <button
+            onClick={assignSelected}
+            disabled={!assignRep || assigning}
+            className="text-sm bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-3 py-1.5 rounded-lg font-medium"
+          >
+            {assigning ? "Assigning…" : "Assign"}
+          </button>
+          <button onClick={() => setSelected(new Set())} className="text-xs text-slate-600 underline ml-auto">
+            Clear
+          </button>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-slate-500">Loading…</div>
@@ -205,11 +272,19 @@ export default function HCPsPage() {
         ) : (
           <div className="divide-y divide-slate-100">
             {filtered.map((h) => (
-              <Link
-                key={h.id}
-                href={`/dashboard/hcps/${h.id}`}
-                className="p-4 hover:bg-slate-50 transition flex items-start gap-4"
-              >
+              <div key={h.id} className="flex items-center">
+                {canAssign && (
+                  <input
+                    type="checkbox"
+                    checked={selected.has(h.id)}
+                    onChange={() => toggleSel(h.id)}
+                    className="ml-4 w-4 h-4 shrink-0"
+                  />
+                )}
+                <Link
+                  href={`/dashboard/hcps/${h.id}`}
+                  className="flex-1 p-4 hover:bg-slate-50 transition flex items-start gap-4"
+                >
                 <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold shrink-0">
                   {h.full_name.charAt(0)}
                 </div>
@@ -285,7 +360,8 @@ export default function HCPsPage() {
                     {scoringId === h.id ? "Scoring…" : "AI Score"}
                   </button>
                 </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         )}

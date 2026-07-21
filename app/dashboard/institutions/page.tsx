@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Building2, MapPin, Search, Plus, Pencil, Download } from "lucide-react";
 import type { Institution } from "@/lib/types";
@@ -143,7 +144,9 @@ export default function InstitutionsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-slate-900">{i.name}</h3>
+                    <Link href={`/dashboard/institutions/${i.id}`} className="font-semibold text-slate-900 hover:text-brand-700">
+                      {i.name}
+                    </Link>
                     {(i as { code?: string }).code && (
                       <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                         {(i as { code?: string }).code}

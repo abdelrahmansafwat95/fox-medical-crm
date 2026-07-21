@@ -18,12 +18,24 @@ interface VisitLite {
   hcps: { full_name: string } | null;
   institutions: { name: string } | null;
 }
+interface CoverageRow {
+  id: string;
+  full_name: string;
+  specialty: string | null;
+  segment: string | null;
+  days_since_last_visit: number | null;
+  last_visit_at: string | null;
+}
+
+// Target visit frequency (days) per HCP segment.
+const TARGET_DAYS: Record<string, number> = { A: 7, KOL: 14, B: 14, C: 30, D: 90 };
 
 export default function MyDayPage() {
   const [loading, setLoading] = useState(true);
   const [planStatus, setPlanStatus] = useState<string | null>(null);
   const [planned, setPlanned] = useState<HCPLite[]>([]);
   const [visits, setVisits] = useState<VisitLite[]>([]);
+  const [overdue, setOverdue] = useState<CoverageRow[]>([]);
   const [optimizing, setOptimizing] = useState(false);
   const [routeResult, setRouteResult] = useState<{
     order: string[];
@@ -94,6 +106,19 @@ export default function MyDayPage() {
         .order("check_in_at", { ascending: false });
       setVisits((visitRows ?? []) as unknown as VisitLite[]);
 
+      // Overdue-for-a-visit worklist (from the RLS-scoped coverage view)
+      const { data: cov } = await supabase
+        .from("hcp_coverage")
+        .select("id, full_name, specialty, segment, days_since_last_visit, last_visit_at");
+      const overdueRows = ((cov ?? []) as CoverageRow[])
+        .filter((c) => {
+          const target = TARGET_DAYS[c.segment ?? ""] ?? 30;
+          return c.days_since_last_visit === null || c.days_since_last_visit > target;
+        })
+        .sort((a, b) => (b.days_since_last_visit ?? 99999) - (a.days_since_last_visit ?? 99999))
+        .slice(0, 20);
+      setOverdue(overdueRows);
+
       setLoading(false);
     })();
   }, []);
@@ -148,6 +173,45 @@ export default function MyDayPage() {
           <p className="text-[11px] text-amber-700 mt-2">Your plan for today is {planStatus} — pending manager approval.</p>
         )}
       </div>
+
+      {/* Overdue for a visit */}
+      {overdue.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-3 border-b border-slate-100 flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-700">Overdue for a visit</span>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">{overdue.length}</span>
+            <Link
+              href="/dashboard/visits/check-in"
+              className="ml-auto text-xs text-brand-700 font-medium hover:underline inline-flex items-center gap-1"
+            >
+              <MapPin className="w-3 h-3" /> Check in
+            </Link>
+          </div>
+          <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+            {overdue.map((c) => {
+              const target = TARGET_DAYS[c.segment ?? ""] ?? 30;
+              return (
+                <Link
+                  key={c.id}
+                  href={`/dashboard/hcps/${c.id}`}
+                  className="p-3 flex items-center gap-3 hover:bg-slate-50 text-sm"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-slate-900 truncate">
+                      {c.full_name}
+                      {c.segment && <span className="ml-1.5 text-[10px] font-bold text-slate-400">{c.segment}</span>}
+                    </div>
+                    {c.specialty && <div className="text-xs text-slate-500 truncate">{c.specialty}</div>}
+                  </div>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-red-50 text-red-700 shrink-0">
+                    {c.days_since_last_visit === null ? "never visited" : `${c.days_since_last_visit}d (target ${target}d)`}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Planned HCPs */}
       {planned.length > 0 ? (

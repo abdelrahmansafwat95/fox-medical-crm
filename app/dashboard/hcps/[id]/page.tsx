@@ -21,6 +21,7 @@ import {
   CalendarDays
 } from "lucide-react";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
+import ActivityFeed from "@/components/ActivityFeed";
 
 // ----------------- Types ------------------------------------------
 
@@ -520,6 +521,10 @@ export default function HCPDetailPage() {
           </div>
         </div>
       )}
+
+      <div className="mt-4">
+        <ActivityFeed entityType="hcps" entityId={hcp.id} />
+      </div>
 
       <EditModal
         open={editing}
