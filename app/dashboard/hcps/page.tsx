@@ -272,6 +272,17 @@ export default function HCPsPage() {
         // Assign new HCPs to their creator so rep/senior-rep creators (whose
         // read access is scoped to assigned HCPs) can see the record afterward.
         insertDefaults={uid ? { assigned_rep_id: uid } : undefined}
+        duplicateCheck={async (v) => {
+          const name = String(v.full_name ?? "").trim();
+          if (!name) return null;
+          const { data } = await supabase
+            .from("hcps")
+            .select("id, full_name")
+            .ilike("full_name", name)
+            .limit(1);
+          if (data && data.length > 0) return `An HCP named "${data[0].full_name}" already exists.`;
+          return null;
+        }}
         onClose={() => setCreating(false)}
         onSaved={() => { setCreating(false); load(); }}
       />

@@ -33,6 +33,9 @@ interface Props {
   allowDelete?: boolean;
   /** Extra fields to set on insert that aren't in the form (e.g. created_by) */
   insertDefaults?: Record<string, unknown>;
+  /** Optional dup check run only on CREATE. Return a warning string to prompt
+   *  the user to confirm before inserting, or null to proceed silently. */
+  duplicateCheck?: (values: Record<string, unknown>) => Promise<string | null>;
 }
 
 export default function EditModal({
@@ -46,7 +49,8 @@ export default function EditModal({
   onSaved,
   onDeleted,
   allowDelete,
-  insertDefaults
+  insertDefaults,
+  duplicateCheck
 }: Props) {
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
@@ -93,6 +97,15 @@ export default function EditModal({
         payload[f.name] = !!v;
       } else {
         payload[f.name] = v === "" ? null : v;
+      }
+    }
+
+    // Duplicate guard (create only)
+    if (!recordId && duplicateCheck) {
+      const warn = await duplicateCheck(payload);
+      if (warn && !confirm(`${warn}\n\nCreate it anyway?`)) {
+        setSaving(false);
+        return;
       }
     }
 

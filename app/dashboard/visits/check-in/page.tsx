@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useGeolocation } from "@/lib/useGeolocation";
+import { fetchOrQueue } from "@/lib/offlineQueue";
 import {
   MapPin,
   Crosshair,
@@ -153,9 +154,10 @@ export default function CheckInPage() {
         }
       }
 
-      // Call the check-in RPC via API route
+      // Call the check-in RPC via API route — through the offline queue so a
+      // dropped connection in the field doesn't lose the visit.
       const { data: sess } = await supabase.auth.getSession();
-      const res = await fetch("/api/tracking/check-in", {
+      const init: RequestInit = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,11 +172,32 @@ export default function CheckInPage() {
           selfie_url,
           visit_type: visitType
         })
-      });
+      };
 
-      const result = await res.json();
-      if (!result.success) {
-        setError(result.message || result.error || "Check-in failed.");
+      const outcome = await fetchOrQueue("/api/tracking/check-in", init);
+
+      if (outcome.queued) {
+        const offline = typeof navigator !== "undefined" && !navigator.onLine;
+        if (offline) {
+          alert(
+            "You're offline — this check-in was saved on your device and will sync automatically when you're back online."
+          );
+          router.replace("/dashboard/visits");
+        } else {
+          setError("Check-in couldn't be submitted just now — it's been queued and will retry automatically.");
+          setSubmitting(false);
+        }
+        return;
+      }
+
+      const result = outcome.data as {
+        success?: boolean;
+        visit_id?: string;
+        message?: string;
+        error?: string;
+      };
+      if (!result?.success) {
+        setError(result?.message || result?.error || "Check-in failed.");
         setSubmitting(false);
         return;
       }

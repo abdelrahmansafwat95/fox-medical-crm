@@ -167,6 +167,18 @@ export default function InstitutionsPage() {
         table="institutions"
         fields={INST_FIELDS}
         initialValues={{ type: "private_clinic", is_active: true, geofence_radius_m: 100, latitude: 30.0444, longitude: 31.2357 }}
+        duplicateCheck={async (v) => {
+          const name = String(v.name ?? "").trim();
+          if (!name) return null;
+          const district = String(v.district ?? "").trim();
+          let query = supabase.from("institutions").select("id, name, district").ilike("name", name);
+          if (district) query = query.ilike("district", district);
+          const { data } = await query.limit(1);
+          if (data && data.length > 0) {
+            return `An institution named "${data[0].name}"${district ? ` in ${district}` : ""} already exists.`;
+          }
+          return null;
+        }}
         onClose={() => setCreating(false)}
         onSaved={() => { setCreating(false); load(); }}
       />

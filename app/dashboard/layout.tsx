@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { clearRoleCache } from "@/lib/roles";
+import { flushQueue } from "@/lib/offlineQueue";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import Topbar from "@/components/Topbar";
@@ -39,6 +40,18 @@ export default function DashboardLayout({
       sub.subscription.unsubscribe();
     };
   }, [router]);
+
+  // Flush any check-ins queued while offline — on reconnect and once on mount.
+  useEffect(() => {
+    const onOnline = () => {
+      flushQueue().catch(() => {});
+    };
+    window.addEventListener("online", onOnline);
+    if (typeof navigator === "undefined" || navigator.onLine) {
+      flushQueue().catch(() => {});
+    }
+    return () => window.removeEventListener("online", onOnline);
+  }, []);
 
   if (checking) {
     return (
