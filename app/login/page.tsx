@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { clearRoleCache } from "@/lib/roles";
 import { Mail, Lock, Loader2, Languages } from "lucide-react";
 
 const t = {
@@ -73,6 +74,7 @@ export default function LoginPage() {
       setError(L.invalidCreds);
       return;
     }
+    clearRoleCache(); // ensure the new user's role is fetched fresh
     router.replace("/dashboard");
   }
 

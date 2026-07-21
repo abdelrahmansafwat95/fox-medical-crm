@@ -174,8 +174,22 @@ export async function POST(req: NextRequest) {
         },
         status: "open" as const
       }));
-      // Use upsert with no conflict resolution to avoid blocking on dedupe
-      await supabase.from("compliance_alerts").insert(alertRows);
+      // compliance_alerts RLS only permits INSERT by managers, but these fraud
+      // signals are system-generated during a rep's own check-in — under the
+      // rep's token the insert would be silently rejected by RLS. Write them
+      // with the service-role client (falls back to the user client if the key
+      // isn't configured) and surface any failure to the logs.
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const alertWriter = serviceKey
+        ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+            auth: { persistSession: false }
+          })
+        : supabase;
+      const { error: alertErr } = await alertWriter.from("compliance_alerts").insert(alertRows);
+      if (alertErr) {
+        // eslint-disable-next-line no-console
+        console.error("[check-in] compliance_alerts insert failed:", alertErr.message);
+      }
     }
 
     // ───────── 6. Return everything to the client ─────────

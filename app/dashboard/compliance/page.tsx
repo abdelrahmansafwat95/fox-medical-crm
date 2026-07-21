@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import { Shield, AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
 import type { ComplianceAlert } from "@/lib/types";
 
@@ -24,6 +25,7 @@ const ALERT_LABELS: Record<string, string> = {
 };
 
 export default function CompliancePage() {
+  const { checking } = useRequireManager();
   const [alerts, setAlerts] = useState<(ComplianceAlert & { profiles: { full_name: string | null } | null })[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
@@ -71,6 +73,15 @@ export default function CompliancePage() {
   }
 
   const open = alerts.filter((a) => a.status === "open");
+
+  if (checking) {
+    return (
+      <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">
+        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto">

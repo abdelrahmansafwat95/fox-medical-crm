@@ -67,8 +67,16 @@ export default function HCPsPage() {
   const [scoringId, setScoringId] = useState<string | null>(null);
   const [editing, setEditing] = useState<HCP | null>(null);
   const [creating, setCreating] = useState(false);
+  const [uid, setUid] = useState<string | null>(null);
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      setUid(u.user?.id ?? null);
+    })();
+  }, []);
 
   async function load() {
     setLoading(true);
@@ -261,6 +269,9 @@ export default function HCPsPage() {
         table="hcps"
         fields={HCP_FIELDS}
         initialValues={{ title: "Dr.", is_active: true, is_kol: false }}
+        // Assign new HCPs to their creator so rep/senior-rep creators (whose
+        // read access is scoped to assigned HCPs) can see the record afterward.
+        insertDefaults={uid ? { assigned_rep_id: uid } : undefined}
         onClose={() => setCreating(false)}
         onSaved={() => { setCreating(false); load(); }}
       />

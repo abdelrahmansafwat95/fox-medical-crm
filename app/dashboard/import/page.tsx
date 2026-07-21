@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import * as XLSX from "xlsx";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import {
   Upload,
   Download,
@@ -265,6 +266,7 @@ interface ParsedRow {
 // =====================================================================
 
 export default function ImportPage() {
+  const { checking } = useRequireManager();
   const [schemaKey, setSchemaKey] = useState<SchemaDef["key"]>("hcps");
   const schema = useMemo(() => SCHEMAS.find((s) => s.key === schemaKey)!, [schemaKey]);
 
@@ -480,6 +482,15 @@ export default function ImportPage() {
 
   const validCount = rows.filter((r) => r.errors.length === 0).length;
   const errorCount = rows.length - validCount;
+
+  if (checking) {
+    return (
+      <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">
+        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto pb-24">

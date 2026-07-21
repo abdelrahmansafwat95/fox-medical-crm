@@ -27,9 +27,9 @@ import {
   Inbox,
   TrendingUp,
   CalendarDays,
-  FileSpreadsheet,
-  Bug
+  FileSpreadsheet
 } from "lucide-react";
+import { useRole, isManager } from "@/lib/roles";
 
 interface NavItem {
   href: string;
@@ -41,6 +41,8 @@ interface NavItem {
 interface NavGroup {
   title: string;
   items: NavItem[];
+  /** Only shown to manager roles (admin / country / sales / regional / district). */
+  managerOnly?: boolean;
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -82,6 +84,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: "Manager",
+    managerOnly: true,
     items: [
       { href: "/dashboard/inbox", label: "Approval Inbox", icon: Inbox, badgeKey: "inbox" },
       { href: "/dashboard/tracking", label: "Live Tracking", icon: MapPin },
@@ -90,15 +93,19 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/targets", label: "Targets", icon: TargetIcon },
       { href: "/dashboard/compliance", label: "Compliance", icon: Shield },
       { href: "/dashboard/team", label: "Team", icon: Users },
-      { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet },
-      { href: "/dashboard/admin/test-fake-checkin", label: "Test Fake Check-in", icon: Bug },
-      { href: "/dashboard/settings", label: "Settings", icon: Settings }
+      { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet }
     ]
+  },
+  {
+    title: "Account",
+    items: [{ href: "/dashboard/settings", label: "Settings", icon: Settings }]
   }
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { role } = useRole();
+  const manager = isManager(role);
   const [counts, setCounts] = useState<{ inbox: number; notifications: number }>({
     inbox: 0,
     notifications: 0
@@ -136,7 +143,7 @@ export default function Sidebar() {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
-        {NAV_GROUPS.map((group) => (
+        {NAV_GROUPS.filter((group) => !group.managerOnly || manager).map((group) => (
           <div key={group.title} className="mb-3">
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1">
               {group.title}

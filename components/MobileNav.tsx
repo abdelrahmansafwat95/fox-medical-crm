@@ -4,18 +4,23 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Home, MapPin, Inbox, Sparkles, ClipboardList } from "lucide-react";
+import { useRole, isManager } from "@/lib/roles";
+import { Home, MapPin, Inbox, Sparkles, ClipboardList, Users } from "lucide-react";
 
-const items = [
+const baseItems = [
   { href: "/dashboard", label: "Home", icon: Home, badge: false },
   { href: "/dashboard/visits", label: "Visits", icon: ClipboardList, badge: false },
-  { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin, badge: false },
-  { href: "/dashboard/inbox", label: "Inbox", icon: Inbox, badge: true },
-  { href: "/dashboard/assistant", label: "AI", icon: Sparkles, badge: false }
+  { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin, badge: false }
 ];
+// 4th slot: managers get the Approval Inbox; everyone else gets HCPs.
+const managerItem = { href: "/dashboard/inbox", label: "Inbox", icon: Inbox, badge: true };
+const repItem = { href: "/dashboard/hcps", label: "HCPs", icon: Users, badge: false };
+const aiItem = { href: "/dashboard/assistant", label: "AI", icon: Sparkles, badge: false };
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const { role } = useRole();
+  const items = [...baseItems, isManager(role) ? managerItem : repItem, aiItem];
   const [inboxCount, setInboxCount] = useState(0);
 
   useEffect(() => {

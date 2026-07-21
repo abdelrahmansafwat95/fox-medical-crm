@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import { Target, Save, Loader2 } from "lucide-react";
 
 interface RepRow {
@@ -20,6 +21,7 @@ interface TargetRow {
 }
 
 export default function TargetsPage() {
+  const { checking } = useRequireManager();
   const [reps, setReps] = useState<RepRow[]>([]);
   const [targets, setTargets] = useState<Record<string, TargetRow>>({});
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -74,6 +76,15 @@ export default function TargetsPage() {
     }
     setSavingId(null);
     load();
+  }
+
+  if (checking) {
+    return (
+      <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">
+        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+        Loading…
+      </div>
+    );
   }
 
   return (

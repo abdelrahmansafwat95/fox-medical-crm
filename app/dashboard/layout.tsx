@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { clearRoleCache } from "@/lib/roles";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import Topbar from "@/components/Topbar";
@@ -27,8 +28,10 @@ export default function DashboardLayout({
       }
     })();
 
-    // Sign-out from another tab → redirect immediately.
+    // Sign-out from another tab → redirect immediately. Clear the cached role
+    // on any auth change so a previous user's role can't leak into a new session.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      clearRoleCache();
       if (!session) router.replace("/login");
     });
     return () => {

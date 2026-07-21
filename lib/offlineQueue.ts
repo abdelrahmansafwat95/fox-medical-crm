@@ -1,6 +1,7 @@
 "use client";
 
 import { openDB, type IDBPDatabase } from "idb";
+import { supabase } from "./supabase";
 
 interface QueuedRequest {
   id?: number;
@@ -74,11 +75,22 @@ export async function flushQueue(): Promise<{ flushed: number; failed: number }>
   let flushed = 0;
   let failed = 0;
 
+  // The queued requests captured a bearer token that may have expired while
+  // offline. Refresh it once and swap it into any Authorization header so
+  // replays don't 401 purely due to token expiry.
+  const { data: sess } = await supabase.auth.getSession();
+  const freshToken = sess.session?.access_token;
+
   for (const req of all) {
     try {
+      const headers = { ...req.headers };
+      if (freshToken && (headers.Authorization || headers.authorization)) {
+        delete headers.authorization;
+        headers.Authorization = `Bearer ${freshToken}`;
+      }
       const res = await fetch(req.url, {
         method: req.method,
-        headers: req.headers,
+        headers,
         body: req.body
       });
       if (res.ok) {

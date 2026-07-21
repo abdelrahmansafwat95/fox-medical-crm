@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useRequireManager } from "@/lib/roles";
 import {
   Inbox,
   Calendar,
@@ -91,6 +92,7 @@ const SEVERITY_BADGE: Record<string, string> = {
 // ----------- Page -----------------------------------------------------
 
 export default function InboxPage() {
+  const { checking } = useRequireManager();
   const [tourPlans, setTourPlans] = useState<TourPlanItem[]>([]);
   const [flaggedVisits, setFlaggedVisits] = useState<FlaggedVisitItem[]>([]);
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
@@ -313,6 +315,15 @@ export default function InboxPage() {
   }
 
   // ---------- Render ----------------------------------------------------
+
+  if (checking) {
+    return (
+      <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">
+        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
