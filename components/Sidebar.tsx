@@ -30,6 +30,7 @@ import {
   FileSpreadsheet
 } from "lucide-react";
 import { useRole, isManager } from "@/lib/roles";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface NavItem {
   href: string;
@@ -132,15 +133,15 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-60 bg-white border-r border-slate-200 hidden md:flex flex-col h-screen sticky top-0">
-      <div className="p-4 border-b border-slate-200 flex items-center gap-2">
-        <div className="w-9 h-9 rounded-lg bg-fox-navy flex items-center justify-center p-1 shrink-0">
+    <aside className="w-60 bg-fox-navy border-r border-white/10 hidden md:flex flex-col h-screen sticky top-0">
+      <div className="p-4 border-b border-white/10 flex items-center gap-2">
+        <div className="w-9 h-9 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center p-1 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-mark.png" alt="Fox Systems" className="w-full h-full object-contain" />
         </div>
         <div>
-          <div className="font-bold text-slate-900 text-sm leading-tight">Fox Medical</div>
-          <div className="text-[10px] text-slate-500">CRM v0.12</div>
+          <div className="font-bold text-white text-sm leading-tight">Fox Medical</div>
+          <div className="text-[10px] text-slate-400">CRM v0.12</div>
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
@@ -162,8 +163,8 @@ export default function Sidebar() {
                   href={item.href}
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition mb-0.5 ${
                     active
-                      ? "bg-brand-50 text-brand-700 font-medium"
-                      : "text-slate-700 hover:bg-slate-50"
+                      ? "bg-brand-600 text-white font-medium shadow-sm shadow-brand-900/40"
+                      : "text-slate-300 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
@@ -179,6 +180,9 @@ export default function Sidebar() {
           </div>
         ))}
       </nav>
+      <div className="p-2 border-t border-white/10">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 }

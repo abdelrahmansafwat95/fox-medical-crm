@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Bell, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Profile } from "@/lib/types";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Topbar() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -33,6 +34,7 @@ export default function Topbar() {
       <div className="hidden md:block" />
 
       <div className="flex items-center gap-3">
+        <ThemeToggle variant="icon" />
         <button
           aria-label="Notifications"
           className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 relative"

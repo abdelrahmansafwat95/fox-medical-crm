@@ -32,7 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en" dir="ltr" suppressHydrationWarning>
+      <head>
+        {/* No-flash dark-mode init: set the class before first paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('foxmed_theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`
+          }}
+        />
+      </head>
       <body>
         {children}
         {/* Register service worker on the client */}
