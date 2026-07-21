@@ -35,3 +35,52 @@ body {
   background-size: 1000px 100%;
   animation: shimmer 1.6s linear infinite;
 }
+
+/* ── Login screen: animated navy background ────────────────────────────
+   Deep logo-navy base with drifting electric-cyan / azure aurora blobs and
+   a subtle panning circuit grid — echoes the Fox Systems circuit-wolf DNA. */
+.login-bg {
+  position: relative;
+  background-color: #0a1e3f;      /* logo navy */
+  overflow: hidden;
+  isolation: isolate;
+}
+.login-bg::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  z-index: -2;
+  background:
+    radial-gradient(38% 38% at 22% 28%, rgba(0, 229, 255, 0.28), transparent 60%),
+    radial-gradient(32% 32% at 78% 68%, rgba(43, 135, 242, 0.30), transparent 62%),
+    radial-gradient(26% 26% at 62% 18%, rgba(0, 229, 255, 0.16), transparent 60%),
+    radial-gradient(30% 30% at 30% 82%, rgba(21, 112, 214, 0.22), transparent 60%);
+  filter: blur(24px);
+  animation: auroraDrift 20s ease-in-out infinite alternate;
+}
+.login-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, black, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 40%, black, transparent 78%);
+  animation: gridPan 24s linear infinite;
+}
+@keyframes auroraDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(4%, -3%) scale(1.12); }
+  100% { transform: translate(-3%, 3%) scale(1.06); }
+}
+@keyframes gridPan {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: 44px 88px, 88px 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-bg::before,
+  .login-bg::after { animation: none; }
+}

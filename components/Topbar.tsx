@@ -25,7 +25,8 @@ export default function Topbar() {
     <header className="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-slate-200 px-4 md:px-6 py-3 flex items-center justify-between">
       {/* Mobile brand */}
       <div className="md:hidden flex items-center gap-2">
-        <span className="text-xl">🦊💊</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-mark.png" alt="Fox Systems" className="w-7 h-7 object-contain" />
         <span className="font-semibold text-slate-900">Fox Medical</span>
       </div>
 

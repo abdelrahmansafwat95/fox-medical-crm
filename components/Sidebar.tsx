@@ -134,8 +134,9 @@ export default function Sidebar() {
   return (
     <aside className="w-60 bg-white border-r border-slate-200 hidden md:flex flex-col h-screen sticky top-0">
       <div className="p-4 border-b border-slate-200 flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">
-          🦊
+        <div className="w-9 h-9 rounded-lg bg-fox-navy flex items-center justify-center p-1 shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-mark.png" alt="Fox Systems" className="w-full h-full object-contain" />
         </div>
         <div>
           <div className="font-bold text-slate-900 text-sm leading-tight">Fox Medical</div>

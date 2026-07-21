@@ -79,7 +79,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-gradient-to-br from-brand-50 via-white to-brand-100">
+    <main className="login-bg min-h-screen flex flex-col">
       {/* Top bar with language toggle */}
       <div className="flex justify-end p-4">
         <button
@@ -95,9 +95,14 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Brand */}
           <div className="text-center mb-8">
-            <div className="text-6xl mb-3">🦊💊</div>
-            <h1 className="text-2xl font-bold text-slate-900">{L.title}</h1>
-            <p className="text-sm text-slate-500 mt-1">{L.tagline}</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-mark.png"
+              alt="Fox Systems"
+              className="w-24 h-24 mx-auto mb-3 drop-shadow-[0_0_28px_rgba(0,229,255,0.5)]"
+            />
+            <h1 className="text-2xl font-bold text-white">{L.title}</h1>
+            <p className="text-sm text-brand-200 mt-1">{L.tagline}</p>
           </div>
 
           {/* Card */}
@@ -167,7 +172,7 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
+          <p className="text-center text-xs text-slate-300/80 mt-6">
             {L.poweredBy} · foxsystemstech.com
           </p>
         </div>

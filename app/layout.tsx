@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     statusBarStyle: "default"
   },
   icons: {
-    apple: "/icons/icon-192.png",
-    icon: "/icons/icon-192.png"
+    apple: "/apple-touch-icon.png",
+    icon: "/favicon-32.png"
   }
 };
 
 export const viewport: Viewport = {
-  themeColor: "#14b8a6",
+  themeColor: "#0a1e3f",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1
