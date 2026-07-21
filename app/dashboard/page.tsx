@@ -8,7 +8,6 @@ import {
   Building2,
   ClipboardList,
   Pill,
-  TrendingUp,
   Plus,
   MapPin,
   AlertTriangle,
@@ -185,26 +184,6 @@ export default function DashboardHome() {
         <QuickCard icon={Sparkles}  title="AI Assistant"   desc="Email, WhatsApp, pitches, objections"     href="/dashboard/assistant"       accent="bg-yellow-500" />
         <QuickCard icon={Trophy}    title="Leaderboard"    desc="Rank reps + AI coaching insights"         href="/dashboard/leaderboard"     accent="bg-amber-500" />
       </div>
-
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
-            <TrendingUp className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="font-semibold text-slate-900">Build progress — v0.4</h2>
-            <ul className="space-y-1 text-sm mt-3">
-              <Step done label="Steps 1-12 — Feature-complete CRM" />
-              <Step done label="Demo seed data — 380 visits, 50 HCPs, 12 institutions ✨" />
-              <Step done label="Manager Approval Inbox — unified queue ✨" />
-              <Step done label="Sample distribution flow ✨" />
-              <Step done label="Order builder inside visit ✨" />
-              <Step done label="Manual visit entry ✨" />
-              <Step done label="Edit dialogs across all entities ✨" />
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -221,13 +200,3 @@ function QuickCard({ icon: Icon, title, desc, href, accent }: { icon: typeof Map
   );
 }
 
-function Step({ label, done = false }: { label: string; done?: boolean }) {
-  return (
-    <li className="flex items-center gap-2">
-      <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold ${done ? "bg-brand-600 text-white" : "bg-slate-200 text-slate-500"}`}>
-        {done ? "✓" : "·"}
-      </span>
-      <span className={done ? "text-slate-900" : "text-slate-500"}>{label}</span>
-    </li>
-  );
-}
