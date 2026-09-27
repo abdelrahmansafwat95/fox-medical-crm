@@ -58,7 +58,9 @@ export async function callGemini(prompt: string, opts: CallOptions = {}): Promis
     )
     const data = await res.json().catch(() => ({}))
     if (res.ok) {
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+      // A reply can arrive split across several parts; reading only the first cut answers short.
+      const parts: Array<{ text?: string }> = data?.candidates?.[0]?.content?.parts ?? []
+      const text = parts.some(p => typeof p.text === 'string') ? parts.map(p => p.text ?? '').join('') : undefined
       if (typeof text !== 'string') throw new Error('Gemini returned no text')
       return text
     }
