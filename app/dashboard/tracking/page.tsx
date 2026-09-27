@@ -136,7 +136,8 @@ export default function LiveTrackingPage() {
 
       list.forEach((r) => {
         const el = document.createElement("div");
-        const minutesAgo = (Date.now() - new Date(r.recorded_at).getTime()) / 60_000;
+        // Clamped: a ping stamped a little ahead of this device's clock is "now", not "-5m ago".
+        const minutesAgo = Math.max(0, (Date.now() - new Date(r.recorded_at).getTime()) / 60_000);
         const color =
           minutesAgo < 5 ? "#10b981" : minutesAgo < 30 ? "#f59e0b" : "#94a3b8";
         el.innerHTML = `
@@ -251,9 +252,9 @@ export default function LiveTrackingPage() {
                 </div>
               ) : (
                 reps.map((r) => {
-                  const minutesAgo = Math.round(
+                  const minutesAgo = Math.max(0, Math.round(
                     (Date.now() - new Date(r.recorded_at).getTime()) / 60_000
-                  );
+                  ));
                   return (
                     <div
                       key={r.rep_id}
