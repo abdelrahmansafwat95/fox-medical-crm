@@ -65,6 +65,14 @@ Deno.serve(async (req) => {
     if (fullName.length < 2) return json({ error: "Enter the person's full name." }, 400);
     if (!ROLES.includes(role)) return json({ error: "Choose a role." }, 400);
 
+    // The plan's user limit (fox_plan). The database enforces it too, but
+    // checking first means no login is created for someone who can't be added.
+    const { data: seats } = await admin.rpc("seat_usage");
+    if (seats && seats.used >= seats.limit) {
+      const plan = String(seats.plan).charAt(0).toUpperCase() + String(seats.plan).slice(1);
+      return json({ error: `Your plan (${plan}) includes up to ${seats.limit} active users. Deactivate a user or upgrade the plan to add more.` }, 403);
+    }
+
     const password = tempPassword();
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email, password, email_confirm: true, user_metadata: { full_name: fullName },

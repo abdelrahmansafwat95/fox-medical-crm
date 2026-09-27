@@ -56,6 +56,7 @@ export default function TeamPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<ProfileRow | null>(null);
   const [inviting, setInviting] = useState(false);
+  const [seats, setSeats] = useState<{ plan: string; used: number; limit: number } | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -64,6 +65,8 @@ export default function TeamPage() {
       .order("role")
       .order("code");
     setTeam((data ?? []) as ProfileRow[]);
+    const { data: s } = await supabase.rpc("seat_usage");
+    setSeats((s as any) ?? null);
     setLoading(false);
   }, []);
 
@@ -177,6 +180,11 @@ export default function TeamPage() {
           <Users className="w-6 h-6" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Team</h1>
+        {seats && (
+          <span className={`text-sm ${seats.used >= seats.limit ? "text-amber-600" : "text-slate-500"}`}>
+            {seats.used} of {seats.limit} active users on your plan
+          </span>
+        )}
         {isAdmin && (
           <button
             onClick={() => setInviting(true)}
