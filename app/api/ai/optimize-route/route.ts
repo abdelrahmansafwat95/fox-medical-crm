@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { aiUnavailable } from "@/lib/aiErrors";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: "missing_anthropic_key" }, { status: 500 });
+    if (!apiKey) return aiUnavailable("optimize-route");
     const anthropic = new Anthropic({ apiKey });
 
     // Type the joined relations safely
@@ -111,7 +112,6 @@ Return ONLY a strict JSON object:
       return NextResponse.json({ error: "ai_parse_failed", raw }, { status: 500 });
     }
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "unknown_error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return aiUnavailable("optimize-route", err);
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { aiUnavailable } from "@/lib/aiErrors";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
       .limit(20);
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: "missing_anthropic_key" }, { status: 500 });
+    if (!apiKey) return aiUnavailable("score-hcp");
     const anthropic = new Anthropic({ apiKey });
 
     const prompt = `You are a pharma sales analytics expert. Analyze the following Healthcare Professional (HCP) and recent interaction history. Recommend a segment classification (A, B, C, D, or KOL) with reasoning.
@@ -120,7 +121,6 @@ Return ONLY a strict JSON object with no other text:
 
     return NextResponse.json({ ok: true, ...parsed });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "unknown_error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return aiUnavailable("score-hcp", err);
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { aiUnavailable } from "@/lib/aiErrors";
 import Anthropic from "@anthropic-ai/sdk";
 
 /**
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (!prompt?.trim()) return NextResponse.json({ error: "missing_prompt" }, { status: 400 });
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: "missing_anthropic_key" }, { status: 500 });
+    if (!apiKey) return aiUnavailable("assistant");
     const anthropic = new Anthropic({ apiKey });
 
     const systemByMode: Record<string, string> = {
@@ -50,7 +51,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, reply });
   } catch (err: unknown) {
-    const m = err instanceof Error ? err.message : "unknown_error";
-    return NextResponse.json({ error: m }, { status: 500 });
+    return aiUnavailable("assistant", err);
   }
 }

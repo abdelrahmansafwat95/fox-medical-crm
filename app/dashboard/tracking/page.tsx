@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRequirePermission } from "@/lib/permissions";
-import { MapPin, Users, RefreshCw, AlertCircle } from "lucide-react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { MapPin, Users, RefreshCw } from "lucide-react";
+import maplibregl, { type StyleSpecification } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 interface RepLatest {
   rep_id: string;
@@ -19,42 +19,64 @@ interface RepLatest {
 
 const CAIRO_CENTER: [number, number] = [31.2357, 30.0444];
 
+// MapLibre (the open-source fork of mapbox-gl) with MapTiler's streets style
+// when NEXT_PUBLIC_MAPTILER_KEY is set — that key was configured on Vercel but
+// never used, while the page demanded a Mapbox token nobody had, so customers
+// saw "Mapbox token missing … .env.local" instead of a map. Without a key, or
+// if MapTiler refuses it, plain OpenStreetMap tiles are used: always a map.
+const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY;
+const OSM_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    osm: {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "© OpenStreetMap contributors",
+    },
+  },
+  layers: [{ id: "osm", type: "raster", source: "osm" }],
+};
+
 export default function LiveTrackingPage() {
   const { checking } = useRequirePermission("tracking");
   const mapContainer = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<Record<string, maplibregl.Marker>>({});
   const [reps, setReps] = useState<RepLatest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tokenMissing, setTokenMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Initialize Mapbox map
+  // 1. Initialize the map. Depends on `checking`: the first render is the
+  // permission loader, which has no map container, and with [] the effect never
+  // ran again — the map was never created even with a valid token.
   useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return;
+    if (checking || !mapContainer.current || mapRef.current) return;
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) {
-      setTokenMissing(true);
-      setLoading(false);
-      return;
-    }
-    mapboxgl.accessToken = token;
-
-    mapRef.current = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
+      style: MAPTILER_KEY
+        ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`
+        : OSM_STYLE,
       center: CAIRO_CENTER,
       zoom: 10
     });
-
-    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    let fellBack = !MAPTILER_KEY;
+    map.on("error", () => {
+      // MapTiler refused the key or is unreachable before the style loaded.
+      if (!fellBack && !map.isStyleLoaded()) {
+        fellBack = true;
+        map.setStyle(OSM_STYLE);
+      }
+    });
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    mapRef.current = map;
 
     return () => {
-      mapRef.current?.remove();
+      map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [checking]);
 
   // 2. Load latest location per rep
   async function loadLocations() {
@@ -131,7 +153,7 @@ export default function LiveTrackingPage() {
           </div>
         `;
 
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
           <div style="font-family:system-ui;">
             <div style="font-weight:600; margin-bottom:4px;">${r.rep_name}</div>
             <div style="font-size:11px; color:#64748b;">
@@ -142,7 +164,7 @@ export default function LiveTrackingPage() {
           </div>
         `);
 
-        const marker = new mapboxgl.Marker({ element: el })
+        const marker = new maplibregl.Marker({ element: el })
           .setLngLat([r.longitude, r.latitude])
           .setPopup(popup)
           .addTo(mapRef.current!);
@@ -151,7 +173,7 @@ export default function LiveTrackingPage() {
 
       // Fit to bounds if any markers
       if (list.length > 0) {
-        const bounds = new mapboxgl.LngLatBounds();
+        const bounds = new maplibregl.LngLatBounds();
         list.forEach((r) => bounds.extend([r.longitude, r.latitude]));
         mapRef.current.fitBounds(bounds, { padding: 80, maxZoom: 13 });
       }
@@ -159,13 +181,14 @@ export default function LiveTrackingPage() {
   }
 
   // 3. Load + auto-refresh every 60s
+  // After the map effect above, so the first load can place markers at once.
   useEffect(() => {
-    if (tokenMissing) return;
+    if (checking) return;
     loadLocations();
     const id = setInterval(loadLocations, 60_000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokenMissing]);
+  }, [checking]);
 
   if (checking) {
     return <div className="max-w-7xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
@@ -199,34 +222,13 @@ export default function LiveTrackingPage() {
         </div>
       </div>
 
-      {tokenMissing && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-900">
-            <strong>Mapbox token missing.</strong> Add{" "}
-            <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_MAPBOX_TOKEN</code> to your{" "}
-            <code className="bg-amber-100 px-1 rounded">.env.local</code> (and Vercel env vars).
-            Get a free token at{" "}
-            <a
-              className="underline"
-              href="https://account.mapbox.com/access-tokens/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              account.mapbox.com
-            </a>
-            .
-          </div>
-        </div>
-      )}
-
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 mb-3">
           {error}
         </div>
       )}
 
-      {!tokenMissing && (
+      {(
         <div className="grid lg:grid-cols-4 gap-4 h-full">
           {/* Map */}
           <div className="lg:col-span-3">

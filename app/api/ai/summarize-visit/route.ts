@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { aiUnavailable } from "@/lib/aiErrors";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: "missing_anthropic_key" }, { status: 500 });
+    if (!apiKey) return aiUnavailable("summarize-visit");
     const anthropic = new Anthropic({ apiKey });
 
     // Type the joined hcps relation safely
@@ -109,7 +110,6 @@ Extract and return ONLY a strict JSON object. Use null when something isn't ment
 
     return NextResponse.json({ ok: true, ...parsed });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "unknown_error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return aiUnavailable("summarize-visit", err);
   }
 }

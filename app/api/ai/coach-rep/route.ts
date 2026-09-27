@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { aiUnavailable } from "@/lib/aiErrors";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
     };
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: "missing_anthropic_key" }, { status: 500 });
+    if (!apiKey) return aiUnavailable("coach-rep");
     const anthropic = new Anthropic({ apiKey });
 
     const prompt = `You are a senior pharma sales coach. Generate concise, actionable coaching feedback for a District Manager about one of their reps.
@@ -106,7 +107,6 @@ Return ONLY a strict JSON object:
       return NextResponse.json({ error: "ai_parse_failed", raw, stats }, { status: 500 });
     }
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "unknown_error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return aiUnavailable("coach-rep", err);
   }
 }
