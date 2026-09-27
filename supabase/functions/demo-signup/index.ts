@@ -7,8 +7,9 @@
 //
 // Creates a GoTrue user (handle_new_user makes the profile), turns it into a
 // country_manager demo visitor via demo_signup_record(), or reuses the login
-// this phone got in the last seven days, and answers with a one-time link to
-// the app's /demo/enter page. Nothing is emailed.
+// this phone already has during its 3-day trial, and answers with a one-time
+// link to the app's /demo/enter page. A second trial for the same email or
+// company is refused (409 active_trial) until the first ends. Nothing is emailed.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const APP = "https://fox-medical-crm.vercel.app";
@@ -39,9 +40,13 @@ Deno.serve(async (req) => {
 
     const { data: prep, error: prepError } = await admin.rpc("demo_signup_prepare", {
       p_secret: req.headers.get("x-demo-secret") || "", p_phone: digits, p_ip: ip,
+      p_email: clip(b.email, 200), p_company: clip(b.company, 200),
     });
     if (prepError) return json({ error: "Failed" }, 500);
     if (!prep?.ok) {
+      if (prep?.error === "active_trial") {
+        return json({ error: "active_trial", matched_by: prep.matched_by, ends_at: prep.ends_at }, 409);
+      }
       return prep?.error === "rate_limited"
         ? json({ error: "Too many requests" }, 429)
         : json({ error: "Unauthorized" }, 401);
@@ -81,7 +86,7 @@ Deno.serve(async (req) => {
     const url = new URL("/demo/enter", APP);
     url.searchParams.set("token_hash", tokenHash);
     url.searchParams.set("lang", lang);
-    return json({ url: url.toString(), returning: !isNew });
+    return json({ url: url.toString(), returning: !isNew, ends_at: prep.existing?.ends_at ?? null });
   } catch (_e) {
     return json({ error: "Failed" }, 500);
   }

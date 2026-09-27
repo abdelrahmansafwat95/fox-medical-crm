@@ -23,7 +23,7 @@ const TOUR = [
 ];
 
 export default function DemoBanner() {
-  const [visitor, setVisitor] = useState<{ name: string } | null>(null);
+  const [visitor, setVisitor] = useState<{ name: string; endsAt: number } | null>(null);
   const [welcome, setWelcome] = useState(false);
 
   useEffect(() => {
@@ -32,11 +32,12 @@ export default function DemoBanner() {
       if (!u.user) return;
       const { data: p } = await supabase
         .from("profiles")
-        .select("full_name, is_demo_visitor")
+        .select("full_name, is_demo_visitor, created_at")
         .eq("id", u.user.id)
         .single();
       if (!p?.is_demo_visitor) return;
-      setVisitor({ name: p.full_name ?? "" });
+      // Trials last 3 days from sign-up (public.demo_trial_days()).
+      setVisitor({ name: p.full_name ?? "", endsAt: new Date(p.created_at).getTime() + 3 * 864e5 });
       const params = new URLSearchParams(window.location.search);
       if (params.get("demo") === "welcome") {
         setWelcome(true);
@@ -46,6 +47,9 @@ export default function DemoBanner() {
   }, []);
 
   if (!visitor) return null;
+
+  const daysLeft = Math.max(0, Math.ceil((visitor.endsAt - Date.now()) / 864e5));
+  const countdown = daysLeft === 0 ? " · ends today" : daysLeft === 1 ? " · 1 day left" : ` · ${daysLeft} days left`;
 
   const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
     "Hi, I've been trying the Fox medical CRM demo and would like to know more."
@@ -57,7 +61,7 @@ export default function DemoBanner() {
         <div className="flex items-start gap-2.5 flex-1 min-w-0">
           <Sparkles className="w-4 h-4 text-fox-cyan flex-shrink-0 mt-0.5" />
           <p className="text-xs sm:text-sm leading-relaxed text-white/85">
-            <strong className="text-white">Live demo.</strong> Sample data that resets every night, and other
+            <strong className="text-white">Live demo{countdown}.</strong> Sample data that resets every night, and other
             visitors can see it, so please don&apos;t enter real doctor or patient details. Deleting, settings
             and team changes are switched off.
           </p>
@@ -67,9 +71,9 @@ export default function DemoBanner() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#1ebe5a] px-3 py-2 text-xs font-semibold text-white">
             <MessageCircle className="w-3.5 h-3.5" /> Talk to us
           </a>
-          <a href={PRICING} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center rounded-lg bg-white/10 hover:bg-white/20 px-3 py-2 text-xs font-semibold text-white">
-            Pricing
+          <a href={`${PRICING}#pricing`} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center rounded-lg bg-fox-cyan hover:opacity-90 px-3 py-2 text-xs font-bold text-fox-navy">
+            Get it for my company
           </a>
         </div>
       </div>
@@ -101,7 +105,7 @@ export default function DemoBanner() {
               ))}
             </div>
             <p className="text-xs text-slate-400 mt-4">
-              Your demo login lasts 7 days. To come back, request access on the website with the same phone number.
+              Your demo lasts 3 days, then the account and anything you added are deleted. To come back during it, request access on the website with the same phone number.
             </p>
           </div>
         </div>
