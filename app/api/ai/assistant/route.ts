@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiUnavailable } from "@/lib/aiErrors";
-import Anthropic from "@anthropic-ai/sdk";
+import { aiGuard } from "@/lib/aiGuard";
+import { callGemini } from "@/lib/gemini";
 
 /**
  * POST /api/ai/assistant
@@ -10,17 +11,13 @@ import Anthropic from "@anthropic-ai/sdk";
  */
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "missing_auth" }, { status: 401 });
-    }
+    const guard = await aiGuard(req, "assistant");
+    if (guard instanceof NextResponse) return guard;
 
     const { mode, context, prompt, language = "en" } = await req.json();
     if (!prompt?.trim()) return NextResponse.json({ error: "missing_prompt" }, { status: 400 });
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return aiUnavailable("assistant");
-    const anthropic = new Anthropic({ apiKey });
+    if (!process.env.GEMINI_API_KEY) return aiUnavailable("assistant");
 
     const systemByMode: Record<string, string> = {
       email:
@@ -39,16 +36,9 @@ export async function POST(req: NextRequest) {
 
     const userMsg = `${context ? `Context:\n${context}\n\n` : ""}Task / question:\n${prompt}\n\nLanguage: ${language === "ar" ? "Arabic" : "English"}`;
 
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 800,
-      system,
-      messages: [{ role: "user", content: userMsg }]
-    });
+    const reply = await callGemini(userMsg, { maxTokens: 800, system: system });
 
-    const textBlock = msg.content.find((b) => b.type === "text");
-    const reply = textBlock && "text" in textBlock ? textBlock.text : "";
-
+    
     return NextResponse.json({ ok: true, reply });
   } catch (err: unknown) {
     return aiUnavailable("assistant", err);

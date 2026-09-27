@@ -11,6 +11,6 @@ export const AI_UNAVAILABLE =
 
 export function aiUnavailable(route: string, err?: unknown) {
   if (err !== undefined) console.error(`[ai/${route}]`, err instanceof Error ? err.message : err);
-  else console.error(`[ai/${route}] ANTHROPIC_API_KEY is not set`);
+  else console.error(`[ai/${route}] GEMINI_API_KEY is not set`);
   return NextResponse.json({ error: AI_UNAVAILABLE }, { status: 503 });
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiUnavailable } from "@/lib/aiErrors";
-import Anthropic from "@anthropic-ai/sdk";
+import { aiGuard } from "@/lib/aiGuard";
+import { callGemini } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -11,10 +12,9 @@ import { createClient } from "@supabase/supabase-js";
  */
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "missing_auth" }, { status: 401 });
-    }
+    const guard = await aiGuard(req, "score-hcp");
+    if (guard instanceof NextResponse) return guard;
+    const { auth } = guard;
 
     const { hcp_id } = await req.json();
     if (!hcp_id) return NextResponse.json({ error: "missing_hcp_id" }, { status: 400 });
@@ -47,9 +47,7 @@ export async function POST(req: NextRequest) {
       .order("check_in_at", { ascending: false })
       .limit(20);
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return aiUnavailable("score-hcp");
-    const anthropic = new Anthropic({ apiKey });
+    if (!process.env.GEMINI_API_KEY) return aiUnavailable("score-hcp");
 
     const prompt = `You are a pharma sales analytics expert. Analyze the following Healthcare Professional (HCP) and recent interaction history. Recommend a segment classification (A, B, C, D, or KOL) with reasoning.
 
@@ -83,16 +81,9 @@ Return ONLY a strict JSON object with no other text:
   "next_action": "<one concrete suggestion for the rep>"
 }`;
 
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 700,
-      messages: [{ role: "user", content: prompt }]
-    });
+    const raw = await callGemini(prompt, { maxTokens: 700, json: true });
 
-    // Extract text content
-    const textBlock = msg.content.find((b) => b.type === "text");
-    const raw = textBlock && "text" in textBlock ? textBlock.text : "";
-
+    
     // Parse JSON (strip code fences if present)
     const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
     let parsed: {

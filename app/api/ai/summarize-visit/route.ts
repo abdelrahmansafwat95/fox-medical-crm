@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiUnavailable } from "@/lib/aiErrors";
-import Anthropic from "@anthropic-ai/sdk";
+import { aiGuard } from "@/lib/aiGuard";
+import { callGemini } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -10,10 +11,9 @@ import { createClient } from "@supabase/supabase-js";
  */
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "missing_auth" }, { status: 401 });
-    }
+    const guard = await aiGuard(req, "summarize-visit");
+    if (guard instanceof NextResponse) return guard;
+    const { auth } = guard;
 
     const { visit_id, raw_notes } = await req.json();
     if (!visit_id || !raw_notes?.trim()) {
@@ -36,9 +36,7 @@ export async function POST(req: NextRequest) {
       .eq("id", visit_id)
       .single();
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return aiUnavailable("summarize-visit");
-    const anthropic = new Anthropic({ apiKey });
+    if (!process.env.GEMINI_API_KEY) return aiUnavailable("summarize-visit");
 
     // Type the joined hcps relation safely
     const hcpRel = visit?.hcps as { full_name?: string; specialty?: string } | undefined;
@@ -66,15 +64,9 @@ Extract and return ONLY a strict JSON object. Use null when something isn't ment
   "coaching_notes": "<2-3 specific, actionable coaching tips for this rep>"
 }`;
 
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 900,
-      messages: [{ role: "user", content: prompt }]
-    });
+    const raw = await callGemini(prompt, { maxTokens: 900, json: true });
 
-    const textBlock = msg.content.find((b) => b.type === "text");
-    const raw = textBlock && "text" in textBlock ? textBlock.text : "";
-    const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
+        const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
     let parsed: {
       summary: string;
       doctor_attitude: string | null;

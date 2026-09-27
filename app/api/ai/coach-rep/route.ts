@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiUnavailable } from "@/lib/aiErrors";
-import Anthropic from "@anthropic-ai/sdk";
+import { aiGuard } from "@/lib/aiGuard";
+import { callGemini } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -10,10 +11,9 @@ import { createClient } from "@supabase/supabase-js";
  */
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "missing_auth" }, { status: 401 });
-    }
+    const guard = await aiGuard(req, "coach-rep");
+    if (guard instanceof NextResponse) return guard;
+    const { auth } = guard;
 
     const { rep_id, days = 30 } = await req.json();
     if (!rep_id) return NextResponse.json({ error: "missing_rep_id" }, { status: 400 });
@@ -60,9 +60,7 @@ export async function POST(req: NextRequest) {
       outside_geofence: visits?.filter((v) => v.check_in_within_geofence === false).length ?? 0
     };
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return aiUnavailable("coach-rep");
-    const anthropic = new Anthropic({ apiKey });
+    if (!process.env.GEMINI_API_KEY) return aiUnavailable("coach-rep");
 
     const prompt = `You are a senior pharma sales coach. Generate concise, actionable coaching feedback for a District Manager about one of their reps.
 
@@ -90,15 +88,9 @@ Return ONLY a strict JSON object:
   "risk_level": "<low|medium|high>"
 }`;
 
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 800,
-      messages: [{ role: "user", content: prompt }]
-    });
+    const raw = await callGemini(prompt, { maxTokens: 800, json: true });
 
-    const textBlock = msg.content.find((b) => b.type === "text");
-    const raw = textBlock && "text" in textBlock ? textBlock.text : "";
-    const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
+        const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
 
     try {
       const parsed = JSON.parse(cleaned);

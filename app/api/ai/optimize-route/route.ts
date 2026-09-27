@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiUnavailable } from "@/lib/aiErrors";
-import Anthropic from "@anthropic-ai/sdk";
+import { aiGuard } from "@/lib/aiGuard";
+import { callGemini } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -10,10 +11,9 @@ import { createClient } from "@supabase/supabase-js";
  */
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "missing_auth" }, { status: 401 });
-    }
+    const guard = await aiGuard(req, "optimize-route");
+    if (guard instanceof NextResponse) return guard;
+    const { auth } = guard;
 
     const { hcp_ids, start_lat, start_lng } = await req.json();
     if (!Array.isArray(hcp_ids) || hcp_ids.length === 0) {
@@ -46,9 +46,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "no_hcps_found" }, { status: 404 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return aiUnavailable("optimize-route");
-    const anthropic = new Anthropic({ apiKey });
+    if (!process.env.GEMINI_API_KEY) return aiUnavailable("optimize-route");
 
     // Type the joined relations safely
     type WorkplaceRow = {
@@ -95,15 +93,9 @@ Return ONLY a strict JSON object:
   "tips": ["<actionable tip 1>", "<tip 2>"]
 }`;
 
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 800,
-      messages: [{ role: "user", content: prompt }]
-    });
+    const raw = await callGemini(prompt, { maxTokens: 800, json: true });
 
-    const textBlock = msg.content.find((b) => b.type === "text");
-    const raw = textBlock && "text" in textBlock ? textBlock.text : "";
-    const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
+        const cleaned = raw.replace(/```json\s*|\s*```/g, "").trim();
 
     try {
       const parsed = JSON.parse(cleaned);
