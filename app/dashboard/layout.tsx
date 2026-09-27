@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { clearRoleCache } from "@/lib/roles";
-import { clearPermsCache } from "@/lib/permissions";
+import { clearPermsCache, usePerms } from "@/lib/permissions";
+import { resourceFor } from "@/lib/routeResource";
 import { flushQueue } from "@/lib/offlineQueue";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
@@ -18,7 +19,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [checking, setChecking] = useState(true);
+  const { can, loading: permsLoading } = usePerms();
+  // Every page is checked against its permission here (lib/routeResource),
+  // so a page switched off on the Permissions screen cannot be opened by URL.
+  const resource = resourceFor(pathname);
+  const denied = !checking && !permsLoading && !!resource && !can(resource, "view");
+
+  useEffect(() => {
+    if (denied) router.replace("/dashboard");
+  }, [denied, router]);
 
   useEffect(() => {
     let mounted = true;
@@ -72,7 +83,11 @@ export default function DashboardLayout({
         <Topbar />
         <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6">
           <DemoBanner />
-          {children}
+          {resource && (permsLoading || denied) ? (
+            <div className="p-12 text-center text-slate-500">Loading…</div>
+          ) : (
+            children
+          )}
         </main>
       </div>
       <MobileNav />

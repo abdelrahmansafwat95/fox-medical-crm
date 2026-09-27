@@ -20,7 +20,8 @@ const aiItem = { href: "/dashboard/assistant", label: "AI", icon: Sparkles, badg
 export default function MobileNav() {
   const pathname = usePathname();
   const { can } = usePerms();
-  const items = [...baseItems, can("inbox", "view") ? managerItem : repItem, aiItem];
+  // The AI tab follows the assistant permission like the sidebar does.
+  const items = [...baseItems, can("inbox", "view") ? managerItem : repItem, ...(can("assistant", "view") ? [aiItem] : [])];
   const [inboxCount, setInboxCount] = useState(0);
 
   useEffect(() => {
