@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * POST /api/ai/score-hcp
  * Body: { hcp_id }
- * Pulls the HCP + last 90 days of visits, asks Claude to recommend a segment.
+ * Pulls the HCP + last 90 days of visits, asks the AI (Gemini) to recommend a segment.
  * Writes results back to hcps.ai_score, ai_segment_recommendation, ai_notes.
  */
 export async function POST(req: NextRequest) {

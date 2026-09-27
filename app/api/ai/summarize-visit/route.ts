@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * POST /api/ai/summarize-visit
  * Body: { visit_id, raw_notes: "rough text or voice transcript" }
- * Asks Claude to extract structured fields, writes them back to visits.
+ * Asks the AI (Gemini) to extract structured fields, writes them back to visits.
  */
 export async function POST(req: NextRequest) {
   try {

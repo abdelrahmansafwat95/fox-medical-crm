@@ -51,7 +51,7 @@ export default function AssistantPage() {
         <h1 className="text-2xl font-bold text-slate-900">AI Assistant</h1>
       </div>
       <p className="text-slate-500 mb-4">
-        Powered by Claude. Write emails, WhatsApp messages, detailing pitches, or get advice.
+        FoxBot, your AI assistant. Write emails, WhatsApp messages, detailing pitches, or get advice.
       </p>
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -124,7 +124,7 @@ export default function AssistantPage() {
         <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-yellow-700" />
-            <span className="font-semibold text-yellow-900">Claude says</span>
+            <span className="font-semibold text-yellow-900">FoxBot says</span>
             <button
               onClick={() => navigator.clipboard.writeText(reply)}
               className="ml-auto text-xs text-yellow-700 underline"
