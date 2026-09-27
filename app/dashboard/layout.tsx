@@ -10,6 +10,7 @@ import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import Topbar from "@/components/Topbar";
 import GlobalSearch from "@/components/GlobalSearch";
+import DemoBanner from "@/components/DemoBanner";
 
 export default function DashboardLayout({
   children
@@ -69,7 +70,10 @@ export default function DashboardLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar />
-        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6">
+          <DemoBanner />
+          {children}
+        </main>
       </div>
       <MobileNav />
       <GlobalSearch />
