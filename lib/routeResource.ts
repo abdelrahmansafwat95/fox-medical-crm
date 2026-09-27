@@ -38,6 +38,8 @@ const ROUTE_RESOURCES: Array<[string, string]> = [
   ["/dashboard/settings", "settings"],
   ["/dashboard/permissions", "permissions"],
   ["/dashboard/admin", "permissions"],
+  // Managing keys and webhooks is admin-only in the database; managers may look.
+  ["/dashboard/integrations", "team"],
 ];
 
 export function resourceFor(pathname: string): string | null {

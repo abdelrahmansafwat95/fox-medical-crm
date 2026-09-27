@@ -29,7 +29,8 @@ import {
   CalendarDays,
   CalendarCheck,
   FileSpreadsheet,
-  KeyRound
+  KeyRound,
+  Plug
 } from "lucide-react";
 import { usePerms } from "@/lib/permissions";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -96,7 +97,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/targets", label: "Targets", icon: TargetIcon, resource: "targets" },
       { href: "/dashboard/compliance", label: "Compliance", icon: Shield, resource: "compliance" },
       { href: "/dashboard/team", label: "Team", icon: Users, resource: "team" },
-      { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet, resource: "import" }
+      { href: "/dashboard/import", label: "Bulk Import", icon: FileSpreadsheet, resource: "import" },
+      { href: "/dashboard/integrations", label: "API & Webhooks", icon: Plug, resource: "team" }
     ]
   },
   {
