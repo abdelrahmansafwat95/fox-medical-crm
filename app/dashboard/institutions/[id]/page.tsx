@@ -54,7 +54,7 @@ export default function InstitutionDetailPage() {
           .eq("institution_id", params.id),
         supabase
           .from("visits")
-          .select("id, check_in_at, visit_type, hcps(full_name), profiles(full_name)")
+          .select("id, check_in_at, visit_type, hcps(full_name), profiles!visits_rep_id_fkey(full_name)")
           .eq("institution_id", params.id)
           .order("check_in_at", { ascending: false })
           .limit(10)

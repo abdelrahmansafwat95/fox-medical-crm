@@ -158,7 +158,7 @@ export default function EventDetailPage() {
     const [eRes, iRes, hRes] = await Promise.all([
       supabase
         .from("events")
-        .select("*, profiles(full_name)")
+        .select("*, profiles!events_organizer_id_fkey(full_name)")
         .eq("id", params.id)
         .single(),
       supabase

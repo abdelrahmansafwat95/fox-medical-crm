@@ -212,7 +212,7 @@ export default function HCPDetailPage() {
         .select(
           `id, check_in_at, duration_minutes, visit_type, status, manager_status,
            check_in_within_geofence, ai_quality_score, ai_summary, doctor_attitude,
-           profiles(full_name), institutions(name)`
+           profiles!visits_rep_id_fkey(full_name), institutions(name)`
         )
         .eq("hcp_id", params.id)
         .order("check_in_at", { ascending: false })
@@ -222,7 +222,7 @@ export default function HCPDetailPage() {
         .from("samples_transactions")
         .select(
           `id, quantity, batch_number, created_at, visit_id, hcp_signature_url,
-           products(name, brand_name), profiles(full_name)`
+           products(name, brand_name), profiles!samples_transactions_rep_id_fkey(full_name)`
         )
         .eq("hcp_id", params.id)
         .eq("transaction_type", "given_to_hcp")

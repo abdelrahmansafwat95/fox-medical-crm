@@ -38,7 +38,7 @@ export default function ReportsPage() {
     const { data: visits } = await supabase
       .from("visits")
       .select(`rep_id, status, manager_status, hcp_id, ai_quality_score, check_in_within_geofence,
-               profiles!inner(full_name)`)
+               profiles!visits_rep_id_fkey!inner(full_name)`)
       .gte("check_in_at", since);
 
     type Row = {

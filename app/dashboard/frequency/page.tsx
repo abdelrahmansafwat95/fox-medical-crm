@@ -92,7 +92,7 @@ export default function FrequencyPage() {
         .limit(500),
       supabase
         .from("call_targets")
-        .select("rep_id, frequency_target, profiles(full_name, product_line)")
+        .select("rep_id, frequency_target, profiles!call_targets_rep_id_fkey(full_name, product_line)")
         .eq("month", monthKey),
       supabase
         .from("visits")
