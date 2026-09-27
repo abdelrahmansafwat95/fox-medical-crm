@@ -5,7 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { useRequirePermission } from "@/lib/permissions";
 import { useRole } from "@/lib/roles";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
-import { Users, Mail, Phone, Search, Pencil, UserCheck } from "lucide-react";
+import InviteUserModal from "@/components/InviteUserModal";
+import { Users, Mail, Phone, Search, Pencil, UserCheck, UserPlus } from "lucide-react";
 
 interface ProfileRow {
   id: string;
@@ -54,6 +55,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<ProfileRow | null>(null);
+  const [inviting, setInviting] = useState(false);
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -98,6 +100,18 @@ export default function TeamPage() {
         m.product_line?.toLowerCase().includes(q)
     );
   }, [team, search]);
+
+  // Anyone active can be chosen as a new person's manager.
+  const activeManagers = useMemo(
+    () =>
+      team
+        .filter((m) => m.is_active)
+        .map((m) => ({
+          value: m.id,
+          label: `${m.full_name ?? m.email ?? "Unknown"} · ${m.role.replaceAll("_", " ")}`
+        })),
+    [team]
+  );
 
   // Built per person, so nobody is offered as their own manager.
   const editFields: FieldConfig[] = useMemo(() => {
@@ -163,10 +177,18 @@ export default function TeamPage() {
           <Users className="w-6 h-6" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Team</h1>
+        {isAdmin && (
+          <button
+            onClick={() => setInviting(true)}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 text-sm font-semibold"
+          >
+            <UserPlus className="w-4 h-4" /> Invite user
+          </button>
+        )}
       </div>
       <p className="text-slate-500 mb-4">
         {isAdmin
-          ? "Use Edit to change someone's role, manager, branch, territory or status. To add a new person, create their login in Supabase Auth → Users; they then appear here to set up."
+          ? "Invite user adds someone new. Use Edit to change a person's role, manager, branch, territory or status."
           : "Your team and their contact details."}
       </p>
 
@@ -272,6 +294,18 @@ export default function TeamPage() {
             setEditing(null);
             load();
           }}
+        />
+      )}
+
+      {isAdmin && (
+        <InviteUserModal
+          open={inviting}
+          onClose={() => setInviting(false)}
+          onCreated={load}
+          roles={ROLE_OPTIONS}
+          managers={activeManagers}
+          branches={branches}
+          territories={territories}
         />
       )}
     </div>
