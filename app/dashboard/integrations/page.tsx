@@ -50,6 +50,7 @@ export default function IntegrationsPage() {
   const [shownSecret, setShownSecret] = useState<{ id: string; secret: string } | null>(null)
   const [copied, setCopied] = useState('')
   const [busy, setBusy] = useState(false)
+  const [plan, setPlan] = useState<{ plan: string; api_enabled: boolean } | null>(null)
 
   const load = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -57,12 +58,13 @@ export default function IntegrationsPage() {
       const { data: p } = await supabase.from('profiles').select('is_demo_visitor').eq('id', user.id).single()
       setDemo(p?.is_demo_visitor === true)
     }
-    const [k, h, d] = await Promise.all([
+    const [k, h, d, pl] = await Promise.all([
       supabase.from('api_keys').select('*').order('created_at', { ascending: false }),
       supabase.from('webhooks').select('id, url, events, active, description, created_at, last_status, last_delivery_at').order('created_at', { ascending: false }),
       supabase.from('webhook_deliveries').select('id, webhook_id, event, status, attempts, response_status, created_at, delivered_at').order('id', { ascending: false }).limit(20),
+      supabase.rpc('plan_info'),
     ])
-    setKeys(k.data || []); setHooks(h.data || []); setDeliveries(d.data || [])
+    setKeys(k.data || []); setHooks(h.data || []); setDeliveries(d.data || []); setPlan((pl.data as any) || null)
   }
   useEffect(() => { load() }, [])
 
@@ -104,6 +106,11 @@ export default function IntegrationsPage() {
   const input = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300'
   const fmt = (d?: string) => d ? new Date(d).toLocaleString(isAr ? 'ar-EG' : 'en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
   const locked = demo || busy
+  // The plan is set by Fox Systems per installation (fox_plan.config); below
+  // Business, keys and webhooks are paused but can still be revoked or deleted.
+  const noPlan = plan?.api_enabled === false
+  const planName = plan ? ({ starter: t('Starter', 'البداية'), team: t('Team', 'الفريق'), growth: t('Growth', 'النمو'),
+    business: t('Business', 'الأعمال'), complete: t('Complete', 'الشامل') } as Record<string, string>)[plan.plan] || plan.plan : ''
 
   return (
     <div className="max-w-5xl mx-auto space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
@@ -117,6 +124,12 @@ export default function IntegrationsPage() {
         </p>
       </div>
 
+      {noPlan && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg px-4 py-3">
+          {t(`Your plan (${planName}) does not include API access and webhooks — they are part of the Business and Complete plans. Existing keys and webhooks are paused, not deleted, and you can still revoke them.`,
+             `باقتك الحالية (${planName}) لا تشمل الوصول إلى الـ API والـ Webhooks، فهي ضمن باقتَي الأعمال والشامل. المفاتيح والـ Webhooks الحالية موقوفة مؤقتًا ولم تُحذف، ويمكنك إلغاؤها.`)}
+        </div>
+      )}
       {demo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg px-4 py-3">
           {t('In the demo, creating API keys and webhooks is switched off so the shared sample data stays inside the CRM. In your own CRM your administrator creates them here.',
@@ -146,7 +159,7 @@ export default function IntegrationsPage() {
           <div>
             <label className="text-xs font-medium text-gray-500">{t('Key name', 'اسم المفتاح')}</label>
             <input value={keyName} onChange={e => setKeyName(e.target.value)} placeholder='e.g. ERP sync' className={input} disabled={demo} />
-            <button onClick={createKey} disabled={locked || !keyName.trim() || !keyScopes.length} className={`${btn} mt-3`}>
+            <button onClick={createKey} disabled={locked || noPlan || !keyName.trim() || !keyScopes.length} className={`${btn} mt-3`}>
               <Plus size={15} /> {t('Create key', 'إنشاء مفتاح')}
             </button>
           </div>
@@ -212,7 +225,7 @@ export default function IntegrationsPage() {
             <label className="text-xs font-medium text-gray-500">{t('Your URL (https)', 'رابطك (https)')}</label>
             <input dir="ltr" value={hookUrl} onChange={e => setHookUrl(e.target.value)} placeholder="https://example.com/fox-webhook" className={input} disabled={demo} />
             <input value={hookDesc} onChange={e => setHookDesc(e.target.value)} placeholder={t('Description (optional)', 'وصف (اختياري)')} className={input} disabled={demo} />
-            <button onClick={createHook} disabled={locked || !hookUrl.trim() || !hookEvents.length} className={btn}><Plus size={15} /> {t('Add webhook', 'إضافة Webhook')}</button>
+            <button onClick={createHook} disabled={locked || noPlan || !hookUrl.trim() || !hookEvents.length} className={btn}><Plus size={15} /> {t('Add webhook', 'إضافة Webhook')}</button>
           </div>
           <div>
             <label className="text-xs font-medium text-gray-500">{t('Events', 'الأحداث')}</label>

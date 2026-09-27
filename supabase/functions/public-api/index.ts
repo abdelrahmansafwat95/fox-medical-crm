@@ -103,6 +103,7 @@ Deno.serve(async (req) => {
   const { data: k, error: kErr } = await db.rpc("api_key_check", { p_key: key });
   if (kErr) return fail(500, "error", "Could not check the key.");
   if (!k) return fail(401, "invalid_key", "This API key is not valid or has been revoked.");
+  if (k.plan_api === false) return fail(403, "plan", "API access is part of the Business and Complete plans. Contact Fox Systems to upgrade.");
   if (k.limited) return fail(429, "rate_limited", "Too many requests: the limit is 120 a minute per key.");
   const scopes: string[] = k.scopes ?? [];
 
