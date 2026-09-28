@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRequirePermission } from "@/lib/permissions";
 import { Target, Save, Loader2 } from "lucide-react";
+import IncentivesPanel from "@/components/IncentivesPanel";
 
 interface RepRow {
   id: string;
@@ -27,6 +28,7 @@ export default function TargetsPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"targets" | "incentives">("targets");
 
   useEffect(() => {
     load();
@@ -103,9 +105,20 @@ export default function TargetsPage() {
           className="text-sm px-3 py-2 border border-slate-300 rounded-lg"
         />
       </div>
-      <p className="text-slate-500 mb-4">Set monthly KPIs for each rep.</p>
+      <p className="text-slate-500 mb-4">Set monthly KPIs for each rep, and see the incentives they earn against them.</p>
 
-      {loading ? (
+      <div className="inline-flex p-1 rounded-lg bg-slate-100 mb-4">
+        {(["targets", "incentives"] as const).map((tb) => (
+          <button key={tb} onClick={() => setTab(tb)}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium ${tab === tb ? "bg-white shadow text-slate-900" : "text-slate-500 hover:text-slate-800"}`}>
+            {tb === "targets" ? "Targets" : "Incentives"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "incentives" ? (
+        <IncentivesPanel month={month} />
+      ) : loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
       ) : reps.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">

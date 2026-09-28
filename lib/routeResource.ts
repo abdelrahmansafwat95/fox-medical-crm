@@ -30,6 +30,7 @@ const ROUTE_RESOURCES: Array<[string, string]> = [
   ["/dashboard/inbox", "inbox"],
   ["/dashboard/tracking", "tracking"],
   ["/dashboard/reports", "reports"],
+  ["/dashboard/sales", "reports"],
   ["/dashboard/leaderboard", "leaderboard"],
   ["/dashboard/targets", "targets"],
   ["/dashboard/compliance", "compliance"],

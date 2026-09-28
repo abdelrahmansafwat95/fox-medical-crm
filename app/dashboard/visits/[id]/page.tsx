@@ -17,7 +17,8 @@ import {
   Package,
   Plus,
   ShoppingCart,
-  Pencil
+  Pencil,
+  Presentation
 } from "lucide-react";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 
@@ -68,6 +69,13 @@ interface OrderRow {
   items: { product_id: string; qty: number; total: number }[];
 }
 
+interface DetailingRow {
+  id: string;
+  total_seconds: number;
+  slides: { slide_id: string; seconds: number }[];
+  products: { name: string } | null;
+}
+
 const VISIT_EDIT_FIELDS: FieldConfig[] = [
   {
     name: "doctor_attitude",
@@ -95,6 +103,7 @@ export default function VisitDetailPage() {
   const [visit, setVisit] = useState<VisitFull | null>(null);
   const [samplesGiven, setSamplesGiven] = useState<SampleTransactionRow[]>([]);
   const [order, setOrder] = useState<OrderRow | null>(null);
+  const [detailing, setDetailing] = useState<DetailingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [rawNotes, setRawNotes] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
@@ -148,6 +157,14 @@ export default function VisitDetailPage() {
     } else {
       setOrder(null);
     }
+
+    // What the doctor was shown (e-detailing)
+    const { data: dData } = await supabase
+      .from("detailing_sessions")
+      .select("id, total_seconds, slides, products(name)")
+      .eq("visit_id", params.id)
+      .order("started_at");
+    setDetailing((dData ?? []) as unknown as DetailingRow[]);
 
     setLoading(false);
   }
@@ -342,6 +359,14 @@ export default function VisitDetailPage() {
 
         {/* Action buttons */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {visit.status === "in_progress" && (
+            <Link
+              href={`/dashboard/visits/${visit.id}/detail`}
+              className="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
+            >
+              <Presentation className="w-4 h-4" /> Start detailing
+            </Link>
+          )}
           {canDistributeSamples && (
             <Link
               href={`/dashboard/visits/${visit.id}/give-sample`}
@@ -377,6 +402,26 @@ export default function VisitDetailPage() {
           )}
         </div>
       </div>
+
+      {/* E-detailing: what the doctor was shown, and for how long */}
+      {detailing.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Presentation className="w-5 h-5 text-brand-600" />
+            <h2 className="font-semibold text-slate-900">Detailed with slides</h2>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {detailing.map((d) => (
+              <div key={d.id} className="py-2 flex items-center justify-between text-sm">
+                <span className="font-medium text-slate-900">{d.products?.name ?? "Product"}</span>
+                <span className="text-slate-600">
+                  {d.slides.length} slide{d.slides.length === 1 ? "" : "s"} · {Math.floor(d.total_seconds / 60)}m {d.total_seconds % 60}s
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Linked order */}
       {order && (

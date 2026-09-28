@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Pill, ChevronDown, ChevronUp, Plus, Pencil, Download, MessageSquare, Save, X, Loader2, Trash2 } from "lucide-react";
+import { Pill, ChevronDown, ChevronUp, Plus, Pencil, Download, MessageSquare, Save, X, Loader2, Trash2, Presentation } from "lucide-react";
+import DetailingSlidesModal from "@/components/DetailingSlidesModal";
 import type { Product } from "@/lib/types";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
@@ -66,6 +67,7 @@ export default function ProductsPage() {
   const [msgEditing, setMsgEditing] = useState<Product | null>(null);
   const [msgs, setMsgs] = useState<{ title: string; message: string; evidence_label?: string | null }[]>([]);
   const [msgSaving, setMsgSaving] = useState(false);
+  const [slidesFor, setSlidesFor] = useState<Product | null>(null);
 
   function openMessages(p: Product) {
     setMsgEditing(p);
@@ -179,6 +181,15 @@ export default function ProductsPage() {
                   </button>
                   {can("products", "edit") && (
                     <button
+                      onClick={() => setSlidesFor(p)}
+                      className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                      title="E-detailing slides"
+                    >
+                      <Presentation className="w-4 h-4" />
+                    </button>
+                  )}
+                  {can("products", "edit") && (
+                    <button
                       onClick={() => openMessages(p)}
                       className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
                       title="Edit key messages"
@@ -227,6 +238,10 @@ export default function ProductsPage() {
             );
           })}
         </div>
+      )}
+
+      {slidesFor && (
+        <DetailingSlidesModal productId={slidesFor.id} productName={slidesFor.brand_name ?? slidesFor.name} onClose={() => setSlidesFor(null)} />
       )}
 
       {msgEditing && (
