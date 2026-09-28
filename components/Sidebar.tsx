@@ -32,6 +32,7 @@ import {
   FileSpreadsheet,
   KeyRound,
   Plug
+  ClipboardCheck,
 } from "lucide-react";
 import { usePerms } from "@/lib/permissions";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -59,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/visits", label: "Visits", icon: ClipboardList, resource: "visits" },
       { href: "/dashboard/visits/check-in", label: "Check-in", icon: MapPin, resource: "check_in" },
       { href: "/dashboard/tour-plans", label: "Tour Plans", icon: Calendar, resource: "tour_plans" },
+      { href: "/dashboard/coaching", label: "Coaching", icon: ClipboardCheck, resource: "visits" },
       { href: "/dashboard/events", label: "Events", icon: CalendarDays, resource: "events" },
       { href: "/dashboard/notifications", label: "Notifications", icon: Bell, resource: "notifications", badgeKey: "notifications" }
     ]

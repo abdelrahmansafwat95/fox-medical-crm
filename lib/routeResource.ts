@@ -15,6 +15,7 @@ const ROUTE_RESOURCES: Array<[string, string]> = [
   ["/dashboard/visits/check-in", "check_in"],
   ["/dashboard/visits", "visits"],
   ["/dashboard/tour-plans", "tour_plans"],
+  ["/dashboard/coaching", "visits"],
   ["/dashboard/events", "events"],
   ["/dashboard/notifications", "notifications"],
   ["/dashboard/hcps", "hcps"],
