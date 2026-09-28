@@ -84,7 +84,7 @@ export default function ReportsPage() {
         unique_hcps: r._hcps.size,
         avg_quality:
           r._qScores.length > 0
-            ? r._qScores.reduce((a, b) => a + b, 0) / r._qScores.length
+            ? Math.round((r._qScores.reduce((a, b) => a + b, 0) / r._qScores.length) * 10) / 10
             : null
       };
     });
