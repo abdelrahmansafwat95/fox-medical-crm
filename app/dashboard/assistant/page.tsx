@@ -36,7 +36,8 @@ export default function AssistantPage() {
     const j = await res.json();
     setBusy(false);
     if (j.ok) {
-      setReply(j.reply);
+      // plain text: drop markdown bold/italics, turn '* ' bullets into '• '
+      setReply(String(j.reply).replace(/\*\*/g, "").replace(/^(\s*)\* /gm, "$1• ").replace(/\*([^*\n]+)\*/g, "$1"));
     } else {
       setReply("Error: " + (j.error ?? "unknown"));
     }
