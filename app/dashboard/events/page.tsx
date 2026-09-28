@@ -226,7 +226,7 @@ function Stat({
   return (
     <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
       <div className={`text-2xl font-bold ${cls}`}>
-        {value.toLocaleString()}
+        {value.toLocaleString('en-US')}
         {suffix}
       </div>
       <div className="text-xs text-slate-500">{label}</div>
@@ -330,7 +330,7 @@ function EventCard({ event: e }: { event: EventSummary }) {
             )}
             {e.actual_cost_egp && e.actual_cost_egp > 0 && (
               <div className="ml-auto font-semibold text-slate-900">
-                {e.actual_cost_egp.toLocaleString()} EGP
+                {e.actual_cost_egp.toLocaleString('en-US')} EGP
               </div>
             )}
           </div>

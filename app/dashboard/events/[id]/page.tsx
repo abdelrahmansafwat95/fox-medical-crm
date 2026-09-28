@@ -341,7 +341,7 @@ export default function EventDetailPage() {
                 <div className="text-sm text-slate-700 mt-1" dir="rtl">{event.title_ar}</div>
               )}
               <div className="text-xs text-slate-600 mt-2 flex items-center gap-3 flex-wrap">
-                <span>{startsAt.toLocaleString()}</span>
+                <span>{startsAt.toLocaleString('en-US')}</span>
                 {event.is_virtual ? (
                   <span className="inline-flex items-center gap-1">
                     <Wifi className="w-3 h-3" /> Virtual
@@ -376,7 +376,7 @@ export default function EventDetailPage() {
             <div className="px-3 py-1.5 rounded-lg bg-white border border-slate-200">
               <span className="text-slate-500">Budget: </span>
               <span className="font-bold text-slate-900">
-                {event.budget_egp?.toLocaleString()} EGP
+                {event.budget_egp?.toLocaleString('en-US')} EGP
               </span>
             </div>
             {(event.actual_cost_egp ?? 0) > 0 && (
@@ -389,7 +389,7 @@ export default function EventDetailPage() {
                       : "text-emerald-700"
                   }`}
                 >
-                  {event.actual_cost_egp?.toLocaleString()} EGP
+                  {event.actual_cost_egp?.toLocaleString('en-US')} EGP
                 </span>
               </div>
             )}

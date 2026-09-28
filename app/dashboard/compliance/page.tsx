@@ -140,7 +140,7 @@ export default function CompliancePage() {
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
-                    {a.profiles?.full_name ?? "Unknown rep"} · {new Date(a.detected_at).toLocaleString()}
+                    {a.profiles?.full_name ?? "Unknown rep"} · {new Date(a.detected_at).toLocaleString('en-US')}
                   </div>
                   {a.evidence && (
                     <pre className="mt-2 text-xs text-slate-700 bg-slate-50 rounded p-2 overflow-x-auto">

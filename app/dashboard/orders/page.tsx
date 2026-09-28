@@ -91,7 +91,7 @@ export default function OrdersPage() {
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
         <div className="text-xs text-slate-500">Total this month</div>
-        <div className="text-2xl font-bold text-slate-900">{totalThisMonth.toLocaleString()} EGP</div>
+        <div className="text-2xl font-bold text-slate-900">{totalThisMonth.toLocaleString('en-US')} EGP</div>
       </div>
 
       {loading ? (
@@ -137,7 +137,7 @@ export default function OrdersPage() {
                       </span>
                     )}
                   </td>
-                  <td className="p-3 text-right font-bold">{o.total.toLocaleString()} {o.currency}</td>
+                  <td className="p-3 text-right font-bold">{o.total.toLocaleString('en-US')} {o.currency}</td>
                 </tr>
               ))}
             </tbody>

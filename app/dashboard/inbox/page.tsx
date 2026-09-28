@@ -274,7 +274,7 @@ export default function InboxPage() {
     await notifyUser(ex?.rep_id, {
       type: "expense",
       title: "Expense approved",
-      body: ex ? `${ex.amount.toLocaleString()} ${ex.currency} approved.` : undefined,
+      body: ex ? `${ex.amount.toLocaleString('en-US')} ${ex.currency} approved.` : undefined,
       link_url: "/dashboard/expenses"
     });
     setExpenses((prev) => prev.filter((e) => e.id !== id));
@@ -350,7 +350,7 @@ export default function InboxPage() {
           notifyUser(e.rep_id, {
             type: "expense",
             title: "Expense approved",
-            body: `${e.amount.toLocaleString()} ${e.currency} approved.`,
+            body: `${e.amount.toLocaleString('en-US')} ${e.currency} approved.`,
             link_url: "/dashboard/expenses"
           })
         )
@@ -590,7 +590,7 @@ export default function InboxPage() {
                 totalLabel={`Total: ${f.expenses
                   .filter((e) => selected.expenses.has(e.id))
                   .reduce((s, e) => s + e.amount, 0)
-                  .toLocaleString()} EGP`}
+                  .toLocaleString('en-US')} EGP`}
               />
             )}
             <div className="divide-y divide-slate-100">
@@ -611,7 +611,7 @@ export default function InboxPage() {
                         {e.category}
                       </span>
                       <span className="font-bold text-slate-900 ml-auto">
-                        {e.amount.toLocaleString()} {e.currency}
+                        {e.amount.toLocaleString('en-US')} {e.currency}
                       </span>
                     </div>
                     <div className="text-xs text-slate-500 mt-0.5">{e.expense_date}</div>

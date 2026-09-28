@@ -98,7 +98,7 @@ export default function NotificationsPage() {
                   <div className="font-medium text-slate-900">{n.title}</div>
                   {n.body && <div className="text-sm text-slate-600 mt-0.5">{n.body}</div>}
                   <div className="text-xs text-slate-400 mt-1">
-                    {new Date(n.created_at).toLocaleString()}
+                    {new Date(n.created_at).toLocaleString('en-US')}
                   </div>
                 </div>
               </div>

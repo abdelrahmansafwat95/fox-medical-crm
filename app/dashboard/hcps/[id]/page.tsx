@@ -562,7 +562,7 @@ function StatCard({
         <Icon className="w-4 h-4" />
       </div>
       <div className="mt-2">
-        <div className="text-2xl font-bold text-slate-900">{value.toLocaleString()}</div>
+        <div className="text-2xl font-bold text-slate-900">{value.toLocaleString('en-US')}</div>
         <div className="text-[11px] text-slate-500">{label}</div>
       </div>
     </div>
@@ -691,7 +691,7 @@ function OrderRow({ o }: { o: TimelineEvent & { kind: "order" } }) {
             <span className="font-medium text-slate-900 text-sm">
               Order {o.order_number ?? "—"} ·{" "}
               <span className="font-bold">
-                {o.total.toLocaleString()} {o.currency}
+                {o.total.toLocaleString('en-US')} {o.currency}
               </span>
             </span>
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 capitalize">

@@ -93,7 +93,7 @@ export default function ExpensesPage() {
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
         <div className="text-xs text-slate-500">Total this month</div>
-        <div className="text-2xl font-bold text-slate-900">{total.toLocaleString()} EGP</div>
+        <div className="text-2xl font-bold text-slate-900">{total.toLocaleString('en-US')} EGP</div>
       </div>
 
       {showForm && (
@@ -178,7 +178,7 @@ export default function ExpensesPage() {
                 <div className="font-medium text-slate-900">{e.description ?? "—"}</div>
                 <div className="text-xs text-slate-500">{e.expense_date}</div>
               </div>
-              <div className="font-bold">{e.amount.toLocaleString()} EGP</div>
+              <div className="font-bold">{e.amount.toLocaleString('en-US')} EGP</div>
               <span className={`text-[11px] font-bold px-2 py-1 rounded ${STATUS_COLORS[e.status]}`}>
                 {e.status}
               </span>

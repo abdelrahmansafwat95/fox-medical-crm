@@ -111,7 +111,7 @@ export default function ReportsPage() {
   function downloadPdf() {
     exportToPDF({
       title: "Field Force Performance Report",
-      subtitle: `Last ${days} days · generated ${new Date().toLocaleDateString()}`,
+      subtitle: `Last ${days} days · generated ${new Date().toLocaleDateString('en-GB')}`,
       columns: ["Rep", "Visits", "Verified", "Flagged", "Unique HCPs", "Avg Quality"],
       rows: data.map((r) => [
         r.rep_name,

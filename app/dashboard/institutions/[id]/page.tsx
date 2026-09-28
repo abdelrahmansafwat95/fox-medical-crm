@@ -188,7 +188,7 @@ export default function InstitutionDetailPage() {
                   </div>
                 </div>
                 <span className="text-xs text-slate-400 shrink-0">
-                  {v.check_in_at ? new Date(v.check_in_at).toLocaleDateString() : ""}
+                  {v.check_in_at ? new Date(v.check_in_at).toLocaleDateString('en-GB') : ""}
                 </span>
               </Link>
             ))}

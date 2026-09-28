@@ -298,13 +298,13 @@ export default function VisitDetailPage() {
           <div>
             <div className="text-xs text-slate-500">Check-in</div>
             <div className="font-medium">
-              {visit.check_in_at ? new Date(visit.check_in_at).toLocaleString() : "—"}
+              {visit.check_in_at ? new Date(visit.check_in_at).toLocaleString('en-US') : "—"}
             </div>
           </div>
           <div>
             <div className="text-xs text-slate-500">Check-out</div>
             <div className="font-medium">
-              {visit.check_out_at ? new Date(visit.check_out_at).toLocaleString() : "—"}
+              {visit.check_out_at ? new Date(visit.check_out_at).toLocaleString('en-US') : "—"}
             </div>
           </div>
           {visit.duration_minutes !== null && (
@@ -403,7 +403,7 @@ export default function VisitDetailPage() {
               {(order.items?.length ?? 0) === 1 ? "" : "s"}
             </div>
             <div className="font-bold text-slate-900">
-              {order.total.toLocaleString()} {order.currency}
+              {order.total.toLocaleString('en-US')} {order.currency}
             </div>
           </div>
         </div>

@@ -104,7 +104,7 @@ export default function IntegrationsPage() {
   const card = 'bg-white rounded-xl border border-gray-100 p-6'
   const btn = 'flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50'
   const input = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300'
-  const fmt = (d?: string) => d ? new Date(d).toLocaleString(isAr ? 'ar-EG' : 'en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+  const fmt = (d?: string) => d ? new Date(d).toLocaleString(isAr ? 'ar-EG-u-nu-latn' : 'en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
   const locked = demo || busy
   // The plan is set by Fox Systems per installation (fox_plan.config); below
   // Business, keys and webhooks are paused but can still be revoked or deleted.

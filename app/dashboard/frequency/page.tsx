@@ -316,7 +316,7 @@ function Stat({
   return (
     <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
       <div className={`text-2xl font-bold ${cls}`}>
-        {value.toLocaleString()}
+        {value.toLocaleString('en-US')}
         {suffix}
       </div>
       <div className="text-xs text-slate-500">{label}</div>

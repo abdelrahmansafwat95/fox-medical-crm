@@ -116,7 +116,7 @@ export default function WhatsAppPage() {
                   {m.direction === "out" ? "→ sent" : "← received"}
                 </span>
                 <span className="text-xs text-slate-500 ml-auto">
-                  {new Date(m.created_at).toLocaleString()}
+                  {new Date(m.created_at).toLocaleString('en-US')}
                 </span>
               </div>
               <div className="text-slate-700 mt-1">{m.message}</div>

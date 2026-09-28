@@ -170,7 +170,7 @@ export default function DashboardHome() {
               </div>
               <div className="mt-2">
                 <div className="text-xl font-bold text-slate-900">
-                  {k.value === null ? "—" : k.value.toLocaleString()}
+                  {k.value === null ? "—" : k.value.toLocaleString('en-US')}
                 </div>
                 <div className="text-[11px] text-slate-500">{k.label}</div>
               </div>

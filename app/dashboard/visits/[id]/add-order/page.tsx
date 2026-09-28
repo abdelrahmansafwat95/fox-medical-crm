@@ -316,7 +316,7 @@ export default function AddOrderPage() {
                 <div className="text-right mt-2 text-sm">
                   <span className="text-slate-500">Line total: </span>
                   <span className="font-bold text-slate-900">
-                    {it.total.toLocaleString()} EGP
+                    {it.total.toLocaleString('en-US')} EGP
                   </span>
                 </div>
               </div>
@@ -446,7 +446,7 @@ export default function AddOrderPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="font-bold text-slate-900 text-sm">
-                      {p.list_price?.toLocaleString() ?? "—"} {p.currency ?? ""}
+                      {p.list_price?.toLocaleString('en-US') ?? "—"} {p.currency ?? ""}
                     </div>
                   </div>
                 </button>
@@ -508,7 +508,7 @@ function Row({
     <div className={`flex items-center justify-between text-sm ${muted ? "text-slate-500" : "text-slate-700"} ${bold ? "text-base" : ""}`}>
       <span className={bold ? "font-semibold" : ""}>{label}</span>
       <span className={bold ? "font-bold text-slate-900 text-lg" : ""}>
-        {value.toLocaleString()} EGP
+        {value.toLocaleString('en-US')} EGP
       </span>
     </div>
   );

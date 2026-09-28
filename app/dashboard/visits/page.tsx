@@ -152,7 +152,7 @@ export default function VisitsPage() {
                       )}
                       {v.check_in_at && (
                         <span className="text-slate-400">
-                          {new Date(v.check_in_at).toLocaleString()}
+                          {new Date(v.check_in_at).toLocaleString('en-US')}
                         </span>
                       )}
                     </div>

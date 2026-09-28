@@ -171,7 +171,7 @@ export default function ProductsPage() {
                     <div className="shrink-0 text-right">
                       {p.list_price && (
                         <div className="font-semibold text-slate-900">
-                          {p.list_price.toLocaleString()} {p.currency ?? "EGP"}
+                          {p.list_price.toLocaleString('en-US')} {p.currency ?? "EGP"}
                         </div>
                       )}
                       <div className="text-xs text-slate-500">{p.pack_size}</div>

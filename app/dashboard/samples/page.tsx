@@ -238,7 +238,7 @@ export default function SamplesPage() {
                 </div>
                 <div className="text-right">
                   <div className="font-bold">{tx.quantity}</div>
-                  <div className="text-xs text-slate-500">{new Date(tx.created_at).toLocaleDateString()}</div>
+                  <div className="text-xs text-slate-500">{new Date(tx.created_at).toLocaleDateString('en-GB')}</div>
                 </div>
               </div>
             ))

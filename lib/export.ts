@@ -59,7 +59,7 @@ export function exportToPDF(opts: {
   doc.setFontSize(8);
   doc.setTextColor(150);
   doc.text(
-    `Generated ${new Date().toLocaleString()} · FoxSystems Medical CRM`,
+    `Generated ${new Date().toLocaleString('en-US')} · FoxSystems Medical CRM`,
     14,
     lastY + 10
   );
