@@ -119,7 +119,7 @@ export default function LeaderboardPage() {
               </div>
               <div className="text-end hidden sm:block">
                 <div className="text-2xl font-bold text-slate-900">{r.completed_calls}</div>
-                <div className="text-xs text-slate-500">calls</div>
+                <div className="text-xs text-slate-500">{tr("calls")}</div>
               </div>
               <button
                 onClick={() => getCoaching(r.rep_id)}

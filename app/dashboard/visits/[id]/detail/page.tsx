@@ -217,7 +217,7 @@ export default function DetailingPage() {
         </div>
         <p className="text-sm text-slate-500 mb-4">{tr("Pick the products to present, in the order you want. Swipe or tap the sides to move; time on each slide is recorded with the visit.")}</p>
         {products.length === 0 ? (
-          <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-4">{tr("No slide decks yet. A manager can add them on the")} <Link href="/dashboard/products" className="underline">{tr("Products")}</Link> page.</p>
+          <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-4">{tr("No slide decks yet. A manager can add them on the")} <Link href="/dashboard/products" className="underline">{tr("Products")}</Link> {tr("page.")}</p>
         ) : (
           <div className="space-y-2">
             {products.map(([pid, name]) => {
@@ -228,7 +228,7 @@ export default function DetailingPage() {
                   className={`w-full flex items-center gap-3 rounded-lg border p-3 text-start transition-colors ${order >= 0 ? "border-brand-500 bg-brand-50" : "border-slate-200 hover:border-brand-300"}`}>
                   <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${order >= 0 ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-400"}`}>{order >= 0 ? order + 1 : ""}</span>
                   <span className="flex-1 font-medium text-slate-900">{name}</span>
-                  <span className="text-xs text-slate-500">{n} slide{n === 1 ? "" : "s"}</span>
+                  <span className="text-xs text-slate-500">{n} {tr("slide")}{n === 1 ? "" : "s"}</span>
                 </button>
               );
             })}

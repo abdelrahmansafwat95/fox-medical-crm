@@ -711,7 +711,7 @@ function WARow({ w }: { w: TimelineEvent & { kind: "whatsapp" } }) {
               {tr("WhatsApp")} {w.direction === "out" ? "sent" : "received"}
             </span>
             <span className="text-xs text-slate-500">
-              from {w.profiles?.full_name ?? "rep"}
+              {tr("from")} {w.profiles?.full_name ?? "rep"}
             </span>
           </div>
           <p className="text-xs text-slate-600 mt-1 line-clamp-2">{w.message}</p>

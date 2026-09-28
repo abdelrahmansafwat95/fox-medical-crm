@@ -334,7 +334,7 @@ export default function VisitDetailPage() {
             <div>
               <div className="text-xs text-slate-500">{tr("Duration")}</div>
               <div className="font-medium inline-flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {visit.duration_minutes} min
+                <Clock className="w-3 h-3" /> {visit.duration_minutes} {tr("min")}
               </div>
             </div>
           )}
@@ -421,7 +421,7 @@ export default function VisitDetailPage() {
               <div key={d.id} className="py-2 flex items-center justify-between text-sm">
                 <span className="font-medium text-slate-900">{d.products?.name ?? tr("Product")}</span>
                 <span className="text-slate-600">
-                  {d.slides.length} slide{d.slides.length === 1 ? "" : "s"} · {Math.floor(d.total_seconds / 60)}m {d.total_seconds % 60}s
+                  {d.slides.length} {tr("slide")}{d.slides.length === 1 ? "" : "s"} · {Math.floor(d.total_seconds / 60)}m {d.total_seconds % 60}s
                 </span>
               </div>
             ))}

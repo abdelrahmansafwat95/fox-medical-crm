@@ -204,7 +204,7 @@ export default function MyDayPage() {
                       {c.full_name}
                       {c.segment && <span className="ms-1.5 text-[10px] font-bold text-slate-400">{c.segment}</span>}
                     </div>
-                    {c.specialty && <div className="text-xs text-slate-500 truncate">{c.specialty}</div>}
+                    {c.specialty && <div className="text-xs text-slate-500 truncate">{tr(c.specialty)}</div>}
                   </div>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-red-50 text-red-700 shrink-0">
                     {c.days_since_last_visit === null ? tr("never visited") : trf("{d}d (target {t}d)", { d: c.days_since_last_visit, t: target })}
@@ -251,9 +251,9 @@ export default function MyDayPage() {
                     <div className={`text-sm font-medium ${done ? "text-slate-400 line-through" : "text-slate-900"}`}>
                       {h.full_name}
                     </div>
-                    {h.specialty && <div className="text-xs text-slate-500">{h.specialty}</div>}
+                    {h.specialty && <div className="text-xs text-slate-500">{tr(h.specialty)}</div>}
                   </div>
-                  {done && <span className="text-[11px] text-emerald-700 shrink-0">visited</span>}
+                  {done && <span className="text-[11px] text-emerald-700 shrink-0">{tr("visited")}</span>}
                 </Link>
               );
             })}

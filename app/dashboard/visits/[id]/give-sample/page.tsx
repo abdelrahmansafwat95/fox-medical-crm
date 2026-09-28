@@ -289,7 +289,7 @@ export default function GiveSamplePage() {
                         <span className="font-mono">{row.batch_number}</span>
                         <span>·</span>
                         <span className={expCls}>
-                          exp {row.expiry_date} ({days}d)
+                          {tr("exp")} {row.expiry_date} ({days}d)
                         </span>
                       </div>
                     </div>
@@ -369,7 +369,7 @@ export default function GiveSamplePage() {
               ))}
             </div>
             <p className="text-xs text-slate-500 text-center mt-4">
-              {tr("Stock after:")} {selectedBatch.quantity - quantity} unit
+              {tr("Stock after:")} {selectedBatch.quantity - quantity} {tr("unit")}
               {selectedBatch.quantity - quantity === 1 ? "" : "s"}
             </p>
           </div>
@@ -403,7 +403,7 @@ export default function GiveSamplePage() {
               {quantity} × {selectedBatch.products?.brand_name ?? selectedBatch.products?.name}
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
-              to {visit.hcps?.full_name ?? "—"}
+              {tr("to")} {visit.hcps?.full_name ?? "—"}
             </div>
           </div>
 

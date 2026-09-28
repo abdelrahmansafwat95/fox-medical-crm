@@ -791,7 +791,7 @@ function BulkBar({
   }
   return (
     <div className="px-4 py-2 bg-brand-50 border-b border-brand-200 text-sm flex items-center gap-3 flex-wrap">
-      <span className="font-medium text-brand-900">{selected.size} selected</span>
+      <span className="font-medium text-brand-900">{selected.size} {tr("selected")}</span>
       {totalLabel && <span className="text-xs text-brand-700">{totalLabel}</span>}
       <button onClick={onClear} className="text-xs text-slate-600 underline ms-auto">
         {tr("Clear")}

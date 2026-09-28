@@ -546,7 +546,7 @@ export default function EventDetailPage() {
             </div>
 
             <div className="p-3 border-t border-slate-200 flex items-center gap-2 bg-slate-50">
-              <span className="text-sm text-slate-700 me-auto">{selected.size} selected</span>
+              <span className="text-sm text-slate-700 me-auto">{selected.size} {tr("selected")}</span>
               <button
                 onClick={() => setShowInvite(false)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm hover:bg-white"

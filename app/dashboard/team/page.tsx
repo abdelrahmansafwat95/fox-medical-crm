@@ -183,7 +183,7 @@ export default function TeamPage() {
         <h1 className="text-2xl font-bold text-slate-900">{tr("Team")}</h1>
         {seats && (
           <span className={`text-sm ${seats.used >= seats.limit ? "text-amber-600" : "text-slate-500"}`}>
-            {seats.used} of {seats.limit} {tr("active users on your plan")}
+            {seats.used} {tr("of")} {seats.limit} {tr("active users on your plan")}
           </span>
         )}
         {isAdmin && (

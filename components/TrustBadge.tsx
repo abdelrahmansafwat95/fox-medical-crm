@@ -95,7 +95,7 @@ export default function TrustBadge({ score, signals, variant = "pill" }: Props) 
             className="ms-auto text-xs underline opacity-80 hover:opacity-100 inline-flex items-center gap-1"
           >
             {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            {flags.length} flag{flags.length === 1 ? "" : "s"}
+            {flags.length} {tr("flag")}{flags.length === 1 ? "" : "s"}
           </button>
         )}
       </div>

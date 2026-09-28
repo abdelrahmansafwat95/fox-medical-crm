@@ -95,7 +95,7 @@ export default function TrustOffendersWidget() {
                 )}
               </div>
               <div className="text-xs text-slate-500 mt-0.5">
-                <span className="font-semibold text-amber-700">{r.low_trust_visits}</span> low-trust
+                <span className="font-semibold text-amber-700">{r.low_trust_visits}</span> {tr("low-trust")}
                 {r.critical_visits > 0 && (
                   <>
                     {" "}·{" "}

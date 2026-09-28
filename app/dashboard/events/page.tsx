@@ -301,12 +301,12 @@ function EventCard({ event: e }: { event: EventSummary }) {
           <div className="mt-3 flex items-center gap-3 flex-wrap text-xs">
             <div className="inline-flex items-center gap-1 text-slate-600">
               <Users className="w-3 h-3" />
-              <span className="font-semibold">{e.invited_count}</span> invited
+              <span className="font-semibold">{e.invited_count}</span> {tr("invited")}
             </div>
             {e.accepted_count > 0 && (
               <div className="inline-flex items-center gap-1 text-emerald-700">
                 <CheckCircle2 className="w-3 h-3" />
-                <span className="font-semibold">{e.accepted_count}</span> accepted
+                <span className="font-semibold">{e.accepted_count}</span> {tr("accepted")}
                 {e.invited_count > 0 && (
                   <span className="text-slate-400">({acceptanceRate}%)</span>
                 )}
@@ -315,18 +315,18 @@ function EventCard({ event: e }: { event: EventSummary }) {
             {e.declined_count > 0 && (
               <div className="inline-flex items-center gap-1 text-red-700">
                 <XCircle className="w-3 h-3" />
-                <span className="font-semibold">{e.declined_count}</span> declined
+                <span className="font-semibold">{e.declined_count}</span> {tr("declined")}
               </div>
             )}
             {e.pending_count > 0 && (
               <div className="inline-flex items-center gap-1 text-amber-700">
                 <Clock className="w-3 h-3" />
-                <span className="font-semibold">{e.pending_count}</span> pending
+                <span className="font-semibold">{e.pending_count}</span> {tr("pending")}
               </div>
             )}
             {!isUpcoming && e.attended_count > 0 && (
               <div className="inline-flex items-center gap-1 text-purple-700">
-                ✨ <span className="font-semibold">{e.attended_count}</span> attended
+                ✨ <span className="font-semibold">{e.attended_count}</span> {tr("attended")}
               </div>
             )}
             {e.actual_cost_egp && e.actual_cost_egp > 0 && (

@@ -126,7 +126,7 @@ export default function CoveragePage() {
                       </span>
                     ) : (
                       <span className="text-red-700 font-semibold inline-flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> never
+                        <AlertTriangle className="w-3 h-3" /> {tr("never")}
                       </span>
                     )}
                   </td>

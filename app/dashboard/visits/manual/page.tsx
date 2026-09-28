@@ -189,7 +189,7 @@ export default function ManualVisitPage() {
       <div className="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-900 flex items-start gap-2">
         <Info className="w-4 h-4 shrink-0 mt-0.5" />
         <div>
-          <strong>{tr("Manual entries are flagged for manager review")}</strong> {tr("and marked as GPS-unverified. They will")} <em>not</em> {tr("count toward GPS-verified visit metrics. Use only when GPS check-in wasn't possible.")}
+          <strong>{tr("Manual entries are flagged for manager review")}</strong> {tr("and marked as GPS-unverified. They will")} <em>{tr("not")}</em> {tr("count toward GPS-verified visit metrics. Use only when GPS check-in wasn't possible.")}
         </div>
       </div>
 

@@ -161,7 +161,7 @@ export default function SamplesPage() {
       {expiringSoon.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-2 text-sm text-amber-900">
           <AlertTriangle className="w-4 h-4" />
-          <span><strong>{expiringSoon.length}</strong> batch{expiringSoon.length > 1 ? "es" : ""} {tr("expiring within 60 days.")}</span>
+          <span><strong>{expiringSoon.length}</strong> {tr("batch")}{expiringSoon.length > 1 ? "es" : ""} {tr("expiring within 60 days.")}</span>
         </div>
       )}
 

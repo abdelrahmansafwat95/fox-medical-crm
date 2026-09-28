@@ -235,7 +235,7 @@ export default function HCPsPage() {
 
       {canAssign && selected.size > 0 && (
         <div className="bg-brand-50 border border-brand-200 rounded-xl p-3 mb-4 flex items-center gap-3 flex-wrap">
-          <span className="text-sm font-medium text-brand-900">{selected.size} selected</span>
+          <span className="text-sm font-medium text-brand-900">{selected.size} {tr("selected")}</span>
           <select
             value={assignRep}
             onChange={(e) => setAssignRep(e.target.value)}

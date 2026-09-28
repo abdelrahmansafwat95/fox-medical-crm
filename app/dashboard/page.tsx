@@ -141,7 +141,7 @@ export default function DashboardHome() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-slate-900">
-                {totalInbox} item{totalInbox === 1 ? "" : "s"} {tr("need your attention")}
+                {totalInbox} {tr("item")}{totalInbox === 1 ? "" : "s"} {tr("need your attention")}
               </div>
               <div className="text-xs text-slate-600 mt-0.5">
                 {[

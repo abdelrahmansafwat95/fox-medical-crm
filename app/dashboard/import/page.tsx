@@ -539,7 +539,7 @@ export default function ImportPage() {
               </div>
               <div className="font-semibold text-slate-900 mt-2">{tr(s.label)}</div>
               <div className="text-xs text-slate-500 mt-0.5">
-                {s.fields.length} {tr("columns ·")} {s.fields.filter((f) => f.required).length} required
+                {s.fields.length} {tr("columns ·")} {s.fields.filter((f) => f.required).length} {tr("required")}
               </div>
             </button>
           );
@@ -675,7 +675,7 @@ export default function ImportPage() {
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" /> {tr("Import")} {validCount} rows
+                  <CheckCircle2 className="w-4 h-4" /> {tr("Import")} {validCount} {tr("rows")}
                 </>
               )}
             </button>
@@ -750,7 +750,7 @@ export default function ImportPage() {
           <h2 className="font-bold text-emerald-900">{tr("Import complete")}</h2>
           <p className="text-sm text-emerald-700 mt-1">
             <strong>{result.ok}</strong> {tr("rows imported successfully")}
-            {result.skipped > 0 && <>, {result.skipped} skipped</>}
+            {result.skipped > 0 && <>, {result.skipped} {tr("skipped")}</>}
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <button

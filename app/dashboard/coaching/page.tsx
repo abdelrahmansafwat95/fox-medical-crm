@@ -106,7 +106,7 @@ export default function CoachingPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap text-sm">
           <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
-          <span className="text-slate-400">to</span>
+          <span className="text-slate-400">{tr("to")}</span>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
           <button onClick={exportRows} className="px-3 py-2 border border-slate-300 rounded-lg inline-flex items-center gap-2 hover:bg-slate-50"><Download className="w-4 h-4" /> {tr("Excel")}</button>
           {manager && (
@@ -176,7 +176,7 @@ export default function CoachingPage() {
               <div key={s.id}>
                 <button onClick={() => setOpen(open === s.id ? null : s.id)} className="w-full p-3 flex items-center gap-3 text-start hover:bg-slate-50">
                   <span className="text-sm text-slate-500 w-24 shrink-0">{s.coached_on}</span>
-                  <span className="font-medium text-slate-900 flex-1 min-w-0 truncate">{name(s.rep_id)} <span className="text-slate-400 font-normal">with {name(s.manager_id)}</span></span>
+                  <span className="font-medium text-slate-900 flex-1 min-w-0 truncate">{name(s.rep_id)} <span className="text-slate-400 font-normal">{tr("with")} {name(s.manager_id)}</span></span>
                   <span className="hidden sm:flex gap-0.5" aria-hidden="true">
                     {SKILLS.map((sk) => <span key={sk.key} title={`${sk.label}: ${s.scores[sk.key]}`} className={`w-2 rounded-sm ${tone(s.scores[sk.key])}`} style={{ height: 4 + s.scores[sk.key] * 4 }} />)}
                   </span>

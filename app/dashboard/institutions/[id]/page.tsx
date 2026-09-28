@@ -133,7 +133,7 @@ export default function InstitutionDetailPage() {
         <div className="p-3 border-b border-slate-100 flex items-center gap-2">
           <MapPin className="w-4 h-4 text-slate-500" />
           <span className="text-sm font-semibold text-slate-700">{tr("Location")}</span>
-          <span className="ms-auto text-xs text-slate-400">geofence {inst.geofence_radius_m ?? 100}m</span>
+          <span className="ms-auto text-xs text-slate-400">{tr("geofence")} {inst.geofence_radius_m ?? 100}m</span>
         </div>
         <iframe
           title="map"
@@ -159,9 +159,9 @@ export default function InstitutionDetailPage() {
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-slate-900 truncate">
                       {w.hcps.full_name}
-                      {w.is_primary && <span className="ms-1.5 text-[10px] font-bold text-emerald-600">primary</span>}
+                      {w.is_primary && <span className="ms-1.5 text-[10px] font-bold text-emerald-600">{tr("primary")}</span>}
                     </div>
-                    {w.hcps.specialty && <div className="text-xs text-slate-500">{w.hcps.specialty}</div>}
+                    {w.hcps.specialty && <div className="text-xs text-slate-500">{tr(w.hcps.specialty)}</div>}
                   </div>
                   {w.hcps.segment && (
                     <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{w.hcps.segment}</span>

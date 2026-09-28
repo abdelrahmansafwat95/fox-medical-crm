@@ -72,7 +72,7 @@ export default function OfflineStatus() {
       )}
       {justSynced > 0 && (
         <div className="rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-900 dark:bg-cyan-950/40 dark:border-cyan-800 dark:text-cyan-200 px-4 py-2.5 text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" /> {tr("Synced")} {justSynced} saved {justSynced === 1 ? "item" : "items"}.
+          <CheckCircle2 className="w-4 h-4" /> {tr("Synced")} {justSynced} {tr("saved")} {justSynced === 1 ? "item" : "items"}.
         </div>
       )}
       {failed.length > 0 && (

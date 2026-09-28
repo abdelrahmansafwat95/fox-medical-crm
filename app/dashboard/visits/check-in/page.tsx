@@ -324,7 +324,7 @@ export default function CheckInPage() {
                     <span className="text-xs font-bold text-emerald-700 shrink-0">{tr("CHECK IN")}</span>
                   ) : (
                     <span className="text-[11px] text-slate-500 shrink-0">
-                      get {(i.distance_m - i.geofence_radius_m).toFixed(0)}{tr("m closer")}
+                      {tr("get")} {(i.distance_m - i.geofence_radius_m).toFixed(0)}{tr("m closer")}
                     </span>
                   )}
                 </button>

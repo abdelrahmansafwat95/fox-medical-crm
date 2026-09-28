@@ -85,7 +85,7 @@ export default function IncentivesPanel({ month }: { month: string }) {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 text-sm">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-slate-900">{plan.name}</span>
-            <span className="text-slate-500">from {plan.effective_from}</span>
+            <span className="text-slate-500">{tr("from")} {plan.effective_from}</span>
             <span className="flex-1" />
             {role && PLAN_EDITORS.includes(role) && (
               <button onClick={() => setEditPlan(true)} className="inline-flex items-center gap-1 text-brand-700 hover:underline"><Pencil className="w-3.5 h-3.5" /> {tr("Edit plan")}</button>
@@ -94,7 +94,7 @@ export default function IncentivesPanel({ month }: { month: string }) {
           <div className="mt-2 grid sm:grid-cols-3 gap-2 text-slate-600">
             <div><b className="text-slate-800">{tr("Verified calls:")}</b> {plan.calls_tiers.map((t) => `${t.from_pct}% → ${fmt(t.amount)}`).join(" · ")}</div>
             <div><b className="text-slate-800">{tr("Coverage:")}</b> {plan.coverage_tiers.map((t) => `${t.from_pct}% → ${fmt(t.amount)}`).join(" · ")}</div>
-            <div><b className="text-slate-800">{tr("Quality floor:")}</b> avg {plan.quality_min}{tr("/10, else ×")} {plan.quality_factor}</div>
+            <div><b className="text-slate-800">{tr("Quality floor:")}</b> {tr("avg")} {plan.quality_min}{tr("/10, else ×")} {plan.quality_factor}</div>
           </div>
           <p className="text-xs text-slate-400 mt-2">{tr("Only completed, GPS-verified visits that weren't rejected by a manager count. Amounts in")} {plan.currency}.</p>
         </div>
@@ -186,7 +186,7 @@ function PlanEditor({ plan, onClose, onSaved }: { plan: Plan; onClose: () => voi
       <div className="text-sm font-semibold text-slate-800 mb-1">{label}</div>
       {p[key].map((t, i) => (
         <div key={i} className="flex items-center gap-2 mb-1 text-sm">
-          from <input type="number" value={t.from_pct} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, from_pct: Number(e.target.value) } : x)) })} className="w-20 border border-slate-300 rounded px-2 py-1 text-end" />{tr("% pays")} <input type="number" value={t.amount} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, amount: Number(e.target.value) } : x)) })} className="w-28 border border-slate-300 rounded px-2 py-1 text-end" /> {p.currency}
+          {tr("from")} <input type="number" value={t.from_pct} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, from_pct: Number(e.target.value) } : x)) })} className="w-20 border border-slate-300 rounded px-2 py-1 text-end" />{tr("% pays")} <input type="number" value={t.amount} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, amount: Number(e.target.value) } : x)) })} className="w-28 border border-slate-300 rounded px-2 py-1 text-end" /> {p.currency}
           <button onClick={() => setP({ ...p, [key]: p[key].filter((_, j) => j !== i) })} className="text-slate-400 hover:text-red-600"><X className="w-4 h-4" /></button>
         </div>
       ))}

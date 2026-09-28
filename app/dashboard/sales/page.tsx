@@ -90,7 +90,7 @@ export default function SalesPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap text-sm">
           <input type="month" value={from} onChange={(e) => setFrom(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
-          <span className="text-slate-400">to</span>
+          <span className="text-slate-400">{tr("to")}</span>
           <input type="month" value={to} onChange={(e) => setTo(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
           {manager && (
             <button onClick={() => setImporting(true)} className="bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-lg inline-flex items-center gap-2 font-medium">
@@ -103,7 +103,7 @@ export default function SalesPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[["Sales value", `${fmt(totalValue)} EGP`], ["Units", fmt(totalUnits)], ["Products", String(products.length)], ["Customers", String(customers.length)]].map(([k, v]) => (
           <div key={k} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <div className="text-xs text-slate-500">{k}</div>
+            <div className="text-xs text-slate-500">{tr(k)}</div>
             <div className="text-xl font-bold text-slate-900 mt-1">{v}</div>
           </div>
         ))}
@@ -302,7 +302,7 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
                   <div className="font-semibold text-slate-800 mb-1">{tr("Recent imports")}</div>
                   {batches.map((b) => (
                     <div key={b.batch_id} className="flex items-center justify-between border-b border-slate-100 py-1.5">
-                      <span>{b.source ?? tr("Import")} <span className="text-slate-500">· {b.n}{b.n >= 2000 ? "+" : ""} rows</span></span>
+                      <span>{b.source ?? tr("Import")} <span className="text-slate-500">· {b.n}{b.n >= 2000 ? "+" : ""} {tr("rows")}</span></span>
                       <button onClick={() => undo(b.batch_id)} className="text-xs text-red-600 inline-flex items-center gap-1 hover:underline"><Trash2 className="w-3.5 h-3.5" /> {tr("Undo")}</button>
                     </div>
                   ))}
@@ -323,7 +323,7 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
                 ))}
               </div>
               <div className="flex gap-4 text-xs">
-                <span className="inline-flex items-center gap-1 text-cyan-700"><CheckCircle2 className="w-3.5 h-3.5" /> {good.length} ready</span>
+                <span className="inline-flex items-center gap-1 text-cyan-700"><CheckCircle2 className="w-3.5 h-3.5" /> {good.length} {tr("ready")}</span>
                 <span className="text-slate-600">{good.filter((r) => r.product_id).length} {tr("matched to a product ·")} {good.filter((r) => r.institution_id).length} {tr("to a customer")}</span>
                 {parsed.length - good.length > 0 && <span className="inline-flex items-center gap-1 text-amber-700"><AlertTriangle className="w-3.5 h-3.5" /> {parsed.length - good.length} {tr("will be skipped")}</span>}
               </div>
@@ -354,7 +354,7 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
             <button onClick={() => setSheet(null)} className="border border-slate-300 rounded-lg px-4 py-2">{tr("Back")}</button>
             <button onClick={save} disabled={saving || !good.length || !map.month || !map.product}
               className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 text-white rounded-lg py-2 font-medium inline-flex items-center justify-center gap-2">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} {tr("Import")} {good.length} rows
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} {tr("Import")} {good.length} {tr("rows")}
             </button>
           </div>
         )}
