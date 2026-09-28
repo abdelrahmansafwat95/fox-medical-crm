@@ -31,7 +31,7 @@ import {
   CalendarCheck,
   FileSpreadsheet,
   KeyRound,
-  Plug
+  Plug,
   ClipboardCheck,
 } from "lucide-react";
 import { usePerms } from "@/lib/permissions";
