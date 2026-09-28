@@ -313,7 +313,7 @@ export default function TestFakeCheckinPage() {
         href="/dashboard"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to dashboard
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> Back to dashboard
       </Link>
 
       {/* Header */}
@@ -461,14 +461,14 @@ function ResultCard({ result }: { result: RunResult }) {
   const badge = trustBadgeColor(result.score);
   return (
     <div className="bg-white rounded-xl border-2 border-slate-200 shadow-sm overflow-hidden">
-      <div className={`p-4 ${badge.cls.replace("text-", "border-l-4 border-")}`}>
+      <div className={`p-4 ${badge.cls.replace("text-", "border-s-4 border-")}`}>
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <div className="text-xs text-slate-500">{result.patternLabel}</div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-3xl font-bold text-slate-900">{result.score}</span>
               <span className="text-sm text-slate-500">/100</span>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.cls} ml-2`}>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.cls} ms-2`}>
                 {badge.emoji} {badge.label}
               </span>
             </div>

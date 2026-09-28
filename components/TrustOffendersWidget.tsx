@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Shield, Loader2 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface OffenderRow {
   rep_id: string;
   full_name: string | null;
@@ -40,10 +41,10 @@ export default function TrustOffendersWidget() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-amber-600" />
-          <span className="font-semibold text-slate-700">Trust offenders</span>
+          <span className="font-semibold text-slate-700">{tr("Trust offenders")}</span>
         </div>
         <div className="mt-3 text-center text-slate-500">
-          <Loader2 className="w-4 h-4 animate-spin inline-block" /> Loading…
+          <Loader2 className="w-4 h-4 animate-spin inline-block" /> {tr("Loading…")}
         </div>
       </div>
     );
@@ -54,10 +55,10 @@ export default function TrustOffendersWidget() {
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-1">
           <Shield className="w-5 h-5 text-emerald-700" />
-          <span className="font-semibold text-emerald-900">No trust issues</span>
+          <span className="font-semibold text-emerald-900">{tr("No trust issues")}</span>
         </div>
         <p className="text-xs text-emerald-700">
-          All reps&apos; GPS check-ins this month are healthy. ✓
+          {tr("All reps' GPS check-ins this month are healthy. ✓")}
         </p>
       </div>
     );
@@ -67,8 +68,8 @@ export default function TrustOffendersWidget() {
     <div className="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
       <div className="bg-amber-50 px-4 py-3 border-b border-amber-200 flex items-center gap-2">
         <Shield className="w-5 h-5 text-amber-700" />
-        <span className="font-semibold text-slate-900">Trust offenders this month</span>
-        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 ml-auto">
+        <span className="font-semibold text-slate-900">{tr("Trust offenders this month")}</span>
+        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 ms-auto">
           {rows.length}
         </span>
       </div>
@@ -85,7 +86,7 @@ export default function TrustOffendersWidget() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-slate-900 truncate">
-                  {r.full_name ?? "Unknown"}
+                  {r.full_name ?? tr("Unknown")}
                 </span>
                 {r.rep_code && (
                   <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
@@ -99,11 +100,11 @@ export default function TrustOffendersWidget() {
                   <>
                     {" "}·{" "}
                     <span className="font-semibold text-red-700">
-                      {r.critical_visits} likely fake
+                      {r.critical_visits} {tr("likely fake")}
                     </span>
                   </>
                 )}{" "}
-                · avg score {r.avg_trust_score}/100
+                {tr("· avg score")} {r.avg_trust_score}/100
               </div>
             </div>
           </Link>

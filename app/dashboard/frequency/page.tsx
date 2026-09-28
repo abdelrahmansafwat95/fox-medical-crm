@@ -13,6 +13,7 @@ import {
   Calendar
 } from "lucide-react";
 
+import { tr, trf } from "@/lib/i18n";
 // ----------------- Types ---------------------------------------------
 
 interface HCPRow {
@@ -199,19 +200,19 @@ export default function FrequencyPage() {
         <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
           <TrendingUp className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Frequency Tracker</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("Frequency Tracker")}</h1>
       </div>
       <p className="text-slate-500 mb-6">
-        Monthly visits vs target per HCP, based on segment.
+        {tr("Monthly visits vs target per HCP, based on segment.")}
       </p>
 
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <Stat label="Tracked HCPs" value={summary.tracked} cls="text-slate-900" />
-        <Stat label="On target" value={summary.onTarget} cls="text-emerald-700" />
-        <Stat label="Behind" value={summary.behind} cls="text-red-700" />
+        <Stat label={tr("Tracked HCPs")} value={summary.tracked} cls="text-slate-900" />
+        <Stat label={tr("On target")} value={summary.onTarget} cls="text-emerald-700" />
+        <Stat label={tr("Behind")} value={summary.behind} cls="text-red-700" />
         <Stat
-          label="Overall attainment"
+          label={tr("Overall attainment")}
           value={summary.overallPct}
           suffix="%"
           cls={
@@ -233,7 +234,7 @@ export default function FrequencyPage() {
           onChange={(e) => setFilterRep(e.target.value)}
           className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5"
         >
-          <option value="all">All reps</option>
+          <option value="all">{tr("All reps")}</option>
           {reps.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
@@ -246,30 +247,30 @@ export default function FrequencyPage() {
           onChange={(e) => setFilterSegment(e.target.value)}
           className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5"
         >
-          <option value="all">All segments</option>
-          <option value="KOL">KOL</option>
-          <option value="A">Segment A</option>
-          <option value="B">Segment B</option>
-          <option value="C">Segment C</option>
-          <option value="D">Segment D</option>
+          <option value="all">{tr("All segments")}</option>
+          <option value="KOL">{tr("KOL")}</option>
+          <option value="A">{tr("Segment A")}</option>
+          <option value="B">{tr("Segment B")}</option>
+          <option value="C">{tr("Segment C")}</option>
+          <option value="D">{tr("Segment D")}</option>
         </select>
 
-        <div className="ml-auto flex gap-1">
+        <div className="ms-auto flex gap-1">
           <FilterChip
             active={filterStatus === "all"}
             onClick={() => setFilterStatus("all")}
-            label={`All (${hcps.length})`}
+            label={trf("All ({n})", { n: hcps.length })}
           />
           <FilterChip
             active={filterStatus === "behind"}
             onClick={() => setFilterStatus("behind")}
-            label={`Behind (${summary.behind})`}
+            label={trf("Behind ({n})", { n: summary.behind })}
             color="red"
           />
           <FilterChip
             active={filterStatus === "on_target"}
             onClick={() => setFilterStatus("on_target")}
-            label={`On target (${summary.onTarget})`}
+            label={trf("On target ({n})", { n: summary.onTarget })}
             color="emerald"
           />
         </div>
@@ -279,13 +280,13 @@ export default function FrequencyPage() {
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
           <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-          <p className="text-slate-700 font-medium">No HCPs match this filter</p>
-          <p className="text-xs text-slate-500 mt-1">Try widening your filter.</p>
+          <p className="text-slate-700 font-medium">{tr("No HCPs match this filter")}</p>
+          <p className="text-xs text-slate-500 mt-1">{tr("Try widening your filter.")}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -397,11 +398,11 @@ function HCPRow({ hcp }: { hcp: AugmentedHCP }) {
               className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${statusBadge.cls} inline-flex items-center gap-1`}
             >
               <StatusIcon className="w-3 h-3" />
-              {statusBadge.label}
+              {tr(statusBadge.label)}
             </span>
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
-            {hcp.specialty ?? "—"} {hcp.rep_name && ` · Rep: ${hcp.rep_name}`}
+            {hcp.specialty ?? "—"} {hcp.rep_name && trf(" · Rep: {name}", { name: hcp.rep_name })}
           </div>
           {/* Visual bar */}
           <div className="mt-2 flex items-center gap-2">
@@ -411,7 +412,7 @@ function HCPRow({ hcp }: { hcp: AugmentedHCP }) {
                 style={{ width: `${barWidth}%` }}
               />
             </div>
-            <div className="text-xs font-medium text-slate-700 shrink-0 w-20 text-right">
+            <div className="text-xs font-medium text-slate-700 shrink-0 w-20 text-end">
               {hcp.actual} / {hcp.target} ({hcp.pct}%)
             </div>
           </div>

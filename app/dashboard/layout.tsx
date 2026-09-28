@@ -14,6 +14,7 @@ import GlobalSearch from "@/components/GlobalSearch";
 import DemoBanner from "@/components/DemoBanner";
 import OfflineStatus from "@/components/OfflineStatus";
 
+import { tr } from "@/lib/i18n";
 export default function DashboardLayout({
   children
 }: {
@@ -72,7 +73,7 @@ export default function DashboardLayout({
   if (checking) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-500">
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -86,7 +87,7 @@ export default function DashboardLayout({
           <DemoBanner />
           <OfflineStatus />
           {resource && (permsLoading || denied) ? (
-            <div className="p-12 text-center text-slate-500">Loading…</div>
+            <div className="p-12 text-center text-slate-500">{tr("Loading…")}</div>
           ) : (
             children
           )}

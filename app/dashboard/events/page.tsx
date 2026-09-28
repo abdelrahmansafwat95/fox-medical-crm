@@ -16,6 +16,7 @@ import {
   Filter
 } from "lucide-react";
 
+import { tr, locale } from "@/lib/i18n";
 interface EventSummary {
   id: string;
   title: string;
@@ -121,26 +122,26 @@ export default function EventsPage() {
           <div className="p-2 rounded-lg bg-purple-50 text-purple-700">
             <CalendarDays className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Events</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Events")}</h1>
         </div>
         <Link
           href="/dashboard/events/new"
           className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
         >
-          <Plus className="w-4 h-4" /> New event
+          <Plus className="w-4 h-4" /> {tr("New event")}
         </Link>
       </div>
       <p className="text-slate-500 mb-6">
-        CME, symposiums, dinner meetings, product launches — KOL development tracking.
+        {tr("CME, symposiums, dinner meetings, product launches — KOL development tracking.")}
       </p>
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <Stat label="Total events" value={stats.total} cls="text-slate-900" />
-        <Stat label="Upcoming" value={stats.upcoming} cls="text-blue-700" />
-        <Stat label="Total attendees" value={stats.attended} cls="text-emerald-700" />
+        <Stat label={tr("Total events")} value={stats.total} cls="text-slate-900" />
+        <Stat label={tr("Upcoming")} value={stats.upcoming} cls="text-blue-700" />
+        <Stat label={tr("Total attendees")} value={stats.attended} cls="text-emerald-700" />
         <Stat
-          label="Total spend"
+          label={tr("Total spend")}
           value={stats.totalBudget}
           suffix=" EGP"
           cls="text-purple-700"
@@ -168,9 +169,9 @@ export default function EventsPage() {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 ml-auto"
+          className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 ms-auto"
         >
-          <option value="all">All types</option>
+          <option value="all">{tr("All types")}</option>
           {Object.entries(TYPE_LABELS).map(([k, v]) => (
             <option key={k} value={k}>
               {v}
@@ -183,22 +184,22 @@ export default function EventsPage() {
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
           <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">🎟️</div>
           <p className="text-slate-700 font-medium">
-            {timeFilter === "upcoming" ? "No upcoming events" : "No events match this filter"}
+            {timeFilter === "upcoming" ? tr("No upcoming events") : tr("No events match this filter")}
           </p>
           <p className="text-sm text-slate-500 mt-1 mb-4">
-            Plan your first symposium or dinner meeting.
+            {tr("Plan your first symposium or dinner meeting.")}
           </p>
           <Link
             href="/dashboard/events/new"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-700"
           >
-            <Plus className="w-4 h-4" /> Create event
+            <Plus className="w-4 h-4" /> {tr("Create event")}
           </Link>
         </div>
       ) : (
@@ -237,12 +238,12 @@ function Stat({
 function EventCard({ event: e }: { event: EventSummary }) {
   const startsAt = new Date(e.starts_at);
   const isUpcoming = startsAt.getTime() >= Date.now();
-  const dateStr = startsAt.toLocaleDateString("en-EG", {
+  const dateStr = startsAt.toLocaleDateString(locale(), {
     weekday: "short",
     month: "short",
     day: "numeric"
   });
-  const timeStr = startsAt.toLocaleTimeString([], {
+  const timeStr = startsAt.toLocaleTimeString(locale(), {
     hour: "2-digit",
     minute: "2-digit"
   });
@@ -259,7 +260,7 @@ function EventCard({ event: e }: { event: EventSummary }) {
         {/* Date pill */}
         <div className="w-16 shrink-0 bg-slate-50 rounded-lg p-2 text-center border border-slate-200">
           <div className="text-[10px] font-bold text-slate-500 uppercase">
-            {startsAt.toLocaleDateString("en-EG", { month: "short" })}
+            {startsAt.toLocaleDateString(locale(), { month: "short" })}
           </div>
           <div className="text-2xl font-bold text-slate-900 leading-none">
             {startsAt.getDate()}
@@ -269,19 +270,19 @@ function EventCard({ event: e }: { event: EventSummary }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-slate-900">{e.title}</span>
+            <span className="font-semibold text-slate-900">{tr(e.title)}</span>
             <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${TYPE_COLORS[e.event_type]}`}>
               {TYPE_LABELS[e.event_type]}
             </span>
             <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${STATUS_COLORS[e.status]}`}>
-              {e.status}
+              {tr(e.status)}
             </span>
           </div>
           <div className="text-xs text-slate-500 mt-1 flex items-center gap-3 flex-wrap">
             <span>{dateStr}</span>
             {e.is_virtual ? (
               <span className="inline-flex items-center gap-1">
-                <Wifi className="w-3 h-3" /> Virtual
+                <Wifi className="w-3 h-3" /> {tr("Virtual")}
               </span>
             ) : (
               e.venue_name && (
@@ -329,8 +330,8 @@ function EventCard({ event: e }: { event: EventSummary }) {
               </div>
             )}
             {e.actual_cost_egp && e.actual_cost_egp > 0 && (
-              <div className="ml-auto font-semibold text-slate-900">
-                {e.actual_cost_egp.toLocaleString('en-US')} EGP
+              <div className="ms-auto font-semibold text-slate-900">
+                {e.actual_cost_egp.toLocaleString('en-US')} {tr("EGP")}
               </div>
             )}
           </div>

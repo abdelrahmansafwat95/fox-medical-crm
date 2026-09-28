@@ -16,6 +16,7 @@ import {
   Package
 } from "lucide-react";
 
+import { tr, trf } from "@/lib/i18n";
 // --- Types ------------------------------------------------------------
 
 interface VisitInfo {
@@ -99,7 +100,7 @@ export default function AddOrderPage() {
 
   function addProduct(p: ProductOption) {
     if (items.some((it) => it.product_id === p.id)) {
-      setError(`${p.brand_name ?? p.name} is already in the order. Update its quantity instead.`);
+      setError(trf("{p} is already in the order. Update its quantity instead.", { p: p.brand_name ?? p.name }));
       setShowPicker(false);
       return;
     }
@@ -147,7 +148,7 @@ export default function AddOrderPage() {
 
   async function save(status: "draft" | "submitted") {
     if (!visit || items.length === 0) {
-      setError("Add at least one product before saving.");
+      setError(tr("Add at least one product before saving."));
       return;
     }
     setSubmitting(status === "draft" ? "draft" : "submit");
@@ -157,7 +158,7 @@ export default function AddOrderPage() {
     const { data: sess } = await supabase.auth.getSession();
     const user = sess.session?.user;
     if (!user) {
-      setError("Not authenticated.");
+      setError(tr("Not authenticated."));
       setSubmitting(null);
       return;
     }
@@ -202,7 +203,7 @@ export default function AddOrderPage() {
     setSubmitting(null);
 
     if (saved.queued) {
-      alert("You're offline. The order is saved on this phone and will be sent automatically when the signal is back.");
+      alert(tr("You're offline. The order is saved on this phone and will be sent automatically when the signal is back."));
     }
     router.push(`/dashboard/visits/${visit.id}`);
   }
@@ -213,7 +214,7 @@ export default function AddOrderPage() {
     return (
       <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -221,9 +222,9 @@ export default function AddOrderPage() {
   if (!visit) {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
-        <p className="text-slate-700">Visit not found.</p>
+        <p className="text-slate-700">{tr("Visit not found.")}</p>
         <Link href="/dashboard/visits" className="text-brand-700 underline text-sm">
-          Back to visits
+          {tr("Back to visits")}
         </Link>
       </div>
     );
@@ -235,7 +236,7 @@ export default function AddOrderPage() {
         href={`/dashboard/visits/${visit.id}`}
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to visit
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to visit")}
       </Link>
 
       {/* Header */}
@@ -245,7 +246,7 @@ export default function AddOrderPage() {
             <ShoppingCart className="w-6 h-6 text-emerald-700" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-900">New order</h1>
+            <h1 className="font-bold text-slate-900">{tr("New order")}</h1>
             <p className="text-xs text-slate-600">
               {visit.hcps?.full_name ?? "—"} · {visit.institutions?.name ?? "—"}
             </p>
@@ -264,22 +265,22 @@ export default function AddOrderPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-4">
         <div className="p-3 border-b border-slate-100 flex items-center justify-between">
           <span className="font-semibold text-slate-700 text-sm">
-            Line items {items.length > 0 && `(${items.length})`}
+            {tr("Line items")} {items.length > 0 && `(${items.length})`}
           </span>
           <button
             onClick={() => setShowPicker(true)}
             className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg inline-flex items-center gap-1 font-medium"
           >
-            <Plus className="w-3 h-3" /> Add product
+            <Plus className="w-3 h-3" /> {tr("Add product")}
           </button>
         </div>
 
         {items.length === 0 ? (
           <div className="p-8 text-center">
             <Package className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-            <p className="text-sm text-slate-500">No products yet</p>
+            <p className="text-sm text-slate-500">{tr("No products yet")}</p>
             <p className="text-xs text-slate-400 mt-1">
-              Tap &ldquo;Add product&rdquo; to begin.
+              {tr("Tap “Add product” to begin.")}
             </p>
           </div>
         ) : (
@@ -293,37 +294,37 @@ export default function AddOrderPage() {
                   <button
                     onClick={() => removeItem(it.id)}
                     className="p-1 text-slate-400 hover:text-red-600"
-                    title="Remove"
+                    title={tr("Remove")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <NumField
-                    label="Qty"
+                    label={tr("Qty")}
                     value={it.qty}
                     min={1}
                     onChange={(v) => updateItem(it.id, { qty: v })}
                   />
                   <NumField
-                    label="Unit price"
+                    label={tr("Unit price")}
                     value={it.unit_price}
                     min={0}
                     step={0.5}
                     onChange={(v) => updateItem(it.id, { unit_price: v })}
                   />
                   <NumField
-                    label="Discount %"
+                    label={tr("Discount %")}
                     value={it.discount_pct}
                     min={0}
                     max={100}
                     onChange={(v) => updateItem(it.id, { discount_pct: v })}
                   />
                 </div>
-                <div className="text-right mt-2 text-sm">
-                  <span className="text-slate-500">Line total: </span>
+                <div className="text-end mt-2 text-sm">
+                  <span className="text-slate-500">{tr("Line total:")} </span>
                   <span className="font-bold text-slate-900">
-                    {it.total.toLocaleString('en-US')} EGP
+                    {it.total.toLocaleString('en-US')} {tr("EGP")}
                   </span>
                 </div>
               </div>
@@ -337,7 +338,7 @@ export default function AddOrderPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 space-y-3">
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Tax / VAT %
+              {tr("Tax / VAT %")}
             </label>
             <input
               type="number"
@@ -348,29 +349,29 @@ export default function AddOrderPage() {
               onChange={(e) => setTaxPct(parseFloat(e.target.value) || 0)}
               className="w-24 p-2 border border-slate-300 rounded-lg text-sm"
             />
-            <span className="text-xs text-slate-500 ml-2">Default 14% (Egypt VAT)</span>
+            <span className="text-xs text-slate-500 ms-2">{tr("Default 14% (Egypt VAT)")}</span>
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Payment terms
+              {tr("Payment terms")}
             </label>
             <input
               type="text"
               value={paymentTerms}
               onChange={(e) => setPaymentTerms(e.target.value)}
-              placeholder="e.g. Net 30"
+              placeholder={tr("e.g. Net 30")}
               className="w-full p-2 border border-slate-300 rounded-lg text-sm"
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Notes (optional)
+              {tr("Notes (optional)")}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              placeholder="Internal notes about this order"
+              placeholder={tr("Internal notes about this order")}
               className="w-full p-2 border border-slate-300 rounded-lg text-sm"
             />
           </div>
@@ -380,13 +381,13 @@ export default function AddOrderPage() {
       {/* Totals */}
       {items.length > 0 && (
         <div className="bg-white rounded-xl border-2 border-slate-300 shadow-sm p-4 mb-4">
-          <Row label="Subtotal" value={subtotal} />
+          <Row label={tr("Subtotal")} value={subtotal} />
           {totalDiscount > 0 && (
-            <Row label="Discount" value={-totalDiscount} muted />
+            <Row label={tr("Discount")} value={-totalDiscount} muted />
           )}
-          <Row label={`Tax (${taxPct}%)`} value={tax} muted />
+          <Row label={trf("Tax ({n}%)", { n: taxPct })} value={tax} muted />
           <div className="border-t border-slate-200 mt-2 pt-2">
-            <Row label="Grand total" value={grandTotal} bold />
+            <Row label={tr("Grand total")} value={grandTotal} bold />
           </div>
         </div>
       )}
@@ -402,7 +403,7 @@ export default function AddOrderPage() {
             {submitting === "draft" ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : null}
-            Save as draft
+            {tr("Save as draft")}
           </button>
           <button
             onClick={() => save("submitted")}
@@ -414,7 +415,7 @@ export default function AddOrderPage() {
             ) : (
               <CheckCircle2 className="w-4 h-4" />
             )}
-            Submit order
+            {tr("Submit order")}
           </button>
         </div>
       )}
@@ -430,7 +431,7 @@ export default function AddOrderPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-3 border-b border-slate-200 flex items-center justify-between">
-              <span className="font-semibold text-slate-900">Pick a product</span>
+              <span className="font-semibold text-slate-900">{tr("Pick a product")}</span>
               <button
                 onClick={() => setShowPicker(false)}
                 className="text-slate-400 hover:text-slate-700 text-xl leading-none px-2"
@@ -443,7 +444,7 @@ export default function AddOrderPage() {
                 <button
                   key={p.id}
                   onClick={() => addProduct(p)}
-                  className="w-full p-3 text-left hover:bg-slate-50 flex items-center gap-3"
+                  className="w-full p-3 text-start hover:bg-slate-50 flex items-center gap-3"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-slate-900">
@@ -451,7 +452,7 @@ export default function AddOrderPage() {
                     </div>
                     <div className="text-xs text-slate-500">{p.pack_size ?? "—"}</div>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-end shrink-0">
                     <div className="font-bold text-slate-900 text-sm">
                       {p.list_price?.toLocaleString('en-US') ?? "—"} {p.currency ?? ""}
                     </div>
@@ -515,7 +516,7 @@ function Row({
     <div className={`flex items-center justify-between text-sm ${muted ? "text-slate-500" : "text-slate-700"} ${bold ? "text-base" : ""}`}>
       <span className={bold ? "font-semibold" : ""}>{label}</span>
       <span className={bold ? "font-bold text-slate-900 text-lg" : ""}>
-        {value.toLocaleString('en-US')} EGP
+        {value.toLocaleString('en-US')} {tr("EGP")}
       </span>
     </div>
   );

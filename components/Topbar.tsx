@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
 
+import { tr, LangToggle } from "@/lib/i18n";
 export default function Topbar() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -27,8 +28,8 @@ export default function Topbar() {
       {/* Mobile brand */}
       <div className="md:hidden flex items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-mark.png" alt="Fox Systems" className="w-7 h-7 object-contain" />
-        <span className="font-semibold text-slate-900">Fox Medical</span>
+        <img src="/logo-mark.png" alt={tr("Fox Systems")} className="w-7 h-7 object-contain" />
+        <span className="font-semibold text-slate-900">{tr("Fox Medical")}</span>
       </div>
 
       <div className="hidden md:block" />
@@ -38,19 +39,20 @@ export default function Topbar() {
           onClick={() => window.dispatchEvent(new Event("foxmed:search"))}
           className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 text-xs"
         >
-          <Search className="w-4 h-4" /> Search
-          <kbd className="ml-1 text-[10px] bg-slate-100 rounded px-1 border border-slate-200">⌘K</kbd>
+          <Search className="w-4 h-4" /> {tr("Search")}
+          <kbd className="ms-1 text-[10px] bg-slate-100 rounded px-1 border border-slate-200">⌘K</kbd>
         </button>
         <button
           onClick={() => window.dispatchEvent(new Event("foxmed:search"))}
-          aria-label="Search"
+          aria-label={tr("Search")}
           className="sm:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100"
         >
           <Search className="w-5 h-5" />
         </button>
+        <LangToggle className="px-2 py-1 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 md:hidden" />
         <ThemeToggle variant="icon" />
         <button
-          aria-label="Notifications"
+          aria-label={tr("Notifications")}
           className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 relative"
         >
           <Bell className="w-5 h-5" />
@@ -61,7 +63,7 @@ export default function Topbar() {
           </div>
           <div className="hidden sm:block text-xs leading-tight">
             <div className="font-medium text-slate-900">
-              {profile?.full_name ?? profile?.email ?? "Loading…"}
+              {profile?.full_name ?? profile?.email ?? tr("Loading…")}
             </div>
             <div className="text-slate-500 capitalize">
               {profile?.role?.replaceAll("_", " ") ?? ""}

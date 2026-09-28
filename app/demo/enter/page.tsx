@@ -17,6 +17,7 @@ import { clearRoleCache } from "@/lib/roles";
 import { clearPermsCache } from "@/lib/permissions";
 import { Loader2 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 const WEBSITE_DEMO = "https://foxsystemstech.com/solutions/medical-crm";
 
 export default function DemoEnterPage() {
@@ -60,16 +61,16 @@ export default function DemoEnterPage() {
             <p className="mb-3">
               {isAr
                 ? "انتهت صلاحية رابط الدخول هذا أو استُخدم من قبل."
-                : "This sign-in link has expired or was already used."}
+                : tr("This sign-in link has expired or was already used.")}
             </p>
             <a href={`${back}?demo=expired#demo`} className="underline text-cyan-300">
-              {isAr ? "اطلب رابطًا جديدًا" : "Request a new one"}
+              {isAr ? "اطلب رابطًا جديدًا" : tr("Request a new one")}
             </a>
           </>
         ) : (
           <>
             <Loader2 className="w-7 h-7 animate-spin mx-auto mb-4 text-cyan-300" />
-            <p>{isAr ? "جارٍ فتح النسخة التجريبية…" : "Opening your demo…"}</p>
+            <p>{isAr ? "جارٍ فتح النسخة التجريبية…" : tr("Opening your demo…")}</p>
           </>
         )}
       </div>

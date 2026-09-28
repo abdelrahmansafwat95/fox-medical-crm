@@ -14,6 +14,7 @@ import {
   Info
 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface HCPOption {
   id: string;
   full_name: string;
@@ -85,11 +86,11 @@ export default function ManualVisitPage() {
     setError(null);
 
     if (!hcpId || !institutionId || !date || !time) {
-      setError("Please fill in HCP, institution, date and time.");
+      setError(tr("Please fill in HCP, institution, date and time."));
       return;
     }
     if (!reasonNoCheckIn.trim()) {
-      setError("A reason is required for manual visit entry (audit requirement).");
+      setError(tr("A reason is required for manual visit entry (audit requirement)."));
       return;
     }
 
@@ -99,7 +100,7 @@ export default function ManualVisitPage() {
     const { data: sess } = await supabase.auth.getSession();
     const user = sess.session?.user;
     if (!user) {
-      setError("Not authenticated.");
+      setError(tr("Not authenticated."));
       setSubmitting(false);
       return;
     }
@@ -141,7 +142,7 @@ export default function ManualVisitPage() {
     return (
       <div className="max-w-md mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -150,11 +151,11 @@ export default function ManualVisitPage() {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
         <div className="text-6xl mb-2">✅</div>
-        <h2 className="font-bold text-emerald-900">{queued ? "Visit saved on this phone" : "Visit logged"}</h2>
+        <h2 className="font-bold text-emerald-900">{queued ? tr("Visit saved on this phone") : tr("Visit logged")}</h2>
         <p className="text-sm text-slate-600 mt-1">
           {queued
-            ? "You're offline — it will sync automatically when the signal is back, then go to your manager for review."
-            : <>Marked as &ldquo;pending&rdquo; for manager review.</>}
+            ? tr("You're offline — it will sync automatically when the signal is back, then go to your manager for review.")
+            : <>{tr("Marked as “pending” for manager review.")}</>}
         </p>
       </div>
     );
@@ -166,7 +167,7 @@ export default function ManualVisitPage() {
         href="/dashboard/visits"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to visits
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to visits")}
       </Link>
 
       {/* Header */}
@@ -176,9 +177,9 @@ export default function ManualVisitPage() {
             <ClipboardEdit className="w-6 h-6 text-amber-700" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-900">Log visit manually</h1>
+            <h1 className="font-bold text-slate-900">{tr("Log visit manually")}</h1>
             <p className="text-xs text-slate-600">
-              For visits where you forgot to check in via GPS.
+              {tr("For visits where you forgot to check in via GPS.")}
             </p>
           </div>
         </div>
@@ -188,9 +189,7 @@ export default function ManualVisitPage() {
       <div className="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-900 flex items-start gap-2">
         <Info className="w-4 h-4 shrink-0 mt-0.5" />
         <div>
-          <strong>Manual entries are flagged for manager review</strong> and marked as
-          GPS-unverified. They will <em>not</em> count toward GPS-verified visit metrics.
-          Use only when GPS check-in wasn&apos;t possible.
+          <strong>{tr("Manual entries are flagged for manager review")}</strong> {tr("and marked as GPS-unverified. They will")} <em>not</em> {tr("count toward GPS-verified visit metrics. Use only when GPS check-in wasn't possible.")}
         </div>
       </div>
 
@@ -205,14 +204,14 @@ export default function ManualVisitPage() {
         {/* HCP */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            HCP <span className="text-red-600">*</span>
+            {tr("HCP")} <span className="text-red-600">*</span>
           </label>
           <select
             value={hcpId}
             onChange={(e) => onHcpChange(e.target.value)}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           >
-            <option value="">— pick a doctor —</option>
+            <option value="">{tr("— pick a doctor —")}</option>
             {hcps.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.full_name} {h.specialty ? `(${h.specialty})` : ""}
@@ -224,14 +223,14 @@ export default function ManualVisitPage() {
         {/* Institution */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Institution <span className="text-red-600">*</span>
+            {tr("Institution")} <span className="text-red-600">*</span>
           </label>
           <select
             value={institutionId}
             onChange={(e) => setInstitutionId(e.target.value)}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           >
-            <option value="">— pick an institution —</option>
+            <option value="">{tr("— pick an institution —")}</option>
             {institutions.map((i) => (
               <option key={i.id} value={i.id}>
                 {i.name}
@@ -239,7 +238,7 @@ export default function ManualVisitPage() {
             ))}
           </select>
           <p className="text-[11px] text-slate-500 mt-1">
-            Auto-filled when you pick an HCP, but you can change it.
+            {tr("Auto-filled when you pick an HCP, but you can change it.")}
           </p>
         </div>
 
@@ -247,7 +246,7 @@ export default function ManualVisitPage() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Visit date <span className="text-red-600">*</span>
+              {tr("Visit date")} <span className="text-red-600">*</span>
             </label>
             <input
               type="date"
@@ -259,7 +258,7 @@ export default function ManualVisitPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Start time <span className="text-red-600">*</span>
+              {tr("Start time")} <span className="text-red-600">*</span>
             </label>
             <input
               type="time"
@@ -274,7 +273,7 @@ export default function ManualVisitPage() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Duration (min)
+              {tr("Duration (min)")}
             </label>
             <input
               type="number"
@@ -287,20 +286,20 @@ export default function ManualVisitPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Visit type
+              {tr("Visit type")}
             </label>
             <select
               value={visitType}
               onChange={(e) => setVisitType(e.target.value)}
               className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
             >
-              <option value="detailing">Detailing</option>
-              <option value="follow_up">Follow-up</option>
-              <option value="sample_drop">Sample drop</option>
-              <option value="order_visit">Order visit</option>
-              <option value="courtesy">Courtesy</option>
-              <option value="launch">Launch</option>
-              <option value="training">Training</option>
+              <option value="detailing">{tr("Detailing")}</option>
+              <option value="follow_up">{tr("Follow-up")}</option>
+              <option value="sample_drop">{tr("Sample drop")}</option>
+              <option value="order_visit">{tr("Order visit")}</option>
+              <option value="courtesy">{tr("Courtesy")}</option>
+              <option value="launch">{tr("Launch")}</option>
+              <option value="training">{tr("Training")}</option>
             </select>
           </div>
         </div>
@@ -308,7 +307,7 @@ export default function ManualVisitPage() {
         {/* Doctor attitude */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Doctor attitude
+            {tr("Doctor attitude")}
           </label>
           <select
             value={doctorAttitude}
@@ -316,41 +315,41 @@ export default function ManualVisitPage() {
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           >
             <option value="">—</option>
-            <option value="positive">Positive</option>
-            <option value="neutral">Neutral</option>
-            <option value="skeptical">Skeptical</option>
-            <option value="negative">Negative</option>
+            <option value="positive">{tr("Positive")}</option>
+            <option value="neutral">{tr("Neutral")}</option>
+            <option value="skeptical">{tr("Skeptical")}</option>
+            <option value="negative">{tr("Negative")}</option>
           </select>
         </div>
 
         {/* Reason - REQUIRED */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Reason for not checking in via GPS{" "}
+            {tr("Reason for not checking in via GPS")}{" "}
             <span className="text-red-600">*</span>
           </label>
           <textarea
             value={reasonNoCheckIn}
             onChange={(e) => setReasonNoCheckIn(e.target.value)}
             rows={2}
-            placeholder="e.g. Phone battery died · Doctor saw me last-minute · Connection issue"
+            placeholder={tr("e.g. Phone battery died · Doctor saw me last-minute · Connection issue")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
           <p className="text-[11px] text-slate-500 mt-1">
-            Required for audit. Manager will see this when reviewing.
+            {tr("Required for audit. Manager will see this when reviewing.")}
           </p>
         </div>
 
         {/* Notes */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Visit notes
+            {tr("Visit notes")}
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            placeholder="What happened during the visit? Doctor feedback, objections, next steps…"
+            placeholder={tr("What happened during the visit? Doctor feedback, objections, next steps…")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
         </div>
@@ -361,7 +360,7 @@ export default function ManualVisitPage() {
           href="/dashboard/visits"
           className="px-4 py-3 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
         >
-          Cancel
+          {tr("Cancel")}
         </Link>
         <button
           onClick={submit}
@@ -373,7 +372,7 @@ export default function ManualVisitPage() {
           ) : (
             <CheckCircle2 className="w-4 h-4" />
           )}
-          Log visit
+          {tr("Log visit")}
         </button>
       </div>
     </div>

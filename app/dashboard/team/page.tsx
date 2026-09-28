@@ -8,6 +8,7 @@ import EditModal, { type FieldConfig } from "@/components/EditModal";
 import InviteUserModal from "@/components/InviteUserModal";
 import { Users, Mail, Phone, Search, Pencil, UserCheck, UserPlus } from "lucide-react";
 
+import { tr, trf } from "@/lib/i18n";
 interface ProfileRow {
   id: string;
   code: string | null;
@@ -170,7 +171,7 @@ export default function TeamPage() {
   );
 
   if (checking) {
-    return <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
+    return <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">{tr("Loading…")}</div>;
   }
 
   return (
@@ -179,47 +180,47 @@ export default function TeamPage() {
         <div className="p-2 rounded-lg bg-purple-50 text-purple-700">
           <Users className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Team</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("Team")}</h1>
         {seats && (
           <span className={`text-sm ${seats.used >= seats.limit ? "text-amber-600" : "text-slate-500"}`}>
-            {seats.used} of {seats.limit} active users on your plan
+            {seats.used} of {seats.limit} {tr("active users on your plan")}
           </span>
         )}
         {isAdmin && (
           <button
             onClick={() => setInviting(true)}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 text-sm font-semibold"
+            className="ms-auto inline-flex items-center gap-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 text-sm font-semibold"
           >
-            <UserPlus className="w-4 h-4" /> Invite user
+            <UserPlus className="w-4 h-4" /> {tr("Invite user")}
           </button>
         )}
       </div>
       <p className="text-slate-500 mb-4">
         {isAdmin
-          ? "Invite user adds someone new. Use Edit to change a person's role, manager, branch, territory or status."
-          : "Your team and their contact details."}
+          ? tr("Invite user adds someone new. Use Edit to change a person's role, manager, branch, territory or status.")
+          : tr("Your team and their contact details.")}
       </p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, code (R-0001), email, or product line…"
-            className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
+            placeholder={tr("Search by name, code (R-0001), email, or product line…")}
+            className="w-full ps-10 pe-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
       </div>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          {search ? "No team members match your search." : "No team members yet."}
+          {search ? tr("No team members match your search.") : tr("No team members yet.")}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
@@ -232,7 +233,7 @@ export default function TeamPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="font-semibold text-slate-900 truncate">
-                      {m.full_name ?? "Unknown"}
+                      {m.full_name ?? tr("Unknown")}
                     </div>
                     {m.code && (
                       <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
@@ -241,7 +242,7 @@ export default function TeamPage() {
                     )}
                     {!m.is_active && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
-                        Inactive
+                        {tr("Inactive")}
                       </span>
                     )}
                   </div>
@@ -259,8 +260,8 @@ export default function TeamPage() {
                     <button
                       onClick={() => setEditing(m)}
                       className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                      aria-label={`Edit ${m.full_name ?? "team member"}`}
-                      title="Edit role, manager and status"
+                      aria-label={trf("Edit {name}", { name: m.full_name ?? tr("team member") })}
+                      title={tr("Edit role, manager and status")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -270,7 +271,7 @@ export default function TeamPage() {
               <div className="mt-2 space-y-1 text-xs text-slate-600">
                 {m.line_manager_id && (
                   <div className="flex items-center gap-1.5">
-                    <UserCheck className="w-3 h-3" /> Reports to {nameById.get(m.line_manager_id) ?? "—"}
+                    <UserCheck className="w-3 h-3" /> {tr("Reports to")} {nameById.get(m.line_manager_id) ?? "—"}
                   </div>
                 )}
                 {m.email && (
@@ -292,7 +293,7 @@ export default function TeamPage() {
       {isAdmin && (
         <EditModal
           open={!!editing}
-          title={`Edit ${editing?.full_name ?? "team member"}`}
+          title={trf("Edit {name}", { name: editing?.full_name ?? tr("team member") })}
           table="profiles"
           recordId={editing?.id ?? null}
           fields={editFields}

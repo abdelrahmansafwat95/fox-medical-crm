@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { usePerms } from "@/lib/permissions";
 import { Package, AlertTriangle, Plus, X, Loader2 } from "lucide-react";
 
+import { tr, locale } from "@/lib/i18n";
 interface InventoryRow {
   id: string;
   product_id: string;
@@ -141,26 +142,26 @@ export default function SamplesPage() {
           <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
             <Package className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Samples</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Samples")}</h1>
         </div>
         {canIssue && (
           <button
             onClick={() => { setIssueErr(null); setShowIssue(true); }}
             className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
           >
-            <Plus className="w-4 h-4" /> Issue stock
+            <Plus className="w-4 h-4" /> {tr("Issue stock")}
           </button>
         )}
       </div>
       <p className="text-slate-500 mb-4">
-        Track sample stock with full audit trail.
-        {canIssue ? " Issue stock to a rep to replenish their bag." : ""}
+        {tr("Track sample stock with full audit trail.")}
+        {canIssue ? tr(" Issue stock to a rep to replenish their bag.") : ""}
       </p>
 
       {expiringSoon.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-2 text-sm text-amber-900">
           <AlertTriangle className="w-4 h-4" />
-          <span><strong>{expiringSoon.length}</strong> batch{expiringSoon.length > 1 ? "es" : ""} expiring within 60 days.</span>
+          <span><strong>{expiringSoon.length}</strong> batch{expiringSoon.length > 1 ? "es" : ""} {tr("expiring within 60 days.")}</span>
         </div>
       )}
 
@@ -173,29 +174,29 @@ export default function SamplesPage() {
               tab === t ? "border-b-2 border-brand-600 text-brand-700" : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {t === "stock" ? "Current stock" : "Transactions"}
+            {t === "stock" ? tr("Current stock") : tr("Transactions")}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-slate-500">Loading…</div>
+        <div className="text-center py-12 text-slate-500">{tr("Loading…")}</div>
       ) : tab === "stock" ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           {inventory.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-5xl mb-2">📦</div>
-              <p className="text-slate-700 font-medium">No samples in stock</p>
-              <p className="text-sm text-slate-500 mt-1">Warehouse issuance comes from your supply team.</p>
+              <p className="text-slate-700 font-medium">{tr("No samples in stock")}</p>
+              <p className="text-sm text-slate-500 mt-1">{tr("Warehouse issuance comes from your supply team.")}</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-600 text-xs">
                 <tr>
-                  <th className="text-left p-3">Product</th>
-                  <th className="text-left p-3">Batch</th>
-                  <th className="text-left p-3">Expiry</th>
-                  <th className="text-right p-3">Qty</th>
+                  <th className="text-start p-3">{tr("Product")}</th>
+                  <th className="text-start p-3">{tr("Batch")}</th>
+                  <th className="text-start p-3">{tr("Expiry")}</th>
+                  <th className="text-end p-3">{tr("Qty")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -210,7 +211,7 @@ export default function SamplesPage() {
                       </td>
                       <td className="p-3 text-slate-700 font-mono text-xs">{row.batch_number}</td>
                       <td className={`p-3 ${cls}`}>{row.expiry_date} <span className="text-xs">({days}d)</span></td>
-                      <td className="p-3 text-right font-bold">{row.quantity}</td>
+                      <td className="p-3 text-end font-bold">{row.quantity}</td>
                     </tr>
                   );
                 })}
@@ -221,7 +222,7 @@ export default function SamplesPage() {
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
           {transactions.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">No transactions yet.</div>
+            <div className="p-12 text-center text-slate-500">{tr("No transactions yet.")}</div>
           ) : (
             transactions.map((tx) => (
               <div key={tx.id} className="p-3 flex items-center gap-3 text-sm">
@@ -236,9 +237,9 @@ export default function SamplesPage() {
                   <div className="font-medium text-slate-900">{tx.products?.name}</div>
                   {tx.hcps?.full_name && <div className="text-xs text-slate-500">→ {tx.hcps.full_name}</div>}
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <div className="font-bold">{tx.quantity}</div>
-                  <div className="text-xs text-slate-500">{new Date(tx.created_at).toLocaleDateString('en-GB')}</div>
+                  <div className="text-xs text-slate-500">{new Date(tx.created_at).toLocaleDateString(locale())}</div>
                 </div>
               </div>
             ))
@@ -256,7 +257,7 @@ export default function SamplesPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="font-semibold text-slate-900">Issue stock to rep</h2>
+              <h2 className="font-semibold text-slate-900">{tr("Issue stock to rep")}</h2>
               <button onClick={() => setShowIssue(false)} className="p-1 text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
@@ -266,26 +267,26 @@ export default function SamplesPage() {
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{issueErr}</div>
               )}
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Rep</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Rep")}</label>
                 <select
                   value={form.rep_id}
                   onChange={(e) => setForm({ ...form, rep_id: e.target.value })}
                   className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
                 >
-                  <option value="">— pick a rep —</option>
+                  <option value="">{tr("— pick a rep —")}</option>
                   {reps.map((r) => (
-                    <option key={r.id} value={r.id}>{r.full_name ?? "Rep"}</option>
+                    <option key={r.id} value={r.id}>{r.full_name ?? tr("Rep")}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Product</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Product")}</label>
                 <select
                   value={form.product_id}
                   onChange={(e) => setForm({ ...form, product_id: e.target.value })}
                   className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
                 >
-                  <option value="">— pick a product —</option>
+                  <option value="">{tr("— pick a product —")}</option>
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>{p.brand_name ?? p.name}</option>
                   ))}
@@ -293,7 +294,7 @@ export default function SamplesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Batch #</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Batch #")}</label>
                   <input
                     value={form.batch_number}
                     onChange={(e) => setForm({ ...form, batch_number: e.target.value })}
@@ -302,7 +303,7 @@ export default function SamplesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Quantity</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Quantity")}</label>
                   <input
                     type="number"
                     min={1}
@@ -313,7 +314,7 @@ export default function SamplesPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Expiry date</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Expiry date")}</label>
                 <input
                   type="date"
                   value={form.expiry_date}
@@ -325,9 +326,9 @@ export default function SamplesPage() {
             <div className="p-4 border-t border-slate-200 flex gap-2">
               <button
                 onClick={() => setShowIssue(false)}
-                className="ml-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
+                className="ms-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
               >
-                Cancel
+                {tr("Cancel")}
               </button>
               <button
                 onClick={issueStock}
@@ -335,7 +336,7 @@ export default function SamplesPage() {
                 className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-4 py-2 rounded-lg inline-flex items-center gap-2"
               >
                 {issuing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Issue
+                {tr("Issue")}
               </button>
             </div>
           </div>

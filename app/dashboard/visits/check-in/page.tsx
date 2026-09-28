@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type { NearestInstitution } from "@/lib/types";
 
+import { tr, trf } from "@/lib/i18n";
 interface HCPOption {
   id: string;
   full_name: string;
@@ -128,7 +129,7 @@ export default function CheckInPage() {
   // 5. Submit check-in
   async function submitCheckIn() {
     if (!selectedInst || !selectedHcp || !geo.position) {
-      setError("Missing required data.");
+      setError(tr("Missing required data."));
       return;
     }
     setSubmitting(true);
@@ -179,11 +180,11 @@ export default function CheckInPage() {
         const offline = typeof navigator !== "undefined" && !navigator.onLine;
         if (offline) {
           alert(
-            "You're offline — this check-in was saved on your device and will sync automatically when you're back online."
+            tr("You're offline — this check-in was saved on your device and will sync automatically when you're back online.")
           );
           router.replace("/dashboard/visits");
         } else {
-          setError("Check-in couldn't be submitted just now — it's been queued and will retry automatically.");
+          setError(tr("Check-in couldn't be submitted just now — it's been queued and will retry automatically."));
           setSubmitting(false);
         }
         return;
@@ -196,7 +197,7 @@ export default function CheckInPage() {
         error?: string;
       };
       if (!result?.success) {
-        setError(result?.message || result?.error || "Check-in failed.");
+        setError(result?.message || result?.error || tr("Check-in failed."));
         setSubmitting(false);
         return;
       }
@@ -215,11 +216,11 @@ export default function CheckInPage() {
         href="/dashboard/visits"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to visits
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to visits")}
       </Link>
-      <h1 className="text-2xl font-bold text-slate-900 mb-2">GPS Check-in</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-2">{tr("GPS Check-in")}</h1>
       <p className="text-slate-500 mb-6">
-        Verifies your visit by checking your location is within the institution&apos;s geofence.
+        {tr("Verifies your visit by checking your location is within the institution's geofence.")}
       </p>
 
       {/* GPS status card */}
@@ -235,19 +236,18 @@ export default function CheckInPage() {
           <div className="flex-1">
             <div className="font-semibold text-slate-900">
               {geo.loading
-                ? "Locating you…"
+                ? tr("Locating you…")
                 : geo.position
-                ? "Location locked"
-                : "Location unavailable"}
+                ? tr("Location locked")
+                : tr("Location unavailable")}
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
               {geo.position ? (
                 <>
-                  {geo.position.latitude.toFixed(6)}, {geo.position.longitude.toFixed(6)} ·
-                  accuracy {Math.round(geo.position.accuracy)}m
+                  {geo.position.latitude.toFixed(6)}, {geo.position.longitude.toFixed(6)} {tr("· accuracy")} {Math.round(geo.position.accuracy)}m
                 </>
               ) : (
-                geo.error ?? "Tap to retry"
+                geo.error ?? tr("Tap to retry")
               )}
             </div>
           </div>
@@ -256,7 +256,7 @@ export default function CheckInPage() {
             disabled={geo.loading}
             className="text-xs text-brand-700 font-medium hover:underline disabled:opacity-50"
           >
-            {geo.loading ? "…" : "Refresh"}
+            {geo.loading ? "…" : tr("Refresh")}
           </button>
         </div>
       </div>
@@ -274,16 +274,16 @@ export default function CheckInPage() {
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-slate-500" />
-              <span className="font-semibold text-slate-900">Nearby institutions</span>
+              <span className="font-semibold text-slate-900">{tr("Nearby institutions")}</span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Sorted by distance. You can only check in at green ones.
+              {tr("Sorted by distance. You can only check in at green ones.")}
             </p>
           </div>
           <div className="divide-y divide-slate-100">
             {nearest.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-500">
-                No institutions found. Add some in the Institutions page first.
+                {tr("No institutions found. Add some in the Institutions page first.")}
               </div>
             ) : (
               nearest.map((i) => (
@@ -291,7 +291,7 @@ export default function CheckInPage() {
                   key={i.id}
                   onClick={() => i.within_geofence && pickInstitution(i)}
                   disabled={!i.within_geofence}
-                  className={`w-full p-4 flex items-center gap-3 text-left transition ${
+                  className={`w-full p-4 flex items-center gap-3 text-start transition ${
                     i.within_geofence
                       ? "hover:bg-emerald-50 cursor-pointer"
                       : "cursor-not-allowed opacity-60"
@@ -315,16 +315,16 @@ export default function CheckInPage() {
                     <div className="text-xs text-slate-500 mt-0.5">
                       {i.district ? `${i.district} · ` : ""}
                       {i.distance_m < 1000
-                        ? `${i.distance_m.toFixed(0)}m away`
-                        : `${(i.distance_m / 1000).toFixed(1)}km away`}{" "}
-                      · radius {i.geofence_radius_m}m
+                        ? trf("{n}m away", { n: i.distance_m.toFixed(0) })
+                        : trf("{n}km away", { n: (i.distance_m / 1000).toFixed(1) })}{" "}
+                      {tr("· radius")} {i.geofence_radius_m}m
                     </div>
                   </div>
                   {i.within_geofence ? (
-                    <span className="text-xs font-bold text-emerald-700 shrink-0">CHECK IN</span>
+                    <span className="text-xs font-bold text-emerald-700 shrink-0">{tr("CHECK IN")}</span>
                   ) : (
                     <span className="text-[11px] text-slate-500 shrink-0">
-                      get {(i.distance_m - i.geofence_radius_m).toFixed(0)}m closer
+                      get {(i.distance_m - i.geofence_radius_m).toFixed(0)}{tr("m closer")}
                     </span>
                   )}
                 </button>
@@ -343,7 +343,7 @@ export default function CheckInPage() {
               <div>
                 <div className="font-semibold text-emerald-900">{selectedInst.name}</div>
                 <div className="text-xs text-emerald-700">
-                  {selectedInst.distance_m.toFixed(0)}m from geofence anchor (allowed{" "}
+                  {selectedInst.distance_m.toFixed(0)}{tr("m from geofence anchor (allowed")}{" "}
                   {selectedInst.geofence_radius_m}m) ✓
                 </div>
               </div>
@@ -352,11 +352,11 @@ export default function CheckInPage() {
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Which HCP are you visiting?
+              {tr("Which HCP are you visiting?")}
             </label>
             {hcpsAtInst.length === 0 ? (
               <div className="text-sm text-slate-500 italic">
-                No HCPs registered at this institution yet. Add some in the HCPs page.
+                {tr("No HCPs registered at this institution yet. Add some in the HCPs page.")}
               </div>
             ) : (
               <select
@@ -364,29 +364,29 @@ export default function CheckInPage() {
                 onChange={(e) => setSelectedHcp(e.target.value)}
                 className="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
               >
-                <option value="">— pick a doctor —</option>
+                <option value="">{tr("— pick a doctor —")}</option>
                 {hcpsAtInst.map((h) => (
                   <option key={h.id} value={h.id}>
                     {h.full_name} {h.specialty ? `(${h.specialty})` : ""}{" "}
-                    {h.segment ? `· segment ${h.segment}` : ""}
+                    {h.segment ? trf("· segment {s}", { s: h.segment }) : ""}
                   </option>
                 ))}
               </select>
             )}
 
-            <label className="block text-sm font-medium text-slate-700 mb-2 mt-4">Visit type</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2 mt-4">{tr("Visit type")}</label>
             <select
               value={visitType}
               onChange={(e) => setVisitType(e.target.value)}
               className="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
             >
-              <option value="detailing">Detailing</option>
-              <option value="follow_up">Follow-up</option>
-              <option value="sample_drop">Sample drop</option>
-              <option value="order_visit">Order visit</option>
-              <option value="courtesy">Courtesy</option>
-              <option value="launch">Launch</option>
-              <option value="training">Training</option>
+              <option value="detailing">{tr("Detailing")}</option>
+              <option value="follow_up">{tr("Follow-up")}</option>
+              <option value="sample_drop">{tr("Sample drop")}</option>
+              <option value="order_visit">{tr("Order visit")}</option>
+              <option value="courtesy">{tr("Courtesy")}</option>
+              <option value="launch">{tr("Launch")}</option>
+              <option value="training">{tr("Training")}</option>
             </select>
           </div>
 
@@ -395,14 +395,14 @@ export default function CheckInPage() {
               onClick={() => setSelectedInst(null)}
               className="px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
             >
-              Back
+              {tr("Back")}
             </button>
             <button
               disabled={!selectedHcp}
               onClick={() => setStep("selfie")}
               className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              <Camera className="w-4 h-4" /> Take selfie & continue
+              <Camera className="w-4 h-4" /> {tr("Take selfie & continue")}
             </button>
           </div>
         </>
@@ -412,21 +412,21 @@ export default function CheckInPage() {
       {step === "selfie" && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">
           <div className="text-5xl mb-3">🤳</div>
-          <h2 className="font-semibold text-slate-900">Quick selfie for verification</h2>
+          <h2 className="font-semibold text-slate-900">{tr("Quick selfie for verification")}</h2>
           <p className="text-sm text-slate-500 mt-1 mb-4">
-            We capture one photo to confirm you&apos;re actually here. Stored privately.
+            {tr("We capture one photo to confirm you're actually here. Stored privately.")}
           </p>
           <button
             onClick={captureSelfie}
             className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-medium px-6 py-3 rounded-lg"
           >
-            <Camera className="w-5 h-5" /> Open camera
+            <Camera className="w-5 h-5" /> {tr("Open camera")}
           </button>
           <button
             onClick={() => setStep("submit")}
             className="block mx-auto mt-3 text-xs text-slate-500 underline"
           >
-            Skip selfie (managers may flag)
+            {tr("Skip selfie (managers may flag)")}
           </button>
         </div>
       )}
@@ -438,30 +438,30 @@ export default function CheckInPage() {
             <div className="text-center">
               <img
                 src={selfieDataUrl}
-                alt="Selfie"
+                alt={tr("Selfie")}
                 className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-emerald-200"
               />
             </div>
           )}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <div className="text-xs text-slate-500">Institution</div>
+              <div className="text-xs text-slate-500">{tr("Institution")}</div>
               <div className="font-medium">{selectedInst.name}</div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">Distance</div>
+              <div className="text-xs text-slate-500">{tr("Distance")}</div>
               <div className="font-medium text-emerald-700">
                 {selectedInst.distance_m.toFixed(0)}m ✓
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">HCP</div>
+              <div className="text-xs text-slate-500">{tr("HCP")}</div>
               <div className="font-medium">
                 {hcpsAtInst.find((h) => h.id === selectedHcp)?.full_name}
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">Visit type</div>
+              <div className="text-xs text-slate-500">{tr("Visit type")}</div>
               <div className="font-medium capitalize">{visitType.replace("_", " ")}</div>
             </div>
           </div>
@@ -472,11 +472,11 @@ export default function CheckInPage() {
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Checking in…
+                <Loader2 className="w-4 h-4 animate-spin" /> {tr("Checking in…")}
               </>
             ) : (
               <>
-                <MapPin className="w-4 h-4" /> Confirm check-in
+                <MapPin className="w-4 h-4" /> {tr("Confirm check-in")}
               </>
             )}
           </button>

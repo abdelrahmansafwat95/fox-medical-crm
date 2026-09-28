@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { ShoppingCart, Filter } from "lucide-react";
 import { usePerms } from "@/lib/permissions";
 
+import { tr } from "@/lib/i18n";
 const ORDER_STATUSES = [
   "draft", "submitted", "approved", "dispatched", "delivered", "paid", "cancelled", "returned"
 ];
@@ -69,7 +70,7 @@ export default function OrdersPage() {
           <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
             <ShoppingCart className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Orders")}</h1>
         </div>
         <div className="inline-flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5">
           <Filter className="w-3 h-3 text-slate-400" />
@@ -78,7 +79,7 @@ export default function OrdersPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="text-sm bg-transparent outline-none"
           >
-            <option value="all">All statuses</option>
+            <option value="all">{tr("All statuses")}</option>
             {ORDER_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
@@ -86,32 +87,32 @@ export default function OrdersPage() {
         </div>
       </div>
       <p className="text-slate-500 mb-4">
-        Pharmacy and institution orders.{canManage ? " Change an order's status inline." : ""}
+        {tr("Pharmacy and institution orders.")}{canManage ? tr(" Change an order's status inline.") : ""}
       </p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
-        <div className="text-xs text-slate-500">Total this month</div>
-        <div className="text-2xl font-bold text-slate-900">{totalThisMonth.toLocaleString('en-US')} EGP</div>
+        <div className="text-xs text-slate-500">{tr("Total this month")}</div>
+        <div className="text-2xl font-bold text-slate-900">{totalThisMonth.toLocaleString('en-US')} {tr("EGP")}</div>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("Loading…")}</div>
       ) : shown.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">🛒</div>
-          <p className="text-slate-700 font-medium">No orders yet</p>
-          <p className="text-sm text-slate-500 mt-1">Take orders from the visit detail page.</p>
+          <p className="text-slate-700 font-medium">{tr("No orders yet")}</p>
+          <p className="text-sm text-slate-500 mt-1">{tr("Take orders from the visit detail page.")}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-600 text-xs">
               <tr>
-                <th className="text-left p-3">Order #</th>
-                <th className="text-left p-3">Institution</th>
-                <th className="text-left p-3">Date</th>
-                <th className="text-left p-3">Status</th>
-                <th className="text-right p-3">Total</th>
+                <th className="text-start p-3">{tr("Order #")}</th>
+                <th className="text-start p-3">{tr("Institution")}</th>
+                <th className="text-start p-3">{tr("Date")}</th>
+                <th className="text-start p-3">{tr("Status")}</th>
+                <th className="text-end p-3">{tr("Total")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -133,11 +134,11 @@ export default function OrdersPage() {
                       </select>
                     ) : (
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${STATUS_COLORS[o.status] ?? "bg-slate-100 text-slate-700"}`}>
-                        {o.status}
+                        {tr(o.status)}
                       </span>
                     )}
                   </td>
-                  <td className="p-3 text-right font-bold">{o.total.toLocaleString('en-US')} {o.currency}</td>
+                  <td className="p-3 text-end font-bold">{o.total.toLocaleString('en-US')} {o.currency}</td>
                 </tr>
               ))}
             </tbody>

@@ -19,6 +19,7 @@ import {
   ArrowRight
 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 type Counts = {
   hcps: number | null;
   institutions: number | null;
@@ -113,15 +114,15 @@ export default function DashboardHome() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} 👋
+            {tr("Welcome")}{userName ? `, ${userName.split(" ")[0]}` : ""} 👋
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Here&apos;s your field force at a glance.</p>
+          <p className="text-sm text-slate-500 mt-1">{tr("Here's your field force at a glance.")}</p>
         </div>
         <Link
           href="/dashboard/visits/check-in"
           className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-lg inline-flex items-center gap-2 font-medium shadow-sm"
         >
-          <Plus className="w-4 h-4" /> New Check-in
+          <Plus className="w-4 h-4" /> {tr("New Check-in")}
         </Link>
       </div>
 
@@ -134,13 +135,13 @@ export default function DashboardHome() {
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-white shadow-sm relative">
               <Inbox className="w-6 h-6 text-brand-700" />
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-6 h-6 px-1.5 flex items-center justify-center">
+              <span className="absolute -top-1 -end-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-6 h-6 px-1.5 flex items-center justify-center">
                 {totalInbox}
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-slate-900">
-                {totalInbox} item{totalInbox === 1 ? "" : "s"} need your attention
+                {totalInbox} item{totalInbox === 1 ? "" : "s"} {tr("need your attention")}
               </div>
               <div className="text-xs text-slate-600 mt-0.5">
                 {[
@@ -151,7 +152,7 @@ export default function DashboardHome() {
                 ].filter(Boolean).join(" · ")}
               </div>
             </div>
-            <ArrowRight className="w-5 h-5 text-brand-700 group-hover:translate-x-1 transition" />
+            <ArrowRight className="w-5 h-5 text-brand-700 group-hover:translate-x-1 transition rtl:-scale-x-100" />
           </div>
         </Link>
       )}
@@ -172,7 +173,7 @@ export default function DashboardHome() {
                 <div className="text-xl font-bold text-slate-900">
                   {k.value === null ? "—" : k.value.toLocaleString('en-US')}
                 </div>
-                <div className="text-[11px] text-slate-500">{k.label}</div>
+                <div className="text-[11px] text-slate-500">{tr(k.label)}</div>
               </div>
             </Link>
           );
@@ -180,9 +181,9 @@ export default function DashboardHome() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
-        <QuickCard icon={MapPin}    title="GPS Check-in"   desc="Log a visit with geofence verification"   href="/dashboard/visits/check-in" accent="bg-brand-500" />
-        <QuickCard icon={Sparkles}  title="AI Assistant"   desc="Email, WhatsApp, pitches, objections"     href="/dashboard/assistant"       accent="bg-yellow-500" />
-        <QuickCard icon={Trophy}    title="Leaderboard"    desc="Rank reps + AI coaching insights"         href="/dashboard/leaderboard"     accent="bg-amber-500" />
+        <QuickCard icon={MapPin}    title={tr("GPS Check-in")}   desc="Log a visit with geofence verification"   href="/dashboard/visits/check-in" accent="bg-brand-500" />
+        <QuickCard icon={Sparkles}  title={tr("AI Assistant")}   desc="Email, WhatsApp, pitches, objections"     href="/dashboard/assistant"       accent="bg-yellow-500" />
+        <QuickCard icon={Trophy}    title={tr("Leaderboard")}    desc="Rank reps + AI coaching insights"         href="/dashboard/leaderboard"     accent="bg-amber-500" />
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { offlineInsert } from "@/lib/offlineQueue";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Presentation, StickyNote, X, CheckCircle2 } from "lucide-react";
 
+import { tr, trf } from "@/lib/i18n";
 interface Slide {
   id: string;
   product_id: string;
@@ -139,16 +140,16 @@ export default function DetailingPage() {
   const touchX = useRef<number | null>(null);
 
   if (loading) {
-    return <div className="p-12 text-center text-slate-500"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />Loading…</div>;
+    return <div className="p-12 text-center text-slate-500"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />{tr("Loading…")}</div>;
   }
-  if (!visit) return <div className="p-12 text-center text-slate-500">Visit not found.</div>;
+  if (!visit) return <div className="p-12 text-center text-slate-500">{tr("Visit not found.")}</div>;
 
   if (done) {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
         <CheckCircle2 className="w-14 h-14 text-brand-600 mx-auto mb-3" />
-        <h2 className="font-bold text-slate-900">Detailing saved with the visit</h2>
-        <p className="text-sm text-slate-600 mt-1">{done.queued ? "You're offline — it will sync when the signal is back." : "Your manager can see which slides the doctor spent time on."}</p>
+        <h2 className="font-bold text-slate-900">{tr("Detailing saved with the visit")}</h2>
+        <p className="text-sm text-slate-600 mt-1">{done.queued ? tr("You're offline — it will sync when the signal is back.") : tr("Your manager can see which slides the doctor spent time on.")}</p>
       </div>
     );
   }
@@ -172,31 +173,31 @@ export default function DetailingPage() {
           <span className="opacity-70">{productSlides.indexOf(s) + 1} / {productSlides.length}</span>
           <span className="flex-1" />
           <button onClick={() => setNotes((n) => !n)} className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 ${notes ? "bg-amber-500 text-slate-950" : "bg-white/10"}`}>
-            <StickyNote className="w-4 h-4" /> Notes
+            <StickyNote className="w-4 h-4" /> {tr("Notes")}
           </button>
           <button onClick={finish} disabled={saving} className="inline-flex items-center gap-1 rounded-lg bg-brand-600 text-white px-3 py-1.5 font-semibold">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} Finish
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} {tr("Finish")}
           </button>
         </div>
         {/* min-h-0 lets the slide shrink to the space left, so it never pushes the dots off screen */}
         <div className="flex-1 min-h-0 relative flex items-center justify-center px-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={s.image_url} alt={s.title ?? ""} className="h-full w-full object-contain" draggable={false} />
-          <button aria-label="Previous" onClick={() => go(idx - 1)} disabled={idx === 0} className="absolute left-0 top-0 bottom-0 w-1/4 flex items-center justify-start pl-2 text-white/40 hover:text-white disabled:opacity-0">
-            <ChevronLeft className="w-10 h-10" />
+          <button aria-label={tr("Previous")} onClick={() => go(idx - 1)} disabled={idx === 0} className="absolute start-0 top-0 bottom-0 w-1/4 flex items-center justify-start ps-2 text-white/40 hover:text-white disabled:opacity-0">
+            <ChevronLeft className="w-10 h-10 rtl:-scale-x-100" />
           </button>
-          <button aria-label="Next" onClick={() => go(idx + 1)} disabled={idx === deck.length - 1} className="absolute right-0 top-0 bottom-0 w-1/4 flex items-center justify-end pr-2 text-white/40 hover:text-white disabled:opacity-0">
-            <ChevronRight className="w-10 h-10" />
+          <button aria-label={tr("Next")} onClick={() => go(idx + 1)} disabled={idx === deck.length - 1} className="absolute end-0 top-0 bottom-0 w-1/4 flex items-center justify-end pe-2 text-white/40 hover:text-white disabled:opacity-0">
+            <ChevronRight className="w-10 h-10 rtl:-scale-x-100" />
           </button>
           {notes && s.key_message && (
-            <div className="absolute bottom-3 left-3 right-3 md:left-auto md:w-96 rounded-xl bg-amber-100 text-amber-950 p-3 text-sm shadow-xl">
-              <b>For you:</b> {s.key_message}
+            <div className="absolute bottom-3 start-3 end-3 md:start-auto md:w-96 rounded-xl bg-amber-100 text-amber-950 p-3 text-sm shadow-xl">
+              <b>{tr("For you:")}</b> {s.key_message}
             </div>
           )}
         </div>
         <div className="flex justify-center gap-1.5 py-3">
           {deck.map((x, i) => (
-            <button key={x.id} aria-label={`Slide ${i + 1}`} onClick={() => go(i)}
+            <button key={x.id} aria-label={trf("Slide {n}", { n: i + 1 })} onClick={() => go(i)}
               className={`h-2 rounded-full transition-all ${i === idx ? "w-6 bg-cyan-400" : x.product_id === s.product_id ? "w-2 bg-white/50" : "w-2 bg-white/20"}`} />
           ))}
         </div>
@@ -207,16 +208,16 @@ export default function DetailingPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <Link href={`/dashboard/visits/${visit.id}`} className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3">
-        <ArrowLeft className="w-4 h-4" /> Back to visit
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to visit")}
       </Link>
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-1">
           <Presentation className="w-5 h-5 text-brand-600" />
-          <h1 className="text-lg font-bold text-slate-900">Detail to {visit.hcps?.full_name ?? "the doctor"}</h1>
+          <h1 className="text-lg font-bold text-slate-900">{tr("Detail to")} {visit.hcps?.full_name ?? tr("the doctor")}</h1>
         </div>
-        <p className="text-sm text-slate-500 mb-4">Pick the products to present, in the order you want. Swipe or tap the sides to move; time on each slide is recorded with the visit.</p>
+        <p className="text-sm text-slate-500 mb-4">{tr("Pick the products to present, in the order you want. Swipe or tap the sides to move; time on each slide is recorded with the visit.")}</p>
         {products.length === 0 ? (
-          <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-4">No slide decks yet. A manager can add them on the <Link href="/dashboard/products" className="underline">Products</Link> page.</p>
+          <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-4">{tr("No slide decks yet. A manager can add them on the")} <Link href="/dashboard/products" className="underline">{tr("Products")}</Link> page.</p>
         ) : (
           <div className="space-y-2">
             {products.map(([pid, name]) => {
@@ -224,7 +225,7 @@ export default function DetailingPage() {
               const order = chosen.indexOf(pid);
               return (
                 <button key={pid} onClick={() => setChosen((c) => (c.includes(pid) ? c.filter((x) => x !== pid) : [...c, pid]))}
-                  className={`w-full flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${order >= 0 ? "border-brand-500 bg-brand-50" : "border-slate-200 hover:border-brand-300"}`}>
+                  className={`w-full flex items-center gap-3 rounded-lg border p-3 text-start transition-colors ${order >= 0 ? "border-brand-500 bg-brand-50" : "border-slate-200 hover:border-brand-300"}`}>
                   <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${order >= 0 ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-400"}`}>{order >= 0 ? order + 1 : ""}</span>
                   <span className="flex-1 font-medium text-slate-900">{name}</span>
                   <span className="text-xs text-slate-500">{n} slide{n === 1 ? "" : "s"}</span>
@@ -236,7 +237,7 @@ export default function DetailingPage() {
         {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
         <button onClick={start} disabled={!chosen.length}
           className="mt-5 w-full bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 text-white font-semibold py-3 rounded-lg inline-flex items-center justify-center gap-2">
-          <Presentation className="w-4 h-4" /> Start presenting
+          <Presentation className="w-4 h-4" /> {tr("Start presenting")}
         </button>
       </div>
     </div>

@@ -37,6 +37,7 @@ import {
 import { usePerms } from "@/lib/permissions";
 import ThemeToggle from "@/components/ThemeToggle";
 
+import { tr, LangToggle } from "@/lib/i18n";
 interface NavItem {
   href: string;
   label: string;
@@ -143,15 +144,15 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-60 bg-fox-navy border-r border-white/10 hidden md:flex flex-col h-screen sticky top-0">
+    <aside className="w-60 bg-fox-navy border-e border-white/10 hidden md:flex flex-col h-screen sticky top-0">
       <div className="p-4 border-b border-white/10 flex items-center gap-2">
         <div className="w-9 h-9 rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center p-1 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-mark.png" alt="Fox Systems" className="w-full h-full object-contain" />
+          <img src="/logo-mark.png" alt={tr("Fox Systems")} className="w-full h-full object-contain" />
         </div>
         <div>
-          <div className="font-bold text-white text-sm leading-tight">Fox Medical</div>
-          <div className="text-[10px] text-slate-400">CRM v0.12</div>
+          <div className="font-bold text-white text-sm leading-tight">{tr("Fox Medical")}</div>
+          <div className="text-[10px] text-slate-400">{tr("CRM v0.12")}</div>
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-2">
@@ -161,7 +162,7 @@ export default function Sidebar() {
           return (
           <div key={group.title} className="mb-3">
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-1">
-              {group.title}
+              {tr(group.title)}
             </div>
             {items.map((item) => {
               const Icon = item.icon;
@@ -181,7 +182,7 @@ export default function Sidebar() {
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1">{tr(item.label)}</span>
                   {count > 0 && (
                     <span className="bg-red-600 text-white text-[10px] font-bold rounded-full min-w-5 h-5 px-1.5 flex items-center justify-center">
                       {count > 99 ? "99+" : count}
@@ -194,8 +195,9 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      <div className="p-2 border-t border-white/10">
-        <ThemeToggle />
+      <div className="p-2 border-t border-white/10 flex items-center gap-2">
+        <div className="flex-1"><ThemeToggle /></div>
+        <LangToggle />
       </div>
     </aside>
   );

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Search, Users, Building2, Pill, Loader2, CornerDownLeft } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 type Result = {
   kind: "hcp" | "institution" | "product";
   id: string;
@@ -110,7 +111,7 @@ export default function GlobalSearch() {
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search HCPs, institutions, products…"
+            placeholder={tr("Search HCPs, institutions, products…")}
             className="flex-1 py-3.5 outline-none text-sm bg-transparent text-slate-900"
           />
           {loading && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
@@ -118,27 +119,27 @@ export default function GlobalSearch() {
 
         <div className="max-h-[55vh] overflow-y-auto">
           {q.trim().length < 2 ? (
-            <div className="p-6 text-center text-sm text-slate-400">Type at least 2 characters…</div>
+            <div className="p-6 text-center text-sm text-slate-400">{tr("Type at least 2 characters…")}</div>
           ) : results.length === 0 && !loading ? (
-            <div className="p-6 text-center text-sm text-slate-500">No matches for &ldquo;{q}&rdquo;.</div>
+            <div className="p-6 text-center text-sm text-slate-500">{tr("No matches for “")}{q}&rdquo;.</div>
           ) : (
             <div className="divide-y divide-slate-100">
               {results.map((r) => {
                 const Icon = ICON[r.kind];
                 return (
                   <button
-                    key={`${r.kind}-${r.id}`}
+                    key={`${tr(r.kind)}-${r.id}`}
                     onClick={() => go(r)}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left hover:bg-slate-50"
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-start hover:bg-slate-50"
                   >
                     <div className="p-1.5 rounded-lg bg-slate-100 text-slate-600 shrink-0">
                       <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-slate-900 truncate">{r.label}</div>
-                      {r.sub && <div className="text-xs text-slate-500 truncate">{r.sub}</div>}
+                      <div className="text-sm font-medium text-slate-900 truncate">{tr(r.label)}</div>
+                      {r.sub && <div className="text-xs text-slate-500 truncate">{tr(r.sub)}</div>}
                     </div>
-                    <span className="text-[10px] uppercase tracking-wide text-slate-400 shrink-0">{r.kind}</span>
+                    <span className="text-[10px] uppercase tracking-wide text-slate-400 shrink-0">{tr(r.kind)}</span>
                   </button>
                 );
               })}
@@ -147,7 +148,7 @@ export default function GlobalSearch() {
         </div>
 
         <div className="px-4 py-2 border-t border-slate-200 text-[11px] text-slate-400 flex items-center gap-2">
-          <CornerDownLeft className="w-3 h-3" /> to open · Esc to close · ⌘K anytime
+          <CornerDownLeft className="w-3 h-3" /> {tr("to open · Esc to close · ⌘K anytime")}
         </div>
       </div>
     </div>

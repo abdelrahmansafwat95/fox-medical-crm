@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { offlineInsert } from "@/lib/offlineQueue";
 import { Receipt, Plus, Loader2 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface ExpenseRow {
   id: string;
   expense_date: string;
@@ -68,7 +69,7 @@ export default function ExpensesPage() {
       currency: "EGP",
       description: form.description || null,
       status: "submitted"
-    }, `Expense — ${form.category} ${form.amount} EGP`);
+    }, `Expense — ${tr(form.category)} ${form.amount} EGP`);
     setSubmitting(false);
     if (saved.error) {
       setFormError(saved.error);
@@ -89,27 +90,27 @@ export default function ExpensesPage() {
           <div className="p-2 rounded-lg bg-orange-50 text-orange-700">
             <Receipt className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Expenses</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Expenses")}</h1>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
         >
-          <Plus className="w-4 h-4" /> New expense
+          <Plus className="w-4 h-4" /> {tr("New expense")}
         </button>
       </div>
-      <p className="text-slate-500 mb-4">Daily expenses — transport, fuel, meals, etc.</p>
+      <p className="text-slate-500 mb-4">{tr("Daily expenses — transport, fuel, meals, etc.")}</p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
-        <div className="text-xs text-slate-500">Total this month</div>
-        <div className="text-2xl font-bold text-slate-900">{total.toLocaleString('en-US')} EGP</div>
+        <div className="text-xs text-slate-500">{tr("Total this month")}</div>
+        <div className="text-2xl font-bold text-slate-900">{total.toLocaleString('en-US')} {tr("EGP")}</div>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 space-y-3">
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Date</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Date")}</label>
               <input
                 type="date"
                 value={form.expense_date}
@@ -118,7 +119,7 @@ export default function ExpensesPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Category</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Category")}</label>
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -131,7 +132,7 @@ export default function ExpensesPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Amount (EGP)</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Amount (EGP)")}</label>
             <input
               type="number"
               value={form.amount}
@@ -141,13 +142,13 @@ export default function ExpensesPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Description</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Description")}</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="w-full p-2 border border-slate-300 rounded-lg text-sm"
-              placeholder="e.g. Uber to Maadi clinic"
+              placeholder={tr("e.g. Uber to Maadi clinic")}
             />
           </div>
           {formError && <p className="text-sm text-red-600">{formError}</p>}
@@ -157,40 +158,40 @@ export default function ExpensesPage() {
               disabled={!form.amount || submitting}
               className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium py-2 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : "Submit"}
+              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" />{tr("Saving…")}</> : tr("Submit")}
             </button>
             <button
               onClick={() => setShowForm(false)}
               className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
             >
-              Cancel
+              {tr("Cancel")}
             </button>
           </div>
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("Loading…")}</div>
       ) : expenses.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">🧾</div>
-          <p className="text-slate-700 font-medium">No expenses yet</p>
-          <p className="text-sm text-slate-500 mt-1">Submit your first expense above.</p>
+          <p className="text-slate-700 font-medium">{tr("No expenses yet")}</p>
+          <p className="text-sm text-slate-500 mt-1">{tr("Submit your first expense above.")}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
           {expenses.map((e) => (
             <div key={e.id} className="p-3 flex items-center gap-3 text-sm">
               <span className="text-[11px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-700 capitalize w-24 text-center">
-                {e.category}
+                {tr(e.category)}
               </span>
               <div className="flex-1">
                 <div className="font-medium text-slate-900">{e.description ?? "—"}</div>
                 <div className="text-xs text-slate-500">{e.expense_date}</div>
               </div>
-              <div className="font-bold">{e.amount.toLocaleString('en-US')} EGP</div>
+              <div className="font-bold">{e.amount.toLocaleString('en-US')} {tr("EGP")}</div>
               <span className={`text-[11px] font-bold px-2 py-1 rounded ${STATUS_COLORS[e.status]}`}>
-                {e.status}
+                {tr(e.status)}
               </span>
             </div>
           ))}

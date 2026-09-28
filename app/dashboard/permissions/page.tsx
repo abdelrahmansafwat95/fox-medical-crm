@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRequirePermission, RESOURCES, ROLES, ROLE_LABELS, defaultCan } from "@/lib/permissions";
 import { KeyRound, Loader2, RotateCcw, Check, X } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface PermRow {
   id: string;
   resource: string;
@@ -104,7 +105,7 @@ export default function PermissionsPage() {
 
   async function clearOverrides() {
     if (!targetId) return;
-    if (!confirm("Reset all overrides for this target back to role defaults?")) return;
+    if (!confirm(tr("Reset all overrides for this target back to role defaults?"))) return;
     await supabase.from("permissions").delete().eq("target_type", targetType).eq("target_id", targetId);
     await reload();
   }
@@ -116,7 +117,7 @@ export default function PermissionsPage() {
   }, []);
 
   if (checking) {
-    return <div className="max-w-4xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
+    return <div className="max-w-4xl mx-auto p-12 text-center text-slate-500">{tr("Loading…")}</div>;
   }
 
   const isAdminTarget = targetRole === "admin";
@@ -127,11 +128,10 @@ export default function PermissionsPage() {
         <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
           <KeyRound className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Permissions</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("Permissions")}</h1>
       </div>
       <p className="text-slate-500 mb-4">
-        Control who can see and do what — per role, or override for a specific user. A colored
-        chip = allowed; a dot marks a manual override of the role default.
+        {tr("Control who can see and do what — per role, or override for a specific user. A colored chip = allowed; a dot marks a manual override of the role default.")}
       </p>
 
       {/* Target picker */}
@@ -141,19 +141,19 @@ export default function PermissionsPage() {
             onClick={() => setTargetType("role")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${targetType === "role" ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-700"}`}
           >
-            By role
+            {tr("By role")}
           </button>
           <button
             onClick={() => setTargetType("user")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${targetType === "user" ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-700"}`}
           >
-            By user
+            {tr("By user")}
           </button>
           <button
             onClick={clearOverrides}
-            className="ml-auto text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 inline-flex items-center gap-1"
+            className="ms-auto text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 inline-flex items-center gap-1"
           >
-            <RotateCcw className="w-3 h-3" /> Reset to defaults
+            <RotateCcw className="w-3 h-3" /> {tr("Reset to defaults")}
           </button>
         </div>
         {targetType === "role" ? (
@@ -174,14 +174,14 @@ export default function PermissionsPage() {
           >
             {profiles.map((p) => (
               <option key={p.id} value={p.id}>
-                {(p.full_name ?? p.email ?? "User")} — {ROLE_LABELS[p.role] ?? p.role}
+                {(p.full_name ?? p.email ?? tr("User"))} — {ROLE_LABELS[p.role] ?? p.role}
               </option>
             ))}
           </select>
         )}
         {isAdminTarget && (
           <p className="text-[11px] text-amber-700 mt-2">
-            Admins always have full access — overrides don&apos;t apply to them.
+            {tr("Admins always have full access — overrides don't apply to them.")}
           </p>
         )}
       </div>
@@ -200,7 +200,7 @@ export default function PermissionsPage() {
               <div className="divide-y divide-slate-100">
                 {resources.map((res) => (
                   <div key={res.key} className="p-3 flex items-center gap-3 flex-wrap">
-                    <div className="w-40 shrink-0 text-sm font-medium text-slate-800">{res.label}</div>
+                    <div className="w-40 shrink-0 text-sm font-medium text-slate-800">{tr(res.label)}</div>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {res.actions.map((action) => {
                         const on = effective(res.key, action);
@@ -216,7 +216,7 @@ export default function PermissionsPage() {
                                 ? "bg-brand-50 border-brand-300 text-brand-700"
                                 : "bg-slate-50 border-slate-200 text-slate-400"
                             }`}
-                            title={overridden ? "Manual override" : "Role default"}
+                            title={overridden ? tr("Manual override") : tr("Role default")}
                           >
                             {busy ? (
                               <Loader2 className="w-3 h-3 animate-spin" />
@@ -226,7 +226,7 @@ export default function PermissionsPage() {
                               <X className="w-3 h-3" />
                             )}
                             {action}
-                            {overridden && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 ml-0.5" />}
+                            {overridden && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 ms-0.5" />}
                           </button>
                         );
                       })}
@@ -240,8 +240,7 @@ export default function PermissionsPage() {
       )}
 
       <p className="text-[11px] text-slate-400 mt-4">
-        Note: changes take effect for a user on their next sign-in (permissions are cached per
-        session). Row-level database security still applies regardless of these UI settings.
+        {tr("Note: changes take effect for a user on their next sign-in (permissions are cached per session). Row-level database security still applies regardless of these UI settings.")}
       </p>
     </div>
   );

@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { usePerms } from "@/lib/permissions";
 import { Home, MapPin, Inbox, Sparkles, ClipboardList, Users } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 const baseItems = [
   { href: "/dashboard", label: "Home", icon: Home, badge: false },
   { href: "/dashboard/visits", label: "Visits", icon: ClipboardList, badge: false },
@@ -41,7 +42,7 @@ export default function MobileNav() {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 grid grid-cols-5 shadow-lg">
+    <nav className="md:hidden fixed bottom-0 start-0 end-0 bg-white border-t border-slate-200 z-30 grid grid-cols-5 shadow-lg">
       {items.map((it) => {
         const Icon = it.icon;
         const active =
@@ -55,9 +56,9 @@ export default function MobileNav() {
             }`}
           >
             <Icon className="w-5 h-5" />
-            <span>{it.label}</span>
+            <span>{tr(it.label)}</span>
             {it.badge && inboxCount > 0 && (
-              <span className="absolute top-1 right-3 bg-red-600 text-white text-[9px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
+              <span className="absolute top-1 end-3 bg-red-600 text-white text-[9px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
                 {inboxCount > 9 ? "9+" : inboxCount}
               </span>
             )}

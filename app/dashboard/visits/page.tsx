@@ -14,6 +14,7 @@ import {
   ClipboardEdit
 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface VisitWithJoins {
   id: string;
   status: string;
@@ -65,43 +66,43 @@ export default function VisitsPage() {
           <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
             <ClipboardList className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Visits</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Visits")}</h1>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Link
             href="/dashboard/visits/manual"
             className="bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium text-sm"
           >
-            <ClipboardEdit className="w-4 h-4" /> Log manually
+            <ClipboardEdit className="w-4 h-4" /> {tr("Log manually")}
           </Link>
           <Link
             href="/dashboard/visits/check-in"
             className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium shadow-sm"
           >
-            <Plus className="w-4 h-4" /> New Check-in
+            <Plus className="w-4 h-4" /> {tr("New Check-in")}
           </Link>
         </div>
       </div>
       <p className="text-slate-500 mb-6">
-        Daily call reports with GPS-verified check-in.
+        {tr("Daily call reports with GPS-verified check-in.")}
       </p>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : visits.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">📋</div>
-          <p className="text-slate-700 font-medium">No visits yet</p>
+          <p className="text-slate-700 font-medium">{tr("No visits yet")}</p>
           <p className="text-sm text-slate-500 mt-1 mb-4">
-            Tap &ldquo;New Check-in&rdquo; to log your first GPS-verified visit.
+            {tr("Tap “New Check-in” to log your first GPS-verified visit.")}
           </p>
           <Link
             href="/dashboard/visits/check-in"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-700"
           >
-            <Plus className="w-4 h-4" /> Start a check-in
+            <Plus className="w-4 h-4" /> {tr("Start a check-in")}
           </Link>
         </div>
       ) : (
@@ -122,14 +123,14 @@ export default function VisitsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-slate-900 truncate">
-                        {v.hcps?.full_name ?? "Unknown HCP"}
+                        {v.hcps?.full_name ?? tr("Unknown HCP")}
                       </span>
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${badge.cls}`}>
-                        {badge.label}
+                        {tr(badge.label)}
                       </span>
                       {v.manager_status === "flagged" && (
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                          ⚠️ Flagged
+                          {tr("⚠️ Flagged")}
                         </span>
                       )}
                     </div>
@@ -142,12 +143,12 @@ export default function VisitsPage() {
                     <div className="mt-1.5 flex items-center gap-2 text-xs">
                       {v.check_in_within_geofence === true && (
                         <span className="text-emerald-700">
-                          ✓ Geo-verified ({v.check_in_distance_m?.toFixed(0)}m)
+                          {tr("✓ Geo-verified (")}{v.check_in_distance_m?.toFixed(0)}m)
                         </span>
                       )}
                       {v.check_in_within_geofence === false && (
                         <span className="text-red-700">
-                          ✗ Outside geofence ({v.check_in_distance_m?.toFixed(0)}m)
+                          {tr("✗ Outside geofence (")}{v.check_in_distance_m?.toFixed(0)}m)
                         </span>
                       )}
                       {v.check_in_at && (

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 
+import { tr, locale } from "@/lib/i18n";
 interface EventDetail {
   id: string;
   title: string;
@@ -260,7 +261,7 @@ export default function EventDetailPage() {
   }
 
   async function removeInvitee(invitee_id: string) {
-    if (!confirm("Remove this invitee?")) return;
+    if (!confirm(tr("Remove this invitee?"))) return;
     setBusyId(invitee_id);
     await supabase.from("event_invitees").delete().eq("id", invitee_id);
     await load();
@@ -284,7 +285,7 @@ export default function EventDetailPage() {
     return (
       <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -292,9 +293,9 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
-        <p className="text-slate-700">Event not found.</p>
+        <p className="text-slate-700">{tr("Event not found.")}</p>
         <Link href="/dashboard/events" className="text-brand-700 underline text-sm">
-          Back to events
+          {tr("Back to events")}
         </Link>
       </div>
     );
@@ -309,7 +310,7 @@ export default function EventDetailPage() {
         href="/dashboard/events"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to events
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to events")}
       </Link>
 
       {/* Header card */}
@@ -318,18 +319,18 @@ export default function EventDetailPage() {
           <div className="flex items-start gap-4 flex-1 min-w-0">
             <div className="w-16 shrink-0 bg-white rounded-lg p-2 text-center border border-slate-200 shadow-sm">
               <div className="text-[10px] font-bold text-slate-500 uppercase">
-                {startsAt.toLocaleDateString("en-EG", { month: "short" })}
+                {startsAt.toLocaleDateString(locale(), { month: "short" })}
               </div>
               <div className="text-2xl font-bold text-slate-900 leading-none">
                 {startsAt.getDate()}
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">
-                {startsAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {startsAt.toLocaleTimeString(locale(), { hour: "2-digit", minute: "2-digit" })}
               </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
+                <h1 className="text-xl font-bold text-slate-900">{tr(event.title)}</h1>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-white text-purple-700 border border-purple-200">
                   {TYPE_LABELS[event.event_type]}
                 </span>
@@ -344,7 +345,7 @@ export default function EventDetailPage() {
                 <span>{startsAt.toLocaleString('en-US')}</span>
                 {event.is_virtual ? (
                   <span className="inline-flex items-center gap-1">
-                    <Wifi className="w-3 h-3" /> Virtual
+                    <Wifi className="w-3 h-3" /> {tr("Virtual")}
                   </span>
                 ) : (
                   event.venue_name && (
@@ -358,14 +359,14 @@ export default function EventDetailPage() {
                 {event.profiles?.full_name && <span>👤 {event.profiles.full_name}</span>}
               </div>
               {event.description && (
-                <p className="text-sm text-slate-700 mt-3">{event.description}</p>
+                <p className="text-sm text-slate-700 mt-3">{tr(event.description)}</p>
               )}
             </div>
           </div>
           <button
             onClick={() => setEditing(true)}
             className="p-2 rounded-lg bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 shrink-0"
-            title="Edit event"
+            title={tr("Edit event")}
           >
             <Pencil className="w-4 h-4" />
           </button>
@@ -374,14 +375,14 @@ export default function EventDetailPage() {
         {(event.budget_egp ?? 0) > 0 && (
           <div className="mt-4 flex items-center gap-3 flex-wrap text-xs">
             <div className="px-3 py-1.5 rounded-lg bg-white border border-slate-200">
-              <span className="text-slate-500">Budget: </span>
+              <span className="text-slate-500">{tr("Budget:")} </span>
               <span className="font-bold text-slate-900">
-                {event.budget_egp?.toLocaleString('en-US')} EGP
+                {event.budget_egp?.toLocaleString('en-US')} {tr("EGP")}
               </span>
             </div>
             {(event.actual_cost_egp ?? 0) > 0 && (
               <div className="px-3 py-1.5 rounded-lg bg-white border border-slate-200">
-                <span className="text-slate-500">Actual: </span>
+                <span className="text-slate-500">{tr("Actual:")} </span>
                 <span
                   className={`font-bold ${
                     (event.actual_cost_egp ?? 0) > (event.budget_egp ?? 0)
@@ -389,7 +390,7 @@ export default function EventDetailPage() {
                       : "text-emerald-700"
                   }`}
                 >
-                  {event.actual_cost_egp?.toLocaleString('en-US')} EGP
+                  {event.actual_cost_egp?.toLocaleString('en-US')} {tr("EGP")}
                 </span>
               </div>
             )}
@@ -398,7 +399,7 @@ export default function EventDetailPage() {
 
         {event.external_speakers && (
           <div className="mt-3 text-sm">
-            <span className="text-slate-500 font-medium">External speakers: </span>
+            <span className="text-slate-500 font-medium">{tr("External speakers:")} </span>
             <span className="text-slate-900">{event.external_speakers}</span>
           </div>
         )}
@@ -406,12 +407,12 @@ export default function EventDetailPage() {
 
       {/* Stats strip */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
-        <Stat label="Invited" value={stats.invited} cls="bg-slate-50 text-slate-900" />
-        <Stat label="Accepted" value={stats.accepted} cls="bg-emerald-50 text-emerald-700" />
-        <Stat label="Declined" value={stats.declined} cls="bg-red-50 text-red-700" />
-        <Stat label="Pending" value={stats.pending} cls="bg-amber-50 text-amber-700" />
-        <Stat label="Speakers" value={stats.speakers} cls="bg-purple-50 text-purple-700" />
-        <Stat label="Attended" value={stats.attended} cls="bg-blue-50 text-blue-700" />
+        <Stat label={tr("Invited")} value={stats.invited} cls="bg-slate-50 text-slate-900" />
+        <Stat label={tr("Accepted")} value={stats.accepted} cls="bg-emerald-50 text-emerald-700" />
+        <Stat label={tr("Declined")} value={stats.declined} cls="bg-red-50 text-red-700" />
+        <Stat label={tr("Pending")} value={stats.pending} cls="bg-amber-50 text-amber-700" />
+        <Stat label={tr("Speakers")} value={stats.speakers} cls="bg-purple-50 text-purple-700" />
+        <Stat label={tr("Attended")} value={stats.attended} cls="bg-blue-50 text-blue-700" />
       </div>
 
       {/* Invitees list */}
@@ -420,23 +421,23 @@ export default function EventDetailPage() {
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-500" />
             <span className="font-semibold text-slate-700 text-sm">
-              Invitees {invitees.length > 0 && `(${invitees.length})`}
+              {tr("Invitees")} {invitees.length > 0 && `(${invitees.length})`}
             </span>
           </div>
           <button
             onClick={() => setShowInvite(true)}
             className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg inline-flex items-center gap-1 font-medium"
           >
-            <Plus className="w-3 h-3" /> Invite HCPs
+            <Plus className="w-3 h-3" /> {tr("Invite HCPs")}
           </button>
         </div>
 
         {invitees.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-            <p className="text-sm text-slate-700 font-medium">No invitees yet</p>
+            <p className="text-sm text-slate-700 font-medium">{tr("No invitees yet")}</p>
             <p className="text-xs text-slate-500 mt-1 mb-3">
-              Click &ldquo;Invite HCPs&rdquo; to add doctors to this event.
+              {tr("Click “Invite HCPs” to add doctors to this event.")}
             </p>
           </div>
         ) : (
@@ -468,7 +469,7 @@ export default function EventDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <span className="font-semibold text-slate-900">Invite HCPs</span>
+              <span className="font-semibold text-slate-900">{tr("Invite HCPs")}</span>
               <button
                 onClick={() => setShowInvite(false)}
                 className="text-slate-400 hover:text-slate-700 text-xl leading-none px-2"
@@ -479,13 +480,13 @@ export default function EventDetailPage() {
 
             <div className="p-3 border-b border-slate-100 space-y-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name or specialty…"
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder={tr("Search by name or specialty…")}
+                  className="w-full ps-10 pe-3 py-2 border border-slate-300 rounded-lg text-sm"
                 />
               </div>
               <label className="flex items-center gap-2 text-xs cursor-pointer">
@@ -494,14 +495,14 @@ export default function EventDetailPage() {
                   checked={makeSpeakers}
                   onChange={(e) => setMakeSpeakers(e.target.checked)}
                 />
-                <span className="text-slate-700">Mark all as speakers</span>
+                <span className="text-slate-700">{tr("Mark all as speakers")}</span>
               </label>
             </div>
 
             <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
               {inviteableHcps.length === 0 ? (
                 <div className="p-8 text-center text-sm text-slate-500">
-                  {search ? "No HCPs match your search." : "All active HCPs are already invited."}
+                  {search ? tr("No HCPs match your search.") : tr("All active HCPs are already invited.")}
                 </div>
               ) : (
                 inviteableHcps.map((h) => (
@@ -526,7 +527,7 @@ export default function EventDetailPage() {
                         </span>
                         {h.is_kol && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
-                            KOL
+                            {tr("KOL")}
                           </span>
                         )}
                         {h.segment && (
@@ -545,12 +546,12 @@ export default function EventDetailPage() {
             </div>
 
             <div className="p-3 border-t border-slate-200 flex items-center gap-2 bg-slate-50">
-              <span className="text-sm text-slate-700 mr-auto">{selected.size} selected</span>
+              <span className="text-sm text-slate-700 me-auto">{selected.size} selected</span>
               <button
                 onClick={() => setShowInvite(false)}
                 className="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm hover:bg-white"
               >
-                Cancel
+                {tr("Cancel")}
               </button>
               <button
                 onClick={bulkInvite}
@@ -558,7 +559,7 @@ export default function EventDetailPage() {
                 className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-bold px-4 py-2 rounded-lg text-sm inline-flex items-center gap-1"
               >
                 {inviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Invite {selected.size}
+                {tr("Invite")} {selected.size}
               </button>
             </div>
           </div>
@@ -567,7 +568,7 @@ export default function EventDetailPage() {
 
       <EditModal
         open={editing}
-        title="Edit event"
+        title={tr("Edit event")}
         table="events"
         recordId={event.id}
         fields={EVENT_EDIT_FIELDS}
@@ -631,12 +632,12 @@ function InviteeRow({
             </Link>
             {invitee.is_speaker && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
-                <Mic className="w-3 h-3" /> SPEAKER
+                <Mic className="w-3 h-3" /> {tr("SPEAKER")}
               </span>
             )}
             {h.is_kol && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
-                KOL
+                {tr("KOL")}
               </span>
             )}
             {h.segment && (
@@ -652,7 +653,7 @@ function InviteeRow({
             <RsvpButton
               active={invitee.rsvp_status === "accepted"}
               icon={CheckCircle2}
-              label="Accepted"
+              label={tr("Accepted")}
               color="emerald"
               onClick={() => onRsvp("accepted")}
               busy={busy}
@@ -660,7 +661,7 @@ function InviteeRow({
             <RsvpButton
               active={invitee.rsvp_status === "declined"}
               icon={XCircle}
-              label="Declined"
+              label={tr("Declined")}
               color="red"
               onClick={() => onRsvp("declined")}
               busy={busy}
@@ -668,7 +669,7 @@ function InviteeRow({
             <RsvpButton
               active={invitee.rsvp_status === "pending"}
               icon={Clock}
-              label="Pending"
+              label={tr("Pending")}
               color="slate"
               onClick={() => onRsvp("pending")}
               busy={busy}
@@ -680,14 +681,14 @@ function InviteeRow({
                 <span className="text-slate-300">|</span>
                 <RsvpButton
                   active={invitee.attendance_status === "attended"}
-                  label="Attended"
+                  label={tr("Attended")}
                   color="blue"
                   onClick={() => onAttendance("attended")}
                   busy={busy}
                 />
                 <RsvpButton
                   active={invitee.attendance_status === "no_show"}
-                  label="No-show"
+                  label={tr("No-show")}
                   color="amber"
                   onClick={() => onAttendance("no_show")}
                   busy={busy}
@@ -704,7 +705,7 @@ function InviteeRow({
               href={`https://wa.me/${h.whatsapp.replace(/\D/g, "")}`}
               target="_blank"
               rel="noreferrer"
-              title="WhatsApp"
+              title={tr("WhatsApp")}
               className="p-1.5 rounded text-emerald-600 hover:bg-emerald-50"
             >
               <MessageCircle className="w-4 h-4" />
@@ -713,7 +714,7 @@ function InviteeRow({
           {h.email && (
             <a
               href={`mailto:${h.email}`}
-              title="Email"
+              title={tr("Email")}
               className="p-1.5 rounded text-slate-500 hover:bg-slate-100"
             >
               <Mail className="w-4 h-4" />
@@ -722,7 +723,7 @@ function InviteeRow({
           <button
             onClick={onToggleSpeaker}
             disabled={busy}
-            title={invitee.is_speaker ? "Remove as speaker" : "Mark as speaker"}
+            title={invitee.is_speaker ? tr("Remove as speaker") : tr("Mark as speaker")}
             className={`p-1.5 rounded ${
               invitee.is_speaker
                 ? "text-purple-700 bg-purple-50"
@@ -734,7 +735,7 @@ function InviteeRow({
           <button
             onClick={onRemove}
             disabled={busy}
-            title="Remove invitee"
+            title={tr("Remove invitee")}
             className="p-1.5 rounded text-slate-400 hover:bg-red-50 hover:text-red-600"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 const KEY = "foxmed_theme";
 
 /** Dark-mode switch. Toggles the `dark` class on <html> and persists the
@@ -31,7 +32,7 @@ export default function ThemeToggle({ variant = "sidebar" }: { variant?: "sideba
     return (
       <button
         onClick={toggle}
-        aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label={dark ? tr("Switch to light mode") : tr("Switch to dark mode")}
         className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
       >
         {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -45,7 +46,7 @@ export default function ThemeToggle({ variant = "sidebar" }: { variant?: "sideba
       className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-slate-300 hover:bg-white/10 hover:text-white transition"
     >
       {dark ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
-      <span className="flex-1 text-left">{dark ? "Light mode" : "Dark mode"}</span>
+      <span className="flex-1 text-start">{dark ? tr("Light mode") : tr("Dark mode")}</span>
     </button>
   );
 }

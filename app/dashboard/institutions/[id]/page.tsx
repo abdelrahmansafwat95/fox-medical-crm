@@ -8,6 +8,7 @@ import { useRequirePermission } from "@/lib/permissions";
 import ActivityFeed from "@/components/ActivityFeed";
 import { ArrowLeft, Building2, MapPin, Users, Loader2, ExternalLink } from "lucide-react";
 
+import { tr, locale } from "@/lib/i18n";
 interface Institution {
   id: string;
   name: string;
@@ -70,7 +71,7 @@ export default function InstitutionDetailPage() {
     return (
       <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -78,9 +79,9 @@ export default function InstitutionDetailPage() {
   if (!inst) {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
-        <p className="text-slate-700">Institution not found.</p>
+        <p className="text-slate-700">{tr("Institution not found.")}</p>
         <Link href="/dashboard/institutions" className="text-brand-700 underline text-sm">
-          Back to institutions
+          {tr("Back to institutions")}
         </Link>
       </div>
     );
@@ -96,7 +97,7 @@ export default function InstitutionDetailPage() {
         href="/dashboard/institutions"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to institutions
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to institutions")}
       </Link>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
@@ -122,7 +123,7 @@ export default function InstitutionDetailPage() {
             rel="noreferrer"
             className="text-xs text-brand-700 hover:underline inline-flex items-center gap-1 shrink-0"
           >
-            <ExternalLink className="w-3 h-3" /> Maps
+            <ExternalLink className="w-3 h-3" /> {tr("Maps")}
           </a>
         </div>
       </div>
@@ -131,8 +132,8 @@ export default function InstitutionDetailPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-3 border-b border-slate-100 flex items-center gap-2">
           <MapPin className="w-4 h-4 text-slate-500" />
-          <span className="text-sm font-semibold text-slate-700">Location</span>
-          <span className="ml-auto text-xs text-slate-400">geofence {inst.geofence_radius_m ?? 100}m</span>
+          <span className="text-sm font-semibold text-slate-700">{tr("Location")}</span>
+          <span className="ms-auto text-xs text-slate-400">geofence {inst.geofence_radius_m ?? 100}m</span>
         </div>
         <iframe
           title="map"
@@ -146,10 +147,10 @@ export default function InstitutionDetailPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-3 border-b border-slate-100 flex items-center gap-2">
           <Users className="w-4 h-4 text-slate-500" />
-          <span className="text-sm font-semibold text-slate-700">HCPs at this institution ({hcps.length})</span>
+          <span className="text-sm font-semibold text-slate-700">{tr("HCPs at this institution (")}{hcps.length})</span>
         </div>
         {hcps.length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-500">No HCPs linked here yet.</div>
+          <div className="p-6 text-center text-sm text-slate-500">{tr("No HCPs linked here yet.")}</div>
         ) : (
           <div className="divide-y divide-slate-100">
             {hcps.map((w) =>
@@ -158,7 +159,7 @@ export default function InstitutionDetailPage() {
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-slate-900 truncate">
                       {w.hcps.full_name}
-                      {w.is_primary && <span className="ml-1.5 text-[10px] font-bold text-emerald-600">primary</span>}
+                      {w.is_primary && <span className="ms-1.5 text-[10px] font-bold text-emerald-600">primary</span>}
                     </div>
                     {w.hcps.specialty && <div className="text-xs text-slate-500">{w.hcps.specialty}</div>}
                   </div>
@@ -174,9 +175,9 @@ export default function InstitutionDetailPage() {
 
       {/* Recent visits */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-3 border-b border-slate-100 text-sm font-semibold text-slate-700">Recent visits</div>
+        <div className="p-3 border-b border-slate-100 text-sm font-semibold text-slate-700">{tr("Recent visits")}</div>
         {visits.length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-500">No visits recorded here yet.</div>
+          <div className="p-6 text-center text-sm text-slate-500">{tr("No visits recorded here yet.")}</div>
         ) : (
           <div className="divide-y divide-slate-100">
             {visits.map((v) => (
@@ -184,11 +185,11 @@ export default function InstitutionDetailPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-slate-900 truncate">{v.hcps?.full_name ?? "—"}</div>
                   <div className="text-xs text-slate-500">
-                    {v.profiles?.full_name ?? "Rep"} · {v.visit_type ?? ""}
+                    {v.profiles?.full_name ?? tr("Rep")} · {v.visit_type ?? ""}
                   </div>
                 </div>
                 <span className="text-xs text-slate-400 shrink-0">
-                  {v.check_in_at ? new Date(v.check_in_at).toLocaleDateString('en-GB') : ""}
+                  {v.check_in_at ? new Date(v.check_in_at).toLocaleDateString(locale()) : ""}
                 </span>
               </Link>
             ))}

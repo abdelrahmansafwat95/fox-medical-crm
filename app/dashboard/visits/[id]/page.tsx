@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 
+import { tr, locale } from "@/lib/i18n";
 interface VisitFull {
   id: string;
   rep_id: string;
@@ -176,7 +177,7 @@ export default function VisitDetailPage() {
 
   async function runAiSummary() {
     if (!rawNotes.trim()) {
-      setError("Type in your rough notes first.");
+      setError(tr("Type in your rough notes first."));
       return;
     }
     setAiBusy(true);
@@ -203,7 +204,7 @@ export default function VisitDetailPage() {
   async function checkOut() {
     if (!geo.position) {
       geo.refresh();
-      setError("Waiting for GPS — tap again in a second.");
+      setError(tr("Waiting for GPS — tap again in a second."));
       return;
     }
     setCheckOutBusy(true);
@@ -231,14 +232,14 @@ export default function VisitDetailPage() {
 
   if (loading)
     return (
-      <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">Loading…</div>
+      <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">{tr("Loading…")}</div>
     );
   if (!visit)
     return (
       <div className="max-w-3xl mx-auto p-12 text-center">
-        <p className="text-slate-700">Visit not found.</p>
+        <p className="text-slate-700">{tr("Visit not found.")}</p>
         <Link href="/dashboard/visits" className="text-brand-700 underline text-sm">
-          Back to visits
+          {tr("Back to visits")}
         </Link>
       </div>
     );
@@ -254,7 +255,7 @@ export default function VisitDetailPage() {
         href="/dashboard/visits"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to visits
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to visits")}
       </Link>
 
       {/* Header card */}
@@ -262,7 +263,7 @@ export default function VisitDetailPage() {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <h1 className="text-xl font-bold text-slate-900">
-              {visit.hcps?.full_name ?? "Unknown HCP"}
+              {visit.hcps?.full_name ?? tr("Unknown HCP")}
             </h1>
             <p className="text-sm text-slate-500">
               {visit.hcps?.specialty ?? "—"} · {visit.institutions?.name ?? "—"}
@@ -282,14 +283,14 @@ export default function VisitDetailPage() {
             </span>
             {visit.manager_status === "flagged" && (
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700 inline-flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> Flagged
+                <AlertTriangle className="w-3 h-3" /> {tr("Flagged")}
               </span>
             )}
             {canEdit && (
               <button
                 onClick={() => setEditing(true)}
                 className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
-                title="Edit visit details"
+                title={tr("Edit visit details")}
               >
                 <Pencil className="w-4 h-4" />
               </button>
@@ -311,27 +312,27 @@ export default function VisitDetailPage() {
             <AlertTriangle className="w-4 h-4" />
           )}
           <span>
-            {visit.check_in_within_geofence ? "GPS-verified" : "Outside geofence"} ·{" "}
-            {visit.check_in_distance_m?.toFixed(0)}m from anchor
+            {visit.check_in_within_geofence ? tr("GPS-verified") : tr("Outside geofence")} ·{" "}
+            {visit.check_in_distance_m?.toFixed(0)}{tr("m from anchor")}
           </span>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div>
-            <div className="text-xs text-slate-500">Check-in</div>
+            <div className="text-xs text-slate-500">{tr("Check-in")}</div>
             <div className="font-medium">
               {visit.check_in_at ? new Date(visit.check_in_at).toLocaleString('en-US') : "—"}
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500">Check-out</div>
+            <div className="text-xs text-slate-500">{tr("Check-out")}</div>
             <div className="font-medium">
               {visit.check_out_at ? new Date(visit.check_out_at).toLocaleString('en-US') : "—"}
             </div>
           </div>
           {visit.duration_minutes !== null && (
             <div>
-              <div className="text-xs text-slate-500">Duration</div>
+              <div className="text-xs text-slate-500">{tr("Duration")}</div>
               <div className="font-medium inline-flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {visit.duration_minutes} min
               </div>
@@ -339,18 +340,18 @@ export default function VisitDetailPage() {
           )}
           {visit.visit_type && (
             <div>
-              <div className="text-xs text-slate-500">Type</div>
-              <div className="font-medium capitalize">{visit.visit_type.replace("_", " ")}</div>
+              <div className="text-xs text-slate-500">{tr("Type")}</div>
+              <div className="font-medium capitalize">{tr(visit.visit_type)}</div>
             </div>
           )}
         </div>
 
         {visit.check_in_selfie_url && (
           <div className="mt-4">
-            <div className="text-xs text-slate-500 mb-1">Verification selfie</div>
+            <div className="text-xs text-slate-500 mb-1">{tr("Verification selfie")}</div>
             <img
               src={visit.check_in_selfie_url}
-              alt="Selfie"
+              alt={tr("Selfie")}
               className="w-24 h-24 rounded-lg object-cover border border-slate-200"
             />
           </div>
@@ -369,7 +370,7 @@ export default function VisitDetailPage() {
               href={`/dashboard/visits/${visit.id}/detail`}
               className="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              <Presentation className="w-4 h-4" /> Start detailing
+              <Presentation className="w-4 h-4" /> {tr("Start detailing")}
             </Link>
           )}
           {canDistributeSamples && (
@@ -377,7 +378,7 @@ export default function VisitDetailPage() {
               href={`/dashboard/visits/${visit.id}/give-sample`}
               className="bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              <Package className="w-4 h-4" /> Give sample
+              <Package className="w-4 h-4" /> {tr("Give sample")}
             </Link>
           )}
           {canAddOrder && (
@@ -385,7 +386,7 @@ export default function VisitDetailPage() {
               href={`/dashboard/visits/${visit.id}/add-order`}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              <ShoppingCart className="w-4 h-4" /> Add order
+              <ShoppingCart className="w-4 h-4" /> {tr("Add order")}
             </Link>
           )}
           {visit.status === "in_progress" && (
@@ -396,11 +397,11 @@ export default function VisitDetailPage() {
             >
               {checkOutBusy ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Checking out…
+                  <Loader2 className="w-4 h-4 animate-spin" /> {tr("Checking out…")}
                 </>
               ) : (
                 <>
-                  <LogOut className="w-4 h-4" /> Check out
+                  <LogOut className="w-4 h-4" /> {tr("Check out")}
                 </>
               )}
             </button>
@@ -413,12 +414,12 @@ export default function VisitDetailPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Presentation className="w-5 h-5 text-brand-600" />
-            <h2 className="font-semibold text-slate-900">Detailed with slides</h2>
+            <h2 className="font-semibold text-slate-900">{tr("Detailed with slides")}</h2>
           </div>
           <div className="divide-y divide-slate-100">
             {detailing.map((d) => (
               <div key={d.id} className="py-2 flex items-center justify-between text-sm">
-                <span className="font-medium text-slate-900">{d.products?.name ?? "Product"}</span>
+                <span className="font-medium text-slate-900">{d.products?.name ?? tr("Product")}</span>
                 <span className="text-slate-600">
                   {d.slides.length} slide{d.slides.length === 1 ? "" : "s"} · {Math.floor(d.total_seconds / 60)}m {d.total_seconds % 60}s
                 </span>
@@ -434,22 +435,22 @@ export default function VisitDetailPage() {
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5 text-emerald-600" />
-              <h2 className="font-semibold text-slate-900">Order placed</h2>
+              <h2 className="font-semibold text-slate-900">{tr("Order placed")}</h2>
               <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
-                {order.status}
+                {tr(order.status)}
               </span>
             </div>
             <Link
               href="/dashboard/orders"
               className="text-xs text-brand-700 underline"
             >
-              View all orders
+              {tr("View all orders")}
             </Link>
           </div>
           <div className="flex items-center justify-between text-sm">
             <div className="text-slate-600">
-              Order <span className="font-mono">{order.order_number ?? "—"}</span> ·{" "}
-              {order.items?.length ?? 0} line item
+              {tr("Order")} <span className="font-mono">{order.order_number ?? "—"}</span> ·{" "}
+              {order.items?.length ?? 0} {tr("line item")}
               {(order.items?.length ?? 0) === 1 ? "" : "s"}
             </div>
             <div className="font-bold text-slate-900">
@@ -466,7 +467,7 @@ export default function VisitDetailPage() {
             <div className="flex items-center gap-2">
               <Package className="w-5 h-5 text-amber-600" />
               <h2 className="font-semibold text-slate-900">
-                Samples given ({samplesGiven.reduce((s, t) => s + t.quantity, 0)} units)
+                {tr("Samples given (")}{samplesGiven.reduce((s, t) => s + t.quantity, 0)} {tr("units)")}
               </h2>
             </div>
             {canDistributeSamples && (
@@ -474,7 +475,7 @@ export default function VisitDetailPage() {
                 href={`/dashboard/visits/${visit.id}/give-sample`}
                 className="text-xs text-brand-700 hover:underline inline-flex items-center gap-1"
               >
-                <Plus className="w-3 h-3" /> Give more
+                <Plus className="w-3 h-3" /> {tr("Give more")}
               </Link>
             )}
           </div>
@@ -486,8 +487,8 @@ export default function VisitDetailPage() {
                     {tx.products?.brand_name ?? tx.products?.name ?? "—"}
                   </div>
                   <div className="text-xs text-slate-500">
-                    Batch {tx.batch_number ?? "—"} ·{" "}
-                    {new Date(tx.created_at).toLocaleTimeString([], {
+                    {tr("Batch")} {tx.batch_number ?? "—"} ·{" "}
+                    {new Date(tx.created_at).toLocaleTimeString(locale(), {
                       hour: "2-digit",
                       minute: "2-digit"
                     })}
@@ -498,10 +499,10 @@ export default function VisitDetailPage() {
                     href={tx.hcp_signature_url}
                     target="_blank"
                     rel="noreferrer"
-                    title="View signature"
+                    title={tr("View signature")}
                     className="text-xs text-emerald-700"
                   >
-                    ✍️ signed
+                    {tr("✍️ signed")}
                   </a>
                 )}
                 <div className="font-bold text-slate-900 shrink-0">×{tx.quantity}</div>
@@ -515,10 +516,10 @@ export default function VisitDetailPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-5 h-5 text-yellow-600" />
-          <h2 className="font-semibold text-slate-900">AI visit summary</h2>
+          <h2 className="font-semibold text-slate-900">{tr("AI visit summary")}</h2>
           {visit.ai_quality_score !== null && (
-            <span className="ml-auto text-xs font-bold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
-              Quality: {visit.ai_quality_score}/10
+            <span className="ms-auto text-xs font-bold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+              {tr("Quality:")} {visit.ai_quality_score}/10
             </span>
           )}
         </div>
@@ -530,24 +531,24 @@ export default function VisitDetailPage() {
             </div>
             <div className="grid sm:grid-cols-2 gap-3 text-sm">
               {visit.doctor_attitude && (
-                <Field label="Doctor attitude" value={visit.doctor_attitude} />
+                <Field label={tr("Doctor attitude")} value={visit.doctor_attitude} />
               )}
               {visit.doctor_feedback && (
-                <Field label="Doctor feedback" value={visit.doctor_feedback} />
+                <Field label={tr("Doctor feedback")} value={visit.doctor_feedback} />
               )}
               {visit.key_message_delivered && (
-                <Field label="Key message delivered" value={visit.key_message_delivered} />
+                <Field label={tr("Key message delivered")} value={visit.key_message_delivered} />
               )}
-              {visit.objections && <Field label="Objections" value={visit.objections} />}
-              {visit.next_action && <Field label="Next action" value={visit.next_action} />}
+              {visit.objections && <Field label={tr("Objections")} value={visit.objections} />}
+              {visit.next_action && <Field label={tr("Next action")} value={visit.next_action} />}
               {visit.next_visit_date && (
-                <Field label="Next visit" value={visit.next_visit_date} />
+                <Field label={tr("Next visit")} value={visit.next_visit_date} />
               )}
             </div>
             {visit.ai_coaching_notes && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
                 <div className="font-semibold text-blue-900 text-xs uppercase tracking-wide mb-1">
-                  Coaching notes for manager
+                  {tr("Coaching notes for manager")}
                 </div>
                 <div className="text-slate-700">{visit.ai_coaching_notes}</div>
               </div>
@@ -556,12 +557,12 @@ export default function VisitDetailPage() {
         ) : (
           <div>
             <p className="text-sm text-slate-500 mb-2">
-              Type rough notes from the visit and let AI structure them into a clean DCR.
+              {tr("Type rough notes from the visit and let AI structure them into a clean DCR.")}
             </p>
             <textarea
               value={rawNotes}
               onChange={(e) => setRawNotes(e.target.value)}
-              placeholder="e.g. Met Dr. Hassan, discussed Cardia 5mg, he was open but worried about pricing..."
+              placeholder={tr("e.g. Met Dr. Hassan, discussed Cardia 5mg, he was open but worried about pricing...")}
               rows={5}
               className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500 text-sm"
             />
@@ -572,11 +573,11 @@ export default function VisitDetailPage() {
             >
               {aiBusy ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Analyzing…
+                  <Loader2 className="w-4 h-4 animate-spin" /> {tr("Analyzing…")}
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" /> Generate AI summary
+                  <Sparkles className="w-4 h-4" /> {tr("Generate AI summary")}
                 </>
               )}
             </button>
@@ -591,13 +592,13 @@ export default function VisitDetailPage() {
           rel="noreferrer"
           className="block bg-white rounded-xl border border-slate-200 shadow-sm p-3 hover:bg-slate-50 transition text-center text-sm text-blue-700 inline-flex items-center justify-center gap-2 w-full"
         >
-          <MapPin className="w-4 h-4" /> View check-in location on Google Maps
+          <MapPin className="w-4 h-4" /> {tr("View check-in location on Google Maps")}
         </a>
       )}
 
       <EditModal
         open={editing}
-        title="Edit visit details"
+        title={tr("Edit visit details")}
         table="visits"
         recordId={visit.id}
         fields={VISIT_EDIT_FIELDS}

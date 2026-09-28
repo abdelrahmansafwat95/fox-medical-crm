@@ -5,6 +5,7 @@ import { Loader2, X, Save, AlertTriangle, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { normalizePhone } from "@/lib/phone";
 
+import { tr, trf } from "@/lib/i18n";
 export type FieldType = "text" | "textarea" | "number" | "select" | "checkbox" | "tel" | "email" | "date";
 
 export interface FieldConfig {
@@ -80,7 +81,7 @@ export default function EditModal({
       if (f.required) {
         const v = values[f.name];
         if (v === null || v === undefined || v === "") {
-          setError(`${f.label} is required.`);
+          setError(trf("{f} is required.", { f: tr(f.label) }));
           return;
         }
       }
@@ -132,7 +133,7 @@ export default function EditModal({
 
   async function del() {
     if (!recordId) return;
-    if (!confirm("Are you sure? This cannot be undone.")) return;
+    if (!confirm(tr("Are you sure? This cannot be undone."))) return;
     setDeleting(true);
     setError(null);
     const { error: delErr } = await supabase.from(table).delete().eq("id", recordId);
@@ -141,7 +142,7 @@ export default function EditModal({
       // If FK violation, suggest soft-delete via is_active
       if (delErr.message.includes("foreign key") || delErr.message.includes("violates")) {
         setError(
-          "This record is referenced by other data. Try deactivating it instead (uncheck 'Active')."
+          tr("This record is referenced by other data. Try deactivating it instead (uncheck 'Active').")
         );
       } else {
         setError(delErr.message);
@@ -193,15 +194,15 @@ export default function EditModal({
               className="px-3 py-2 rounded-lg text-red-700 hover:bg-red-50 inline-flex items-center gap-1 text-sm disabled:opacity-50"
             >
               {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
-              Delete
+              {tr("Delete")}
             </button>
           )}
           <button
             onClick={onClose}
             disabled={saving || deleting}
-            className="ml-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 disabled:opacity-50"
+            className="ms-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {tr("Cancel")}
           </button>
           <button
             onClick={save}
@@ -209,7 +210,7 @@ export default function EditModal({
             className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-4 py-2 rounded-lg inline-flex items-center gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save
+            {tr("Save")}
           </button>
         </div>
       </div>
@@ -238,7 +239,7 @@ function FieldRow({
           onChange={(e) => onChange(e.target.checked)}
           className="w-4 h-4"
         />
-        <span className="text-slate-700">{field.label}</span>
+        <span className="text-slate-700">{tr(field.label)}</span>
       </label>
     );
   }
@@ -246,8 +247,8 @@ function FieldRow({
   return (
     <div>
       <label className="block text-xs font-medium text-slate-700 mb-1">
-        {field.label}
-        {field.required && <span className="text-red-600 ml-0.5">*</span>}
+        {tr(field.label)}
+        {field.required && <span className="text-red-600 ms-0.5">*</span>}
       </label>
 
       {field.type === "textarea" ? (
@@ -264,7 +265,7 @@ function FieldRow({
           <option value="">—</option>
           {field.options?.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {tr(o.label)}
             </option>
           ))}
         </select>

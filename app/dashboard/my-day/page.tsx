@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { CalendarCheck, MapPin, CheckCircle2, Circle, Loader2, ClipboardList, Sparkles, Navigation } from "lucide-react";
 
+import { tr, locale, trf } from "@/lib/i18n";
 interface HCPLite {
   id: string;
   full_name: string;
@@ -133,7 +134,7 @@ export default function MyDayPage() {
     return (
       <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading your day…
+        {tr("Loading your day…")}
       </div>
     );
   }
@@ -146,9 +147,9 @@ export default function MyDayPage() {
             <CalendarCheck className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">My Day</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{tr("My Day")}</h1>
             <p className="text-xs text-slate-500">
-              {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+              {new Date().toLocaleDateString(locale(), { weekday: "long", month: "long", day: "numeric" })}
             </p>
           </div>
         </div>
@@ -156,23 +157,23 @@ export default function MyDayPage() {
           href="/dashboard/visits/check-in"
           className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-lg inline-flex items-center gap-2 font-medium shadow-sm"
         >
-          <MapPin className="w-4 h-4" /> Check in
+          <MapPin className="w-4 h-4" /> {tr("Check in")}
         </Link>
       </div>
 
       {/* Progress */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-slate-700">Today&apos;s plan</span>
+          <span className="text-sm font-semibold text-slate-700">{tr("Today's plan")}</span>
           <span className="text-sm text-slate-500">
-            {planned.length > 0 ? `${plannedDone}/${planned.length} visited` : `${visits.length} visit${visits.length === 1 ? "" : "s"} today`}
+            {planned.length > 0 ? trf("{a}/{b} visited", { a: plannedDone, b: planned.length }) : trf(visits.length === 1 ? "{n} visit today" : "{n} visits today", { n: visits.length })}
           </span>
         </div>
         <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
           <div className="h-full bg-brand-600 transition-all" style={{ width: `${planned.length > 0 ? pct : visits.length > 0 ? 100 : 0}%` }} />
         </div>
         {planStatus && planStatus !== "approved" && (
-          <p className="text-[11px] text-amber-700 mt-2">Your plan for today is {planStatus} — pending manager approval.</p>
+          <p className="text-[11px] text-amber-700 mt-2">{tr("Your plan for today is")} {planStatus} {tr("— pending manager approval.")}</p>
         )}
       </div>
 
@@ -180,13 +181,13 @@ export default function MyDayPage() {
       {overdue.length > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-3 border-b border-slate-100 flex items-center gap-2">
-            <span className="text-sm font-semibold text-slate-700">Overdue for a visit</span>
+            <span className="text-sm font-semibold text-slate-700">{tr("Overdue for a visit")}</span>
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">{overdue.length}</span>
             <Link
               href="/dashboard/visits/check-in"
-              className="ml-auto text-xs text-brand-700 font-medium hover:underline inline-flex items-center gap-1"
+              className="ms-auto text-xs text-brand-700 font-medium hover:underline inline-flex items-center gap-1"
             >
-              <MapPin className="w-3 h-3" /> Check in
+              <MapPin className="w-3 h-3" /> {tr("Check in")}
             </Link>
           </div>
           <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
@@ -201,12 +202,12 @@ export default function MyDayPage() {
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-slate-900 truncate">
                       {c.full_name}
-                      {c.segment && <span className="ml-1.5 text-[10px] font-bold text-slate-400">{c.segment}</span>}
+                      {c.segment && <span className="ms-1.5 text-[10px] font-bold text-slate-400">{c.segment}</span>}
                     </div>
                     {c.specialty && <div className="text-xs text-slate-500 truncate">{c.specialty}</div>}
                   </div>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-red-50 text-red-700 shrink-0">
-                    {c.days_since_last_visit === null ? "never visited" : `${c.days_since_last_visit}d (target ${target}d)`}
+                    {c.days_since_last_visit === null ? tr("never visited") : trf("{d}d (target {t}d)", { d: c.days_since_last_visit, t: target })}
                   </span>
                 </Link>
               );
@@ -219,16 +220,16 @@ export default function MyDayPage() {
       {planned.length > 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-3 border-b border-slate-100 flex items-center justify-between gap-2">
-            <span className="text-sm font-semibold text-slate-700">Planned HCPs</span>
+            <span className="text-sm font-semibold text-slate-700">{tr("Planned HCPs")}</span>
             <button
               onClick={optimizeRoute}
               disabled={optimizing}
               className="text-xs bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 font-medium"
             >
               {optimizing ? (
-                <><Loader2 className="w-3 h-3 animate-spin" /> Optimizing…</>
+                <><Loader2 className="w-3 h-3 animate-spin" /> {tr("Optimizing…")}</>
               ) : (
-                <><Sparkles className="w-3 h-3" /> Optimize route</>
+                <><Sparkles className="w-3 h-3" /> {tr("Optimize route")}</>
               )}
             </button>
           </div>
@@ -261,13 +262,13 @@ export default function MyDayPage() {
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
           <div className="text-4xl mb-2">🗺️</div>
-          <p className="text-slate-700 font-medium">No plan for today</p>
+          <p className="text-slate-700 font-medium">{tr("No plan for today")}</p>
           <p className="text-sm text-slate-500 mt-1">
-            Submit a{" "}
+            {tr("Submit a")}{" "}
             <Link href="/dashboard/tour-plans" className="text-brand-700 underline">
-              tour plan
+              {tr("tour plan")}
             </Link>{" "}
-            to line up your visits, or just check in on the go.
+            {tr("to line up your visits, or just check in on the go.")}
           </p>
         </div>
       )}
@@ -277,9 +278,9 @@ export default function MyDayPage() {
         <div className="bg-white rounded-xl border border-brand-200 shadow-sm overflow-hidden">
           <div className="p-3 border-b border-slate-100 flex items-center gap-2 bg-brand-50">
             <Navigation className="w-4 h-4 text-brand-700" />
-            <span className="text-sm font-semibold text-brand-900">AI-optimized route</span>
+            <span className="text-sm font-semibold text-brand-900">{tr("AI-optimized route")}</span>
             {routeResult.estimated_total_minutes ? (
-              <span className="ml-auto text-xs text-brand-700">
+              <span className="ms-auto text-xs text-brand-700">
                 ≈ {Math.round((routeResult.estimated_total_minutes / 60) * 10) / 10}h
               </span>
             ) : null}
@@ -320,10 +321,10 @@ export default function MyDayPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-3 border-b border-slate-100 flex items-center gap-2">
           <ClipboardList className="w-4 h-4 text-slate-500" />
-          <span className="text-sm font-semibold text-slate-700">Visits logged today ({visits.length})</span>
+          <span className="text-sm font-semibold text-slate-700">{tr("Visits logged today (")}{visits.length})</span>
         </div>
         {visits.length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-500">No visits yet today — your first check-in will show here.</div>
+          <div className="p-6 text-center text-sm text-slate-500">{tr("No visits yet today — your first check-in will show here.")}</div>
         ) : (
           <div className="divide-y divide-slate-100">
             {visits.map((v) => (
@@ -333,7 +334,7 @@ export default function MyDayPage() {
                   <div className="text-xs text-slate-500 truncate">{v.institutions?.name ?? "—"}</div>
                 </div>
                 <span className="text-xs text-slate-400 shrink-0">
-                  {v.check_in_at ? new Date(v.check_in_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
+                  {v.check_in_at ? new Date(v.check_in_at).toLocaleTimeString(locale(), { hour: "2-digit", minute: "2-digit" }) : ""}
                 </span>
               </Link>
             ))}

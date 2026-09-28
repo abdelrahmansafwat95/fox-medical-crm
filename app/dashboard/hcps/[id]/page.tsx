@@ -23,6 +23,7 @@ import {
 import EditModal, { type FieldConfig } from "@/components/EditModal";
 import ActivityFeed from "@/components/ActivityFeed";
 
+import { tr, timeAgo, locale, trf } from "@/lib/i18n";
 // ----------------- Types ------------------------------------------
 
 interface HCPDetail {
@@ -340,7 +341,7 @@ export default function HCPDetailPage() {
     return (
       <div className="max-w-3xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -348,9 +349,9 @@ export default function HCPDetailPage() {
   if (!hcp) {
     return (
       <div className="max-w-3xl mx-auto p-12 text-center">
-        <p className="text-slate-700">HCP not found.</p>
+        <p className="text-slate-700">{tr("HCP not found.")}</p>
         <Link href="/dashboard/hcps" className="text-brand-700 underline text-sm">
-          Back to HCPs
+          {tr("Back to HCPs")}
         </Link>
       </div>
     );
@@ -377,7 +378,7 @@ export default function HCPDetailPage() {
         href="/dashboard/hcps"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to HCPs
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to HCPs")}
       </Link>
 
       {/* Header */}
@@ -389,7 +390,7 @@ export default function HCPDetailPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold text-slate-900">
-                {hcp.title ?? "Dr."} {hcp.full_name}
+                {hcp.title ?? tr("Dr.")} {hcp.full_name}
               </h1>
               {hcp.code && (
                 <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
@@ -436,7 +437,7 @@ export default function HCPDetailPage() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                 >
-                  <MessageCircle className="w-3 h-3" /> WhatsApp
+                  <MessageCircle className="w-3 h-3" /> {tr("WhatsApp")}
                 </a>
               )}
               {hcp.email && (
@@ -444,7 +445,7 @@ export default function HCPDetailPage() {
                   href={`mailto:${hcp.email}`}
                   className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200"
                 >
-                  <Mail className="w-3 h-3" /> Email
+                  <Mail className="w-3 h-3" /> {tr("Email")}
                 </a>
               )}
             </div>
@@ -453,7 +454,7 @@ export default function HCPDetailPage() {
             <button
               onClick={() => setEditing(true)}
               className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-              title="Edit"
+              title={tr("Edit")}
             >
               <Pencil className="w-4 h-4" />
             </button>
@@ -467,7 +468,7 @@ export default function HCPDetailPage() {
               ) : (
                 <Sparkles className="w-3 h-3" />
               )}
-              AI Score
+              {tr("AI Score")}
             </button>
           </div>
         </div>
@@ -475,7 +476,7 @@ export default function HCPDetailPage() {
         {hcp.ai_notes && (
           <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
             <div className="font-semibold text-yellow-900 text-xs uppercase tracking-wide mb-1">
-              AI insights
+              {tr("AI insights")}
             </div>
             <div className="text-slate-700 whitespace-pre-line">{hcp.ai_notes}</div>
           </div>
@@ -484,7 +485,7 @@ export default function HCPDetailPage() {
         {hcp.notes && (
           <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm">
             <div className="font-semibold text-slate-700 text-xs uppercase tracking-wide mb-1">
-              Notes
+              {tr("Notes")}
             </div>
             <div className="text-slate-700 whitespace-pre-line">{hcp.notes}</div>
           </div>
@@ -493,30 +494,30 @@ export default function HCPDetailPage() {
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <StatCard icon={ClipboardList} value={stats.visits}         label="Visits"         cls="bg-brand-50 text-brand-700" />
-        <StatCard icon={Package}       value={stats.samplesGiven}    label="Sample units"   cls="bg-amber-50 text-amber-700" />
-        <StatCard icon={ShoppingCart}  value={stats.orders}         label="Orders"         cls="bg-emerald-50 text-emerald-700" />
-        <StatCard icon={CalendarDays}  value={stats.eventsAttended} label="Events attended" cls="bg-purple-50 text-purple-700" />
+        <StatCard icon={ClipboardList} value={stats.visits}         label={tr("Visits")}         cls="bg-brand-50 text-brand-700" />
+        <StatCard icon={Package}       value={stats.samplesGiven}    label={tr("Sample units")}   cls="bg-amber-50 text-amber-700" />
+        <StatCard icon={ShoppingCart}  value={stats.orders}         label={tr("Orders")}         cls="bg-emerald-50 text-emerald-700" />
+        <StatCard icon={CalendarDays}  value={stats.eventsAttended} label={tr("Events attended")} cls="bg-purple-50 text-purple-700" />
       </div>
 
       {/* Timeline */}
       <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
-        Activity timeline
+        {tr("Activity timeline")}
       </h2>
 
       {events.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">📋</div>
-          <p className="text-slate-700 font-medium">No activity yet</p>
+          <p className="text-slate-700 font-medium">{tr("No activity yet")}</p>
           <p className="text-sm text-slate-500 mt-1">
-            Once visits, samples, or orders happen, they&apos;ll appear here.
+            {tr("Once visits, samples, or orders happen, they'll appear here.")}
           </p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="divide-y divide-slate-100">
             {events.map((e, i) => (
-              <TimelineRow key={`${e.kind}-${i}-${e.date}`} event={e} />
+              <TimelineRow key={`${tr(e.kind)}-${i}-${e.date}`} event={e} />
             ))}
           </div>
         </div>
@@ -528,7 +529,7 @@ export default function HCPDetailPage() {
 
       <EditModal
         open={editing}
-        title="Edit HCP"
+        title={tr("Edit HCP")}
         table="hcps"
         recordId={hcp.id}
         fields={HCP_FIELDS}
@@ -579,19 +580,7 @@ function TimelineRow({ event }: { event: TimelineEvent }) {
   return null;
 }
 
-function timeAgo(iso: string) {
-  const ms = Date.now() - new Date(iso).getTime();
-  const days = Math.floor(ms / 86_400_000);
-  if (days === 0) {
-    const hrs = Math.floor(ms / 3_600_000);
-    if (hrs === 0) return `${Math.max(1, Math.floor(ms / 60_000))}m ago`;
-    return `${hrs}h ago`;
-  }
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
-  return `${Math.floor(days / 365)}y ago`;
-}
+// timeAgo: shared bilingual helper in lib/i18n
 
 function VisitRow({ v }: { v: TimelineEvent & { kind: "visit" } }) {
   return (
@@ -606,21 +595,21 @@ function VisitRow({ v }: { v: TimelineEvent & { kind: "visit" } }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-slate-900 text-sm">
-              Visit by {v.profiles?.full_name ?? "rep"}
+              {tr("Visit by")} {v.profiles?.full_name ?? "rep"}
             </span>
             {v.check_in_within_geofence === true && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
-                ✓ GPS-verified
+                {tr("✓ GPS-verified")}
               </span>
             )}
             {v.check_in_within_geofence === false && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
-                ✗ Outside geofence
+                {tr("✗ Outside geofence")}
               </span>
             )}
             {v.manager_status === "flagged" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
-                ⚠️ Flagged
+                {tr("⚠️ Flagged")}
               </span>
             )}
             {v.ai_quality_score !== null && (
@@ -631,7 +620,7 @@ function VisitRow({ v }: { v: TimelineEvent & { kind: "visit" } }) {
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
             {v.institutions?.name ?? "—"} · {v.visit_type ?? "visit"} ·{" "}
-            {v.duration_minutes !== null ? `${v.duration_minutes}m` : "—"}
+            {v.duration_minutes !== null ? trf("{n}m", { n: v.duration_minutes }) : "—"}
           </div>
           {v.ai_summary && (
             <p className="text-xs text-slate-600 mt-1 line-clamp-2 italic">
@@ -655,7 +644,7 @@ function SampleRow({ s }: { s: TimelineEvent & { kind: "sample" } }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-slate-900 text-sm">
-              Received {s.quantity} × {s.products?.brand_name ?? s.products?.name ?? "—"}
+              {tr("Received")} {s.quantity} × {s.products?.brand_name ?? s.products?.name ?? "—"}
             </span>
             {s.hcp_signature_url && (
               <a
@@ -664,13 +653,13 @@ function SampleRow({ s }: { s: TimelineEvent & { kind: "sample" } }) {
                 rel="noreferrer"
                 className="text-[10px] text-emerald-700 hover:underline"
               >
-                ✍️ signed
+                {tr("✍️ signed")}
               </a>
             )}
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
-            From {s.profiles?.full_name ?? "rep"}
-            {s.batch_number && ` · Batch ${s.batch_number}`}
+            {tr("From")} {s.profiles?.full_name ?? "rep"}
+            {s.batch_number && trf(" · Batch {b}", { b: s.batch_number })}
           </div>
         </div>
         <div className="text-xs text-slate-400 shrink-0">{timeAgo(s.date)}</div>
@@ -689,17 +678,17 @@ function OrderRow({ o }: { o: TimelineEvent & { kind: "order" } }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-slate-900 text-sm">
-              Order {o.order_number ?? "—"} ·{" "}
+              {tr("Order")} {o.order_number ?? "—"} ·{" "}
               <span className="font-bold">
                 {o.total.toLocaleString('en-US')} {o.currency}
               </span>
             </span>
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 capitalize">
-              {o.status}
+              {tr(o.status)}
             </span>
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
-            {o.items?.length ?? 0} line item{(o.items?.length ?? 0) === 1 ? "" : "s"} · placed by{" "}
+            {o.items?.length ?? 0} {tr("line item")}{(o.items?.length ?? 0) === 1 ? "" : "s"} {tr("· placed by")}{" "}
             {o.profiles?.full_name ?? "rep"}
           </div>
         </div>
@@ -719,7 +708,7 @@ function WARow({ w }: { w: TimelineEvent & { kind: "whatsapp" } }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-slate-900 text-sm">
-              WhatsApp {w.direction === "out" ? "sent" : "received"}
+              {tr("WhatsApp")} {w.direction === "out" ? "sent" : "received"}
             </span>
             <span className="text-xs text-slate-500">
               from {w.profiles?.full_name ?? "rep"}
@@ -760,7 +749,7 @@ function AlertRow({ a }: { a: TimelineEvent & { kind: "alert" } }) {
               {a.severity.toUpperCase()}
             </span>
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">Compliance alert</div>
+          <div className="text-xs text-slate-500 mt-0.5">{tr("Compliance alert")}</div>
         </div>
         <div className="text-xs text-slate-400 shrink-0">{timeAgo(a.date)}</div>
       </div>
@@ -805,11 +794,11 @@ function EventRow({ e }: { e: TimelineEvent & { kind: "event" } }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-slate-900 text-sm">
-              {verb} <span className="text-brand-700">{ev.title}</span>
+              {verb} <span className="text-brand-700">{tr(ev.title)}</span>
             </span>
             {e.is_speaker && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
-                🎤 SPEAKER
+                {tr("🎤 SPEAKER")}
               </span>
             )}
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeCls} capitalize`}>
@@ -818,8 +807,8 @@ function EventRow({ e }: { e: TimelineEvent & { kind: "event" } }) {
           </div>
           <div className="text-xs text-slate-500 mt-0.5">
             {ev.event_type.replaceAll("_", " ")} ·{" "}
-            {eventDate.toLocaleDateString("en-EG", { month: "short", day: "numeric", year: "numeric" })}
-            {ev.is_virtual ? " · Virtual" : ev.venue_name ? ` · ${ev.venue_name}` : ""}
+            {eventDate.toLocaleDateString(locale(), { month: "short", day: "numeric", year: "numeric" })}
+            {ev.is_virtual ? tr(" · Virtual") : ev.venue_name ? ` · ${ev.venue_name}` : ""}
           </div>
         </div>
         <div className="text-xs text-slate-400 shrink-0">{timeAgo(e.date)}</div>

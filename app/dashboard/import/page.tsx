@@ -20,6 +20,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
+import { tr, trf } from "@/lib/i18n";
 // =====================================================================
 // Schema definitions per import type
 // =====================================================================
@@ -487,7 +488,7 @@ export default function ImportPage() {
     return (
       <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -498,17 +499,17 @@ export default function ImportPage() {
         href="/dashboard"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to dashboard
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to dashboard")}
       </Link>
 
       <div className="flex items-center gap-3 mb-2">
         <div className="p-2 rounded-lg bg-cyan-50 text-cyan-700">
           <FileSpreadsheet className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Bulk Import</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("Bulk Import")}</h1>
       </div>
       <p className="text-slate-500 mb-6">
-        Onboard a new pharma customer in 5 minutes. Upload Excel files for HCPs, institutions, or products.
+        {tr("Onboard a new pharma customer in 5 minutes. Upload Excel files for HCPs, institutions, or products.")}
       </p>
 
       {/* Type picker */}
@@ -523,7 +524,7 @@ export default function ImportPage() {
                 setSchemaKey(s.key);
                 reset();
               }}
-              className={`p-4 rounded-xl border-2 transition text-left ${
+              className={`p-4 rounded-xl border-2 transition text-start ${
                 active
                   ? "bg-brand-50 border-brand-500 shadow-sm"
                   : "bg-white border-slate-200 hover:border-slate-300"
@@ -536,9 +537,9 @@ export default function ImportPage() {
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <div className="font-semibold text-slate-900 mt-2">{s.label}</div>
+              <div className="font-semibold text-slate-900 mt-2">{tr(s.label)}</div>
               <div className="text-xs text-slate-500 mt-0.5">
-                {s.fields.length} columns · {s.fields.filter((f) => f.required).length} required
+                {s.fields.length} {tr("columns ·")} {s.fields.filter((f) => f.required).length} required
               </div>
             </button>
           );
@@ -552,28 +553,28 @@ export default function ImportPage() {
             1
           </div>
           <div className="flex-1">
-            <div className="font-semibold text-slate-900">Download template</div>
+            <div className="font-semibold text-slate-900">{tr("Download template")}</div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Get an Excel file with the right columns + 2 example rows. Fill it in, then upload.
+              {tr("Get an Excel file with the right columns + 2 example rows. Fill it in, then upload.")}
             </p>
           </div>
           <button
             onClick={downloadTemplate}
             className="bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-2"
           >
-            <Download className="w-4 h-4" /> Template
+            <Download className="w-4 h-4" /> {tr("Template")}
           </button>
         </div>
         <details className="mt-3">
           <summary className="text-xs text-slate-500 cursor-pointer">
-            View column reference for {schema.label}
+            {tr("View column reference for")} {tr(schema.label)}
           </summary>
           <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2 text-[11px]">
             {schema.fields.map((f) => (
               <div key={f.name} className="p-2 bg-slate-50 rounded border border-slate-200">
                 <div className="font-semibold text-slate-700">
-                  {f.label}
-                  {f.required && <span className="text-red-600 ml-0.5">*</span>}
+                  {tr(f.label)}
+                  {f.required && <span className="text-red-600 ms-0.5">*</span>}
                 </div>
                 <div className="text-slate-500 mt-0.5">
                   {f.type}
@@ -595,9 +596,9 @@ export default function ImportPage() {
             2
           </div>
           <div className="flex-1">
-            <div className="font-semibold text-slate-900">Upload your file</div>
+            <div className="font-semibold text-slate-900">{tr("Upload your file")}</div>
             <p className="text-xs text-slate-500 mt-0.5">
-              .xlsx, .xls, or .csv — first sheet only. Header row required.
+              {tr(".xlsx, .xls, or .csv — first sheet only. Header row required.")}
             </p>
           </div>
         </div>
@@ -605,8 +606,8 @@ export default function ImportPage() {
         {!filename && (
           <label className="mt-4 block border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-brand-400 hover:bg-slate-50 transition">
             <Upload className="w-10 h-10 mx-auto text-slate-400 mb-2" />
-            <p className="text-sm font-medium text-slate-700">Click to choose file</p>
-            <p className="text-xs text-slate-500 mt-0.5">or drag and drop</p>
+            <p className="text-sm font-medium text-slate-700">{tr("Click to choose file")}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{tr("or drag and drop")}</p>
             <input
               ref={fileInputRef}
               type="file"
@@ -626,7 +627,7 @@ export default function ImportPage() {
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-slate-900 truncate">{filename}</div>
               <div className="text-xs text-slate-500">
-                {rows.length} rows · {validCount} ready · {errorCount} with issues
+                {rows.length} {tr("rows ·")} {validCount} {tr("ready ·")} {errorCount} {tr("with issues")}
               </div>
             </div>
             <button
@@ -634,7 +635,7 @@ export default function ImportPage() {
               disabled={importing}
               className="text-xs px-3 py-1.5 rounded text-slate-600 hover:bg-white border border-slate-300 inline-flex items-center gap-1"
             >
-              <Trash2 className="w-3 h-3" /> Clear
+              <Trash2 className="w-3 h-3" /> {tr("Clear")}
             </button>
           </div>
         )}
@@ -656,10 +657,10 @@ export default function ImportPage() {
                 3
               </div>
               <div>
-                <div className="font-semibold text-slate-900">Preview & validate</div>
+                <div className="font-semibold text-slate-900">{tr("Preview & validate")}</div>
                 <div className="text-xs text-slate-500">
-                  <span className="text-emerald-700 font-medium">{validCount}</span> ready ·{" "}
-                  <span className="text-red-700 font-medium">{errorCount}</span> need fixes
+                  <span className="text-emerald-700 font-medium">{validCount}</span> {tr("ready ·")}{" "}
+                  <span className="text-red-700 font-medium">{errorCount}</span> {tr("need fixes")}
                 </div>
               </div>
             </div>
@@ -670,11 +671,11 @@ export default function ImportPage() {
             >
               {importing ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Importing… ({progress.done}/{progress.total})
+                  <Loader2 className="w-4 h-4 animate-spin" /> {tr("Importing… (")}{progress.done}/{progress.total})
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" /> Import {validCount} rows
+                  <CheckCircle2 className="w-4 h-4" /> {tr("Import")} {validCount} rows
                 </>
               )}
             </button>
@@ -695,14 +696,14 @@ export default function ImportPage() {
             <table className="w-full text-xs">
               <thead className="bg-slate-50 sticky top-0">
                 <tr>
-                  <th className="text-left px-2 py-2 font-semibold text-slate-600 w-10">#</th>
-                  <th className="text-left px-2 py-2 font-semibold text-slate-600 w-20">Status</th>
+                  <th className="text-start px-2 py-2 font-semibold text-slate-600 w-10">#</th>
+                  <th className="text-start px-2 py-2 font-semibold text-slate-600 w-20">{tr("Status")}</th>
                   {schema.fields.slice(0, 6).map((f) => (
-                    <th key={f.name} className="text-left px-2 py-2 font-semibold text-slate-600">
-                      {f.label}
+                    <th key={f.name} className="text-start px-2 py-2 font-semibold text-slate-600">
+                      {tr(f.label)}
                     </th>
                   ))}
-                  <th className="text-left px-2 py-2 font-semibold text-slate-600">Issues</th>
+                  <th className="text-start px-2 py-2 font-semibold text-slate-600">{tr("Issues")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -717,11 +718,11 @@ export default function ImportPage() {
                     <td className="px-2 py-1.5">
                       {r.errors.length === 0 ? (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700">
-                          <CheckCircle2 className="w-3 h-3" /> Ready
+                          <CheckCircle2 className="w-3 h-3" /> {tr("Ready")}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-700">
-                          <AlertTriangle className="w-3 h-3" /> Fix
+                          <AlertTriangle className="w-3 h-3" /> {tr("Fix")}
                         </span>
                       )}
                     </td>
@@ -732,7 +733,7 @@ export default function ImportPage() {
                     ))}
                     <td className="px-2 py-1.5 text-red-700 max-w-xs">
                       {r.errors.slice(0, 2).join(" · ")}
-                      {r.errors.length > 2 && ` (+${r.errors.length - 2} more)`}
+                      {r.errors.length > 2 && trf(" (+{n} more)", { n: r.errors.length - 2 })}
                     </td>
                   </tr>
                 ))}
@@ -746,9 +747,9 @@ export default function ImportPage() {
       {result && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center">
           <div className="text-5xl mb-2">🎉</div>
-          <h2 className="font-bold text-emerald-900">Import complete</h2>
+          <h2 className="font-bold text-emerald-900">{tr("Import complete")}</h2>
           <p className="text-sm text-emerald-700 mt-1">
-            <strong>{result.ok}</strong> rows imported successfully
+            <strong>{result.ok}</strong> {tr("rows imported successfully")}
             {result.skipped > 0 && <>, {result.skipped} skipped</>}
           </p>
           <div className="mt-4 flex justify-center gap-2">
@@ -756,13 +757,13 @@ export default function ImportPage() {
               onClick={reset}
               className="px-4 py-2 bg-white border border-emerald-300 text-emerald-700 rounded-lg font-medium inline-flex items-center gap-2 hover:bg-emerald-50"
             >
-              <RefreshCw className="w-4 h-4" /> Import more
+              <RefreshCw className="w-4 h-4" /> {tr("Import more")}
             </button>
             <Link
               href={`/dashboard/${schema.key}`}
               className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700"
             >
-              View imported {schema.key}
+              {tr("View imported")} {schema.key}
             </Link>
           </div>
         </div>

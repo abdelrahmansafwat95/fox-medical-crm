@@ -9,6 +9,7 @@ import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
 import { downloadCsv } from "@/lib/csv";
 
+import { tr } from "@/lib/i18n";
 const SEGMENT_COLORS: Record<string, string> = {
   A: "bg-emerald-100 text-emerald-700",
   B: "bg-blue-100 text-blue-700",
@@ -181,7 +182,7 @@ export default function HCPsPage() {
           <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
             <Users className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">HCPs</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("HCPs")}</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -203,31 +204,31 @@ export default function HCPsPage() {
             }
             className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
           >
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> {tr("Export")}
           </button>
           {can("hcps", "create") && (
             <button
               onClick={() => setCreating(true)}
               className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
             >
-              <Plus className="w-4 h-4" /> Add HCP
+              <Plus className="w-4 h-4" /> {tr("Add HCP")}
             </button>
           )}
         </div>
       </div>
       <p className="text-slate-500 mb-6">
-        Healthcare professionals — tap any HCP to see their full activity timeline.
+        {tr("Healthcare professionals — tap any HCP to see their full activity timeline.")}
       </p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, code (D-00042), or specialty…"
-            className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
+            placeholder={tr("Search by name, code (D-00042), or specialty…")}
+            className="w-full ps-10 pe-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
       </div>
@@ -240,9 +241,9 @@ export default function HCPsPage() {
             onChange={(e) => setAssignRep(e.target.value)}
             className="text-sm p-2 border border-slate-300 rounded-lg"
           >
-            <option value="">— assign to rep —</option>
+            <option value="">{tr("— assign to rep —")}</option>
             {reps.map((r) => (
-              <option key={r.id} value={r.id}>{r.full_name ?? "Rep"}</option>
+              <option key={r.id} value={r.id}>{r.full_name ?? tr("Rep")}</option>
             ))}
           </select>
           <button
@@ -250,23 +251,23 @@ export default function HCPsPage() {
             disabled={!assignRep || assigning}
             className="text-sm bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-3 py-1.5 rounded-lg font-medium"
           >
-            {assigning ? "Assigning…" : "Assign"}
+            {assigning ? tr("Assigning…") : tr("Assign")}
           </button>
-          <button onClick={() => setSelected(new Set())} className="text-xs text-slate-600 underline ml-auto">
-            Clear
+          <button onClick={() => setSelected(new Set())} className="text-xs text-slate-600 underline ms-auto">
+            {tr("Clear")}
           </button>
         </div>
       )}
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">Loading…</div>
+          <div className="p-12 text-center text-slate-500">{tr("Loading…")}</div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-5xl mb-2">👨‍⚕️</div>
-            <p className="text-slate-700 font-medium">No HCPs yet</p>
+            <p className="text-slate-700 font-medium">{tr("No HCPs yet")}</p>
             <p className="text-sm text-slate-500 mt-1">
-              Click &ldquo;Add HCP&rdquo; to create your first one.
+              {tr("Click “Add HCP” to create your first one.")}
             </p>
           </div>
         ) : (
@@ -278,7 +279,7 @@ export default function HCPsPage() {
                     type="checkbox"
                     checked={selected.has(h.id)}
                     onChange={() => toggleSel(h.id)}
-                    className="ml-4 w-4 h-4 shrink-0"
+                    className="ms-4 w-4 h-4 shrink-0"
                   />
                 )}
                 <Link
@@ -291,7 +292,7 @@ export default function HCPsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-slate-900">
-                      {h.title ?? "Dr."} {h.full_name}
+                      {h.title ?? tr("Dr.")} {h.full_name}
                     </span>
                     {(h as { code?: string }).code && (
                       <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
@@ -305,7 +306,7 @@ export default function HCPsPage() {
                     )}
                     {h.is_kol && (
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                        KOL
+                        {tr("KOL")}
                       </span>
                     )}
                     {h.ai_score !== null && (
@@ -319,7 +320,7 @@ export default function HCPsPage() {
                   </div>
                   {h.ai_notes && (
                     <div className="mt-2 text-xs text-slate-600 bg-yellow-50 border border-yellow-200 rounded p-2 max-w-2xl">
-                      <span className="font-semibold">AI insight: </span>{h.ai_notes.split("\n")[0]}
+                      <span className="font-semibold">{tr("AI insight:")} </span>{h.ai_notes.split("\n")[0]}
                     </div>
                   )}
                 </div>
@@ -347,7 +348,7 @@ export default function HCPsPage() {
                   <button
                     onClick={(e) => openEdit(e, h)}
                     className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                    title="Edit"
+                    title={tr("Edit")}
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -357,7 +358,7 @@ export default function HCPsPage() {
                     className="text-xs px-2.5 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 disabled:bg-brand-400 inline-flex items-center gap-1"
                   >
                     <Sparkles className="w-3 h-3" />
-                    {scoringId === h.id ? "Scoring…" : "AI Score"}
+                    {scoringId === h.id ? tr("Scoring…") : tr("AI Score")}
                   </button>
                 </div>
                 </Link>
@@ -369,7 +370,7 @@ export default function HCPsPage() {
 
       <EditModal
         open={creating}
-        title="Add HCP"
+        title={tr("Add HCP")}
         table="hcps"
         fields={HCP_FIELDS}
         initialValues={{ title: "Dr.", is_active: true, is_kol: false }}
@@ -393,7 +394,7 @@ export default function HCPsPage() {
 
       <EditModal
         open={!!editing}
-        title="Edit HCP"
+        title={tr("Edit HCP")}
         table="hcps"
         recordId={editing?.id}
         fields={HCP_FIELDS}

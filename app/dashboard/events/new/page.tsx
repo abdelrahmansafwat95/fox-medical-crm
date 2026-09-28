@@ -12,6 +12,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 const EVENT_TYPES = [
   { value: "symposium", label: "Symposium" },
   { value: "dinner_meeting", label: "Dinner Meeting" },
@@ -58,11 +59,11 @@ export default function NewEventPage() {
 
   async function submit() {
     if (!form.title.trim()) {
-      setError("Event title is required.");
+      setError(tr("Event title is required."));
       return;
     }
     if (!form.starts_date || !form.starts_time) {
-      setError("Date and start time are required.");
+      setError(tr("Date and start time are required."));
       return;
     }
 
@@ -71,7 +72,7 @@ export default function NewEventPage() {
 
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
-      setError("Not authenticated.");
+      setError(tr("Not authenticated."));
       setSubmitting(false);
       return;
     }
@@ -121,7 +122,7 @@ export default function NewEventPage() {
         href="/dashboard/events"
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to events
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to events")}
       </Link>
 
       <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4 mb-4">
@@ -130,8 +131,8 @@ export default function NewEventPage() {
             <CalendarDays className="w-6 h-6 text-purple-700" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-900">New event</h1>
-            <p className="text-xs text-slate-600">Plan a CME, symposium, dinner meeting, or product launch</p>
+            <h1 className="font-bold text-slate-900">{tr("New event")}</h1>
+            <p className="text-xs text-slate-600">{tr("Plan a CME, symposium, dinner meeting, or product launch")}</p>
           </div>
         </div>
       </div>
@@ -147,20 +148,20 @@ export default function NewEventPage() {
         {/* Title */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Event title <span className="text-red-600">*</span>
+            {tr("Event title")} <span className="text-red-600">*</span>
           </label>
           <input
             type="text"
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
-            placeholder="e.g. Cardia Q3 Cardiology Symposium"
+            placeholder={tr("e.g. Cardia Q3 Cardiology Symposium")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
         </div>
 
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Title (Arabic)
+            {tr("Title (Arabic)")}
           </label>
           <input
             type="text"
@@ -174,7 +175,7 @@ export default function NewEventPage() {
         {/* Type */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Event type <span className="text-red-600">*</span>
+            {tr("Event type")} <span className="text-red-600">*</span>
           </label>
           <select
             value={form.event_type}
@@ -183,7 +184,7 @@ export default function NewEventPage() {
           >
             {EVENT_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
-                {t.label}
+                {tr(t.label)}
               </option>
             ))}
           </select>
@@ -191,12 +192,12 @@ export default function NewEventPage() {
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Description</label>
+          <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Description")}</label>
           <textarea
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             rows={2}
-            placeholder="What is this event about?"
+            placeholder={tr("What is this event about?")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
         </div>
@@ -205,7 +206,7 @@ export default function NewEventPage() {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Date <span className="text-red-600">*</span>
+              {tr("Date")} <span className="text-red-600">*</span>
             </label>
             <input
               type="date"
@@ -216,7 +217,7 @@ export default function NewEventPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Start <span className="text-red-600">*</span>
+              {tr("Start")} <span className="text-red-600">*</span>
             </label>
             <input
               type="time"
@@ -227,7 +228,7 @@ export default function NewEventPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Duration (hrs)
+              {tr("Duration (hrs)")}
             </label>
             <input
               type="number"
@@ -249,13 +250,13 @@ export default function NewEventPage() {
             onChange={(e) => update("is_virtual", e.target.checked)}
             className="w-4 h-4"
           />
-          <span className="text-slate-700">Virtual / online event</span>
+          <span className="text-slate-700">{tr("Virtual / online event")}</span>
         </label>
 
         {form.is_virtual ? (
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
-              Meeting URL
+              {tr("Meeting URL")}
             </label>
             <input
               type="url"
@@ -269,31 +270,31 @@ export default function NewEventPage() {
           <>
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">
-                Venue name
+                {tr("Venue name")}
               </label>
               <input
                 type="text"
                 value={form.venue_name}
                 onChange={(e) => update("venue_name", e.target.value)}
-                placeholder="e.g. Sheraton Heliopolis Ballroom"
+                placeholder={tr("e.g. Sheraton Heliopolis Ballroom")}
                 className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Venue address
+                  {tr("Venue address")}
                 </label>
                 <input
                   type="text"
                   value={form.venue_address}
                   onChange={(e) => update("venue_address", e.target.value)}
-                  placeholder="Street + district"
+                  placeholder={tr("Street + district")}
                   className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">City</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{tr("City")}</label>
                 <input
                   type="text"
                   value={form.city}
@@ -308,13 +309,13 @@ export default function NewEventPage() {
         {/* Product line */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Product line being promoted
+            {tr("Product line being promoted")}
           </label>
           <input
             type="text"
             value={form.product_line}
             onChange={(e) => update("product_line", e.target.value)}
-            placeholder="e.g. Cardio, Endo, Antibiotic"
+            placeholder={tr("e.g. Cardio, Endo, Antibiotic")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
         </div>
@@ -322,7 +323,7 @@ export default function NewEventPage() {
         {/* Budget */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Budget (EGP)
+            {tr("Budget (EGP)")}
           </label>
           <input
             type="number"
@@ -333,37 +334,37 @@ export default function NewEventPage() {
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
           <p className="text-[11px] text-slate-500 mt-1">
-            Used for compliance audit. Update with actual cost after the event.
+            {tr("Used for compliance audit. Update with actual cost after the event.")}
           </p>
         </div>
 
         {/* External speakers */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            External speakers
+            {tr("External speakers")}
           </label>
           <input
             type="text"
             value={form.external_speakers}
             onChange={(e) => update("external_speakers", e.target.value)}
-            placeholder="e.g. Prof. John Smith (Harvard)"
+            placeholder={tr("e.g. Prof. John Smith (Harvard)")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
           <p className="text-[11px] text-slate-500 mt-1">
-            For HCPs from your database, add them as speakers from the event detail page after creation.
+            {tr("For HCPs from your database, add them as speakers from the event detail page after creation.")}
           </p>
         </div>
 
         {/* Notes */}
         <div>
           <label className="block text-xs font-medium text-slate-700 mb-1">
-            Internal notes
+            {tr("Internal notes")}
           </label>
           <textarea
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
             rows={2}
-            placeholder="Catering, A/V, sponsor logos…"
+            placeholder={tr("Catering, A/V, sponsor logos…")}
             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
           />
         </div>
@@ -374,7 +375,7 @@ export default function NewEventPage() {
           href="/dashboard/events"
           className="px-4 py-3 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
         >
-          Cancel
+          {tr("Cancel")}
         </Link>
         <button
           onClick={submit}
@@ -386,7 +387,7 @@ export default function NewEventPage() {
           ) : (
             <CheckCircle2 className="w-4 h-4" />
           )}
-          Create event
+          {tr("Create event")}
         </button>
       </div>
     </div>

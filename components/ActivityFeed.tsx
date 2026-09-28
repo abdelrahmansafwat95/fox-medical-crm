@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { History } from "lucide-react";
 
+import { tr, timeAgo } from "@/lib/i18n";
 interface ActivityRow {
   id: string;
   actor_id: string | null;
@@ -12,16 +13,7 @@ interface ActivityRow {
   created_at: string;
 }
 
-function timeAgo(iso: string) {
-  const ms = Date.now() - new Date(iso).getTime();
-  const m = Math.round(ms / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.round(h / 24);
-  return `${d}d ago`;
-}
+// timeAgo: shared bilingual helper in lib/i18n
 
 /** Audit trail for a single record (from the activity_log table). */
 export default function ActivityFeed({ entityType, entityId }: { entityType: string; entityId: string }) {
@@ -59,7 +51,7 @@ export default function ActivityFeed({ entityType, entityId }: { entityType: str
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="p-3 border-b border-slate-100 flex items-center gap-2">
         <History className="w-4 h-4 text-slate-500" />
-        <span className="text-sm font-semibold text-slate-700">Activity</span>
+        <span className="text-sm font-semibold text-slate-700">{tr("Activity")}</span>
       </div>
       <div className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
         {rows.map((r) => (
@@ -68,7 +60,7 @@ export default function ActivityFeed({ entityType, entityId }: { entityType: str
             <div className="flex-1 min-w-0">
               <div className="text-slate-800">{r.summary ?? r.action}</div>
               <div className="text-xs text-slate-400">
-                {(r.actor_id && names[r.actor_id]) || "A user"} · {timeAgo(r.created_at)}
+                {(r.actor_id && names[r.actor_id]) || tr("A user")} · {timeAgo(r.created_at)}
               </div>
             </div>
           </div>

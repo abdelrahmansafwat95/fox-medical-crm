@@ -9,6 +9,7 @@ import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
 import { downloadCsv } from "@/lib/csv";
 
+import { tr } from "@/lib/i18n";
 const TYPE_LABELS: Record<string, string> = {
   private_clinic: "Private Clinic",
   polyclinic: "Polyclinic",
@@ -82,7 +83,7 @@ export default function InstitutionsPage() {
           <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
             <Building2 className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Institutions</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Institutions")}</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -104,38 +105,38 @@ export default function InstitutionsPage() {
             }
             className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
           >
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> {tr("Export")}
           </button>
           {can("institutions", "create") && (
             <button
               onClick={() => setCreating(true)}
               className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
             >
-              <Plus className="w-4 h-4" /> Add institution
+              <Plus className="w-4 h-4" /> {tr("Add institution")}
             </button>
           )}
         </div>
       </div>
       <p className="text-slate-500 mb-6">
-        Clinics, hospitals, pharmacies, distributors. Each has a GPS-anchored geofence.
+        {tr("Clinics, hospitals, pharmacies, distributors. Each has a GPS-anchored geofence.")}
       </p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, code (H-00042), or district…"
-            className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
+            placeholder={tr("Search by name, code (H-00042), or district…")}
+            className="w-full ps-10 pe-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
       </div>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
@@ -162,7 +163,7 @@ export default function InstitutionsPage() {
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded-lg text-blue-600 hover:bg-blue-50"
-                    title="Open in Google Maps"
+                    title={tr("Open in Google Maps")}
                   >
                     <MapPin className="w-4 h-4" />
                   </a>
@@ -170,7 +171,7 @@ export default function InstitutionsPage() {
                     <button
                       onClick={() => setEditing(i)}
                       className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                      title="Edit"
+                      title={tr("Edit")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -185,7 +186,7 @@ export default function InstitutionsPage() {
                     {i.latitude.toFixed(4)}, {i.longitude.toFixed(4)}
                   </span>
                   <span className="px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-[11px]">
-                    Geofence: {i.geofence_radius_m}m
+                    {tr("Geofence:")} {i.geofence_radius_m}m
                   </span>
                 </div>
               </div>
@@ -196,7 +197,7 @@ export default function InstitutionsPage() {
 
       <EditModal
         open={creating}
-        title="Add institution"
+        title={tr("Add institution")}
         table="institutions"
         fields={INST_FIELDS}
         initialValues={{ type: "private_clinic", is_active: true, geofence_radius_m: 100, latitude: 30.0444, longitude: 31.2357 }}
@@ -218,7 +219,7 @@ export default function InstitutionsPage() {
 
       <EditModal
         open={!!editing}
-        title="Edit institution"
+        title={tr("Edit institution")}
         table="institutions"
         recordId={editing?.id}
         fields={INST_FIELDS}

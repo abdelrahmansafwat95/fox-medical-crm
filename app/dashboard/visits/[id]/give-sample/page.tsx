@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import SignaturePad, { type SignaturePadHandle } from "@/components/SignaturePad";
 
+import { tr } from "@/lib/i18n";
 interface InventoryRow {
   id: string;
   product_id: string;
@@ -160,7 +161,7 @@ export default function GiveSamplePage() {
     return (
       <div className="max-w-md mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -168,9 +169,9 @@ export default function GiveSamplePage() {
   if (!visit) {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
-        <p className="text-slate-700">Visit not found.</p>
+        <p className="text-slate-700">{tr("Visit not found.")}</p>
         <Link href="/dashboard/visits" className="text-brand-700 underline text-sm">
-          Back to visits
+          {tr("Back to visits")}
         </Link>
       </div>
     );
@@ -183,10 +184,10 @@ export default function GiveSamplePage() {
           href={`/dashboard/visits/${visit.id}`}
           className="inline-flex items-center gap-1 text-sm text-slate-500 mb-3"
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back")}
         </Link>
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
-          You can only distribute samples during an active or completed visit.
+          {tr("You can only distribute samples during an active or completed visit.")}
         </div>
       </div>
     );
@@ -198,7 +199,7 @@ export default function GiveSamplePage() {
         href={`/dashboard/visits/${visit.id}`}
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-3"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to visit
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {tr("Back to visit")}
       </Link>
 
       {/* Header */}
@@ -208,7 +209,7 @@ export default function GiveSamplePage() {
             <Package className="w-6 h-6 text-amber-700" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-900">Give Sample</h1>
+            <h1 className="font-bold text-slate-900">{tr("Give Sample")}</h1>
             <p className="text-xs text-slate-600">
               {visit.hcps?.full_name ?? "—"} · {visit.institutions?.name ?? "—"}
             </p>
@@ -246,14 +247,14 @@ export default function GiveSamplePage() {
       {step === "pick-batch" && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-3 border-b border-slate-100 text-sm font-semibold text-slate-700">
-            Pick a product batch
+            {tr("Pick a product batch")}
           </div>
           {inventory.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-5xl mb-2">📦</div>
-              <p className="text-slate-700 font-medium">No samples in stock</p>
+              <p className="text-slate-700 font-medium">{tr("No samples in stock")}</p>
               <p className="text-xs text-slate-500 mt-1">
-                Request restock from your warehouse via the Samples page.
+                {tr("Request restock from your warehouse via the Samples page.")}
               </p>
             </div>
           ) : (
@@ -276,7 +277,7 @@ export default function GiveSamplePage() {
                       setQuantity(1);
                       setStep("pick-quantity");
                     }}
-                    className="w-full p-3 text-left hover:bg-slate-50 transition flex items-center gap-3"
+                    className="w-full p-3 text-start hover:bg-slate-50 transition flex items-center gap-3"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-slate-900">
@@ -292,11 +293,11 @@ export default function GiveSamplePage() {
                         </span>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-end shrink-0">
                       <div className="text-lg font-bold text-emerald-700">
                         {row.quantity}
                       </div>
-                      <div className="text-[10px] text-slate-500">in stock</div>
+                      <div className="text-[10px] text-slate-500">{tr("in stock")}</div>
                     </div>
                   </button>
                 );
@@ -310,17 +311,17 @@ export default function GiveSamplePage() {
       {step === "pick-quantity" && selectedBatch && (
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <div className="text-xs text-slate-500 mb-1">Selected</div>
+            <div className="text-xs text-slate-500 mb-1">{tr("Selected")}</div>
             <div className="font-semibold text-slate-900">
               {selectedBatch.products?.brand_name ?? selectedBatch.products?.name}
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
-              Batch {selectedBatch.batch_number} · {selectedBatch.quantity} in stock
+              {tr("Batch")} {selectedBatch.batch_number} · {selectedBatch.quantity} {tr("in stock")}
             </div>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <div className="text-center text-sm text-slate-700 mb-3">How many units?</div>
+            <div className="text-center text-sm text-slate-700 mb-3">{tr("How many units?")}</div>
             <div className="flex items-center justify-center gap-4">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -368,7 +369,7 @@ export default function GiveSamplePage() {
               ))}
             </div>
             <p className="text-xs text-slate-500 text-center mt-4">
-              Stock after: {selectedBatch.quantity - quantity} unit
+              {tr("Stock after:")} {selectedBatch.quantity - quantity} unit
               {selectedBatch.quantity - quantity === 1 ? "" : "s"}
             </p>
           </div>
@@ -381,13 +382,13 @@ export default function GiveSamplePage() {
               }}
               className="px-4 py-3 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
             >
-              Back
+              {tr("Back")}
             </button>
             <button
               onClick={() => setStep("sign")}
               className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              <Pen className="w-4 h-4" /> Get HCP signature
+              <Pen className="w-4 h-4" /> {tr("Get HCP signature")}
             </button>
           </div>
         </div>
@@ -397,7 +398,7 @@ export default function GiveSamplePage() {
       {step === "sign" && selectedBatch && (
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <div className="text-xs text-slate-500 mb-1">Handing over</div>
+            <div className="text-xs text-slate-500 mb-1">{tr("Handing over")}</div>
             <div className="font-semibold text-slate-900">
               {quantity} × {selectedBatch.products?.brand_name ?? selectedBatch.products?.name}
             </div>
@@ -408,11 +409,11 @@ export default function GiveSamplePage() {
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <div className="text-sm font-medium text-slate-700 mb-2">
-              Doctor&apos;s signature
+              {tr("Doctor's signature")}
             </div>
             <SignaturePad ref={sigRef} height={200} />
             <p className="text-xs text-slate-500 mt-2">
-              Hand the device to the doctor and have them sign with finger or stylus.
+              {tr("Hand the device to the doctor and have them sign with finger or stylus.")}
             </p>
           </div>
 
@@ -421,17 +422,17 @@ export default function GiveSamplePage() {
               onClick={() => setStep("pick-quantity")}
               className="px-4 py-3 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50"
             >
-              Back
+              {tr("Back")}
             </button>
             <button
               onClick={handleSubmit}
               className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg inline-flex items-center justify-center gap-2"
             >
-              <CheckCircle2 className="w-5 h-5" /> Confirm handover
+              <CheckCircle2 className="w-5 h-5" /> {tr("Confirm handover")}
             </button>
           </div>
           <p className="text-[11px] text-slate-400 text-center">
-            Signature is optional but recommended for audit compliance.
+            {tr("Signature is optional but recommended for audit compliance.")}
           </p>
         </div>
       )}
@@ -440,9 +441,9 @@ export default function GiveSamplePage() {
       {step === "submitting" && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-600 mb-3" />
-          <p className="font-medium text-slate-700">Recording handover…</p>
+          <p className="font-medium text-slate-700">{tr("Recording handover…")}</p>
           <p className="text-xs text-slate-500 mt-1">
-            Decrementing inventory, logging audit trail.
+            {tr("Decrementing inventory, logging audit trail.")}
           </p>
         </div>
       )}
@@ -451,15 +452,15 @@ export default function GiveSamplePage() {
       {step === "done" && selectedBatch && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-12 text-center">
           <div className="text-6xl mb-2">✅</div>
-          <h2 className="font-bold text-emerald-900">Sample handed over</h2>
+          <h2 className="font-bold text-emerald-900">{tr("Sample handed over")}</h2>
           <p className="text-sm text-emerald-700 mt-1">
-            {quantity} × {selectedBatch.products?.brand_name} given to{" "}
+            {quantity} × {selectedBatch.products?.brand_name} {tr("given to")}{" "}
             {visit.hcps?.full_name}
           </p>
           <p className="text-xs text-slate-500 mt-3">
             {queuedOffline
-              ? "You're offline — saved on this phone with the signature. Stock is updated when it syncs. Returning to visit…"
-              : "Inventory updated. Returning to visit…"}
+              ? tr("You're offline — saved on this phone with the signature. Stock is updated when it syncs. Returning to visit…")
+              : tr("Inventory updated. Returning to visit…")}
           </p>
         </div>
       )}

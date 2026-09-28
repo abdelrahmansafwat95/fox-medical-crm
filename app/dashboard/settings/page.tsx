@@ -7,6 +7,7 @@ import { usePushNotifications } from "@/lib/usePushNotifications";
 import { useRole } from "@/lib/roles";
 import { seedDemoData } from "@/lib/demoSeed";
 
+import { tr } from "@/lib/i18n";
 export default function SettingsPage() {
   const [profile, setProfile] = useState<{
     full_name: string;
@@ -49,7 +50,7 @@ export default function SettingsPage() {
   }
 
   async function loadDemo() {
-    if (!confirm("Load a demo dataset (8 institutions, 20 HCPs, 8 products, ~24 visits)? This adds records to your database.")) return;
+    if (!confirm(tr("Load a demo dataset (8 institutions, 20 HCPs, 8 products, ~24 visits)? This adds records to your database."))) return;
     setSeeding(true);
     setSeedMsg(null);
     try {
@@ -109,49 +110,49 @@ export default function SettingsPage() {
         <div className="p-2 rounded-lg bg-slate-100 text-slate-700">
           <Settings className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("Settings")}</h1>
       </div>
-      <p className="text-slate-500 mb-4">Your profile and notification preferences.</p>
+      <p className="text-slate-500 mb-4">{tr("Your profile and notification preferences.")}</p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <User className="w-4 h-4 text-slate-500" />
-          <h2 className="font-semibold text-slate-900">Profile</h2>
+          <h2 className="font-semibold text-slate-900">{tr("Profile")}</h2>
         </div>
         <div className="space-y-3">
-          <Field label="Email" value={email} disabled />
+          <Field label={tr("Email")} value={email} disabled />
           <Field
-            label="Full name"
+            label={tr("Full name")}
             value={profile.full_name}
             onChange={(v) => setProfile({ ...profile, full_name: v })}
           />
           <Field
-            label="Full name (Arabic)"
+            label={tr("Full name (Arabic)")}
             value={profile.full_name_ar}
             onChange={(v) => setProfile({ ...profile, full_name_ar: v })}
             dir="rtl"
           />
           <Field
-            label="Phone"
+            label={tr("Phone")}
             value={profile.phone}
             onChange={(v) => setProfile({ ...profile, phone: v })}
           />
           <Field
-            label="Product line"
+            label={tr("Product line")}
             value={profile.product_line}
             onChange={(v) => setProfile({ ...profile, product_line: v })}
-            placeholder="e.g. Cardio-Metabolic"
+            placeholder={tr("e.g. Cardio-Metabolic")}
           />
           <button
             onClick={save}
             disabled={saving}
             className="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-5 py-2 rounded-lg inline-flex items-center justify-center gap-2"
           >
-            {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Save"}
+            {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> {tr("Saving…")}</> : tr("Save")}
           </button>
           {savedAt && (
-            <span className="text-xs text-emerald-700 inline-flex items-center gap-1 ml-2">
-              <Check className="w-3 h-3" /> Saved
+            <span className="text-xs text-emerald-700 inline-flex items-center gap-1 ms-2">
+              <Check className="w-3 h-3" /> {tr("Saved")}
             </span>
           )}
         </div>
@@ -160,28 +161,28 @@ export default function SettingsPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-3">
           <BellRing className="w-4 h-4 text-slate-500" />
-          <h2 className="font-semibold text-slate-900">Push notifications</h2>
+          <h2 className="font-semibold text-slate-900">{tr("Push notifications")}</h2>
         </div>
         {!push.supported ? (
-          <p className="text-sm text-slate-500">Your browser doesn&apos;t support push notifications.</p>
+          <p className="text-sm text-slate-500">{tr("Your browser doesn't support push notifications.")}</p>
         ) : push.subscribed ? (
           <div>
-            <p className="text-sm text-emerald-700 mb-2">✓ Push notifications enabled on this device.</p>
+            <p className="text-sm text-emerald-700 mb-2">{tr("✓ Push notifications enabled on this device.")}</p>
             <button
               onClick={() => push.unsubscribe()}
               className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg"
             >
-              Disable
+              {tr("Disable")}
             </button>
           </div>
         ) : (
           <div>
-            <p className="text-sm text-slate-600 mb-2">Get notified about flagged visits, approvals, and reminders.</p>
+            <p className="text-sm text-slate-600 mb-2">{tr("Get notified about flagged visits, approvals, and reminders.")}</p>
             <button
               onClick={() => push.subscribe()}
               className="text-sm bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-medium"
             >
-              Enable push notifications
+              {tr("Enable push notifications")}
             </button>
           </div>
         )}
@@ -190,21 +191,21 @@ export default function SettingsPage() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mt-4">
         <div className="flex items-center gap-2 mb-3">
           <Lock className="w-4 h-4 text-slate-500" />
-          <h2 className="font-semibold text-slate-900">Change password</h2>
+          <h2 className="font-semibold text-slate-900">{tr("Change password")}</h2>
         </div>
         <div className="space-y-3 max-w-sm">
           <input
             type="password"
             value={newPass}
             onChange={(e) => setNewPass(e.target.value)}
-            placeholder="New password"
+            placeholder={tr("New password")}
             className="w-full p-2 border border-slate-300 rounded-lg text-sm"
           />
           <input
             type="password"
             value={confirmPass}
             onChange={(e) => setConfirmPass(e.target.value)}
-            placeholder="Confirm new password"
+            placeholder={tr("Confirm new password")}
             className="w-full p-2 border border-slate-300 rounded-lg text-sm"
           />
           <div className="flex items-center gap-2">
@@ -213,7 +214,7 @@ export default function SettingsPage() {
               disabled={pwSaving || !newPass}
               className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-5 py-2 rounded-lg inline-flex items-center gap-2 text-sm"
             >
-              {pwSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating…</> : "Update password"}
+              {pwSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> {tr("Updating…")}</> : tr("Update password")}
             </button>
             {pwMsg && <span className="text-xs text-slate-600">{pwMsg}</span>}
           </div>
@@ -224,11 +225,10 @@ export default function SettingsPage() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mt-4">
           <div className="flex items-center gap-2 mb-3">
             <Database className="w-4 h-4 text-slate-500" />
-            <h2 className="font-semibold text-slate-900">Demo data</h2>
+            <h2 className="font-semibold text-slate-900">{tr("Demo data")}</h2>
           </div>
           <p className="text-sm text-slate-600 mb-3">
-            Populate this instance with realistic sample institutions, HCPs, products, and
-            visits so you can explore or demo the app on a fresh database.
+            {tr("Populate this instance with realistic sample institutions, HCPs, products, and visits so you can explore or demo the app on a fresh database.")}
           </p>
           <button
             onClick={loadDemo}
@@ -237,10 +237,10 @@ export default function SettingsPage() {
           >
             {seeding ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+                <Loader2 className="w-4 h-4 animate-spin" /> {tr("Loading…")}
               </>
             ) : (
-              "Load demo data"
+              tr("Load demo data")
             )}
           </button>
           {seedMsg && <p className="text-xs text-slate-600 mt-2">{seedMsg}</p>}

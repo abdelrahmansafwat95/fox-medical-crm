@@ -4,6 +4,7 @@ import { useState } from "react";
 import { trustBadgeColor } from "@/lib/gpsTrust";
 import { Shield, ChevronDown, ChevronUp } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface TrustSignals {
   accuracy_suspicious?: boolean;
   accuracy_value?: number;
@@ -33,7 +34,7 @@ export default function TrustBadge({ score, signals, variant = "pill" }: Props) 
     if (variant === "pill") return null;
     return (
       <div className="rounded-lg p-3 bg-slate-50 border border-slate-200 text-sm text-slate-600">
-        Trust score not yet calculated for this visit.
+        {tr("Trust score not yet calculated for this visit.")}
       </div>
     );
   }
@@ -75,7 +76,7 @@ export default function TrustBadge({ score, signals, variant = "pill" }: Props) 
         title={badge.label + (flags.length ? ` — ${flags.join("; ")}` : "")}
       >
         <Shield className="w-3 h-3" />
-        Trust: {score}
+        {tr("Trust:")} {score}
       </span>
     );
   }
@@ -86,12 +87,12 @@ export default function TrustBadge({ score, signals, variant = "pill" }: Props) 
       <div className="flex items-center gap-2">
         <Shield className="w-4 h-4" />
         <span className="font-semibold">
-          GPS Trust: {score}/100 — {badge.label}
+          {tr("GPS Trust:")} {score}/100 — {tr(badge.label)}
         </span>
         {flags.length > 0 && (
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="ml-auto text-xs underline opacity-80 hover:opacity-100 inline-flex items-center gap-1"
+            className="ms-auto text-xs underline opacity-80 hover:opacity-100 inline-flex items-center gap-1"
           >
             {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             {flags.length} flag{flags.length === 1 ? "" : "s"}
@@ -110,7 +111,7 @@ export default function TrustBadge({ score, signals, variant = "pill" }: Props) 
       )}
       {flags.length === 0 && score >= 80 && (
         <p className="mt-1 text-xs opacity-80">
-          All GPS signals look healthy. ✓
+          {tr("All GPS signals look healthy. ✓")}
         </p>
       )}
     </div>

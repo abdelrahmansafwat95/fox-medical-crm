@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CloudOff, RefreshCw, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { clearFailed, failedItems, flushQueue, queuedLabels, type FailedItem } from "@/lib/offlineQueue";
 
+import { tr, locale } from "@/lib/i18n";
 export default function OfflineStatus() {
   const [offline, setOffline] = useState(false);
   const [waiting, setWaiting] = useState<string[]>([]);
@@ -51,27 +52,27 @@ export default function OfflineStatus() {
           <div className="flex items-center gap-3 flex-wrap">
             <CloudOff className="w-4 h-4 shrink-0" />
             <span className="flex-1">
-              {offline ? "You're offline. Keep working — everything you save stays on this phone and syncs when the signal is back." : "Back online."}
+              {offline ? tr("You're offline. Keep working — everything you save stays on this phone and syncs when the signal is back.") : tr("Back online.")}
               {waiting.length > 0 && (
-                <button onClick={() => setOpen((o) => !o)} className="ml-1 font-semibold underline underline-offset-2">
-                  {waiting.length} {waiting.length === 1 ? "item" : "items"} waiting to sync
+                <button onClick={() => setOpen((o) => !o)} className="ms-1 font-semibold underline underline-offset-2">
+                  {waiting.length} {waiting.length === 1 ? "item" : "items"} {tr("waiting to sync")}
                 </button>
               )}
             </span>
             {!offline && waiting.length > 0 && (
               <button onClick={sync} disabled={syncing} className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 text-white px-3 py-1.5 text-xs font-semibold disabled:opacity-60">
-                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} /> Sync now
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} /> {tr("Sync now")}
               </button>
             )}
           </div>
           {open && waiting.length > 0 && (
-            <ul className="mt-2 ml-7 list-disc text-xs opacity-80">{waiting.map((w, i) => <li key={i}>{w}</li>)}</ul>
+            <ul className="mt-2 ms-7 list-disc text-xs opacity-80">{waiting.map((w, i) => <li key={i}>{w}</li>)}</ul>
           )}
         </div>
       )}
       {justSynced > 0 && (
         <div className="rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-900 dark:bg-cyan-950/40 dark:border-cyan-800 dark:text-cyan-200 px-4 py-2.5 text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" /> Synced {justSynced} saved {justSynced === 1 ? "item" : "items"}.
+          <CheckCircle2 className="w-4 h-4" /> {tr("Synced")} {justSynced} saved {justSynced === 1 ? "item" : "items"}.
         </div>
       )}
       {failed.length > 0 && (
@@ -79,14 +80,14 @@ export default function OfflineStatus() {
           <div className="flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold">{failed.length === 1 ? "1 saved item could not be synced" : `${failed.length} saved items could not be synced`} — please enter again or ask your manager:</p>
-              <ul className="mt-1 list-disc ml-4 text-xs">
+              <p className="font-semibold">{failed.length === 1 ? tr("1 saved item could not be synced") : `${failed.length} saved items could not be synced`} {tr("— please enter again or ask your manager:")}</p>
+              <ul className="mt-1 list-disc ms-4 text-xs">
                 {failed.map((f) => (
-                  <li key={f.id}>{f.label} ({new Date(f.created_at).toLocaleString("en-GB")}): {humanError(f.error)}</li>
+                  <li key={f.id}>{tr(f.label)} ({new Date(f.created_at).toLocaleString(locale())}): {humanError(f.error)}</li>
                 ))}
               </ul>
             </div>
-            <button onClick={() => clearFailed()} aria-label="Dismiss" className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/40"><X className="w-4 h-4" /></button>
+            <button onClick={() => clearFailed()} aria-label={tr("Dismiss")} className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/40"><X className="w-4 h-4" /></button>
           </div>
         </div>
       )}

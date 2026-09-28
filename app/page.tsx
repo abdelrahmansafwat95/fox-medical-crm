@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+import { tr } from "@/lib/i18n";
 export default function HomePage() {
   const router = useRouter();
 
@@ -23,7 +24,7 @@ export default function HomePage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="text-5xl mb-3">🦊💊</div>
-        <p className="text-slate-500">Loading FoxSystems Medical…</p>
+        <p className="text-slate-500">{tr("Loading FoxSystems Medical…")}</p>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Eraser } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 export interface SignaturePadHandle {
   /** Returns base64 data URL or null if blank */
   toDataURL: () => string | null;
@@ -124,15 +125,15 @@ const SignaturePad = forwardRef<SignaturePadHandle, Props>(function SignaturePad
       />
       {!hasDrawnRef.current && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-sm text-slate-400">Sign here</span>
+          <span className="text-sm text-slate-400">{tr("Sign here")}</span>
         </div>
       )}
       <button
         type="button"
         onClick={clear}
-        className="absolute top-2 right-2 text-xs px-2 py-1 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 inline-flex items-center gap-1"
+        className="absolute top-2 end-2 text-xs px-2 py-1 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 inline-flex items-center gap-1"
       >
-        <Eraser className="w-3 h-3" /> Clear
+        <Eraser className="w-3 h-3" /> {tr("Clear")}
       </button>
     </div>
   );

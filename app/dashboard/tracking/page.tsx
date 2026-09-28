@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRequirePermission } from "@/lib/permissions";
 import { MapPin, Users, RefreshCw } from "lucide-react";
 import maplibregl, { type StyleSpecification } from "maplibre-gl";
+import { tr } from "@/lib/i18n";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 interface RepLatest {
@@ -192,7 +193,7 @@ export default function LiveTrackingPage() {
   }, [checking]);
 
   if (checking) {
-    return <div className="max-w-7xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
+    return <div className="max-w-7xl mx-auto p-12 text-center text-slate-500">{tr("Loading…")}</div>;
   }
 
   return (
@@ -203,22 +204,22 @@ export default function LiveTrackingPage() {
             <MapPin className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Live Tracking</h1>
-            <p className="text-xs text-slate-500">Real-time field force locations · auto-refreshes every 60s</p>
+            <h1 className="text-2xl font-bold text-slate-900">{tr("Live Tracking")}</h1>
+            <p className="text-xs text-slate-500">{tr("Real-time field force locations · auto-refreshes every 60s")}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500" /> Active (&lt;5m)
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 ml-3" /> Idle
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-400 ml-3" /> Stale
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500" /> {tr("Active (<5m)")}
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 ms-3" /> {tr("Idle")}
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-400 ms-3" /> {tr("Stale")}
           </div>
           <button
             onClick={loadLocations}
             disabled={loading}
             className="text-xs px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1"
           >
-            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> {tr("Refresh")}
           </button>
         </div>
       </div>
@@ -243,12 +244,12 @@ export default function LiveTrackingPage() {
           <div className="lg:col-span-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div className="p-3 border-b border-slate-100 flex items-center gap-2">
               <Users className="w-4 h-4 text-slate-500" />
-              <span className="font-semibold text-sm">Reps online ({reps.length})</span>
+              <span className="font-semibold text-sm">{tr("Reps online (")}{reps.length})</span>
             </div>
             <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
               {reps.length === 0 ? (
                 <div className="p-6 text-center text-sm text-slate-500">
-                  No active reps in the last 24h.
+                  {tr("No active reps in the last 24h.")}
                 </div>
               ) : (
                 reps.map((r) => {
@@ -269,7 +270,7 @@ export default function LiveTrackingPage() {
                     >
                       <div className="font-medium text-slate-900">{r.rep_name}</div>
                       <div className="text-xs text-slate-500 mt-0.5">
-                        {minutesAgo}m ago{" "}
+                        {minutesAgo}{tr("m ago")}{" "}
                         {r.battery_level !== null && `· 🔋 ${r.battery_level}%`}
                       </div>
                     </div>

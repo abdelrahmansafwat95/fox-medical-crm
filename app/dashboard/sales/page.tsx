@@ -12,6 +12,7 @@ import { exportToExcel } from "@/lib/export";
 import { isManager, useRole } from "@/lib/roles";
 import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet, LineChart, Loader2, Presentation, Trash2, Upload, X } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface VsRow { dimension: "product" | "customer"; key_id: string | null; label: string; units: number; value: number; verified_calls: number; value_per_call: number | null }
 interface Insight { product_id: string; product_name: string; sessions: number; doctors: number; avg_seconds: number; slides: { title: string; position: number; avg_seconds: number; views: number }[] }
 interface Named { id: string; name: string }
@@ -83,8 +84,8 @@ export default function SalesPage() {
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-cyan-50 text-cyan-700"><LineChart className="w-6 h-6" /></div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Sales vs Calls</h1>
-            <p className="text-sm text-slate-500">Imported sales next to the GPS-verified calls that supported them.</p>
+            <h1 className="text-2xl font-bold text-slate-900">{tr("Sales vs Calls")}</h1>
+            <p className="text-sm text-slate-500">{tr("Imported sales next to the GPS-verified calls that supported them.")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap text-sm">
@@ -93,7 +94,7 @@ export default function SalesPage() {
           <input type="month" value={to} onChange={(e) => setTo(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
           {manager && (
             <button onClick={() => setImporting(true)} className="bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-lg inline-flex items-center gap-2 font-medium">
-              <Upload className="w-4 h-4" /> Import sales
+              <Upload className="w-4 h-4" /> {tr("Import sales")}
             </button>
           )}
         </div>
@@ -109,25 +110,25 @@ export default function SalesPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("Loading…")}</div>
       ) : rows.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          No sales imported for these months yet.{manager && " Use “Import sales” to upload a distributor or pharmacy sales file."}
+          {tr("No sales imported for these months yet.")}{manager && tr(" Use “Import sales” to upload a distributor or pharmacy sales file.")}
         </div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-4">
-          <VsTable title="By product" note="Calls = verified visits where the product was detailed" rows={products} max={maxP} />
-          <VsTable title="By customer" note="Calls = verified visits at that institution" rows={customers.slice(0, 25)} max={maxC} />
+          <VsTable title={tr("By product")} note="Calls = verified visits where the product was detailed" rows={products} max={maxP} />
+          <VsTable title={tr("By customer")} note="Calls = verified visits at that institution" rows={customers.slice(0, 25)} max={maxC} />
         </div>
       )}
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-1">
           <Presentation className="w-5 h-5 text-brand-600" />
-          <h2 className="font-semibold text-slate-900">E-detailing: what doctors spent time on</h2>
+          <h2 className="font-semibold text-slate-900">{tr("E-detailing: what doctors spent time on")}</h2>
         </div>
-        <p className="text-xs text-slate-500 mb-3">Average seconds per slide across all detailing sessions in the period. Slides doctors skip are the ones to rework.</p>
-        {insights.length === 0 ? <p className="text-sm text-slate-500">No detailing sessions in this period.</p> : (
+        <p className="text-xs text-slate-500 mb-3">{tr("Average seconds per slide across all detailing sessions in the period. Slides doctors skip are the ones to rework.")}</p>
+        {insights.length === 0 ? <p className="text-sm text-slate-500">{tr("No detailing sessions in this period.")}</p> : (
           <div className="grid md:grid-cols-2 gap-4">
             {insights.map((p) => {
               const top = Math.max(1, ...p.slides.map((s) => s.avg_seconds));
@@ -135,12 +136,12 @@ export default function SalesPage() {
                 <div key={p.product_id} className="border border-slate-200 rounded-lg p-3">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="font-semibold text-slate-900">{p.product_name}</span>
-                    <span className="text-xs text-slate-500">{p.sessions} sessions · {p.doctors} doctors · avg {fmt(p.avg_seconds)}s</span>
+                    <span className="text-xs text-slate-500">{p.sessions} {tr("sessions ·")} {p.doctors} {tr("doctors · avg")} {fmt(p.avg_seconds)}s</span>
                   </div>
                   <div className="mt-2 space-y-1.5">
                     {p.slides.map((s) => (
                       <div key={s.position} className="text-xs">
-                        <div className="flex justify-between text-slate-600"><span>{s.position}. {s.title}</span><span>{s.avg_seconds}s</span></div>
+                        <div className="flex justify-between text-slate-600"><span>{s.position}. {tr(s.title)}</span><span>{s.avg_seconds}s</span></div>
                         <div className="h-1.5 bg-slate-100 rounded"><div className="h-1.5 rounded bg-brand-500" style={{ width: `${(100 * s.avg_seconds) / top}%` }} /></div>
                       </div>
                     ))}
@@ -163,21 +164,21 @@ function VsTable({ title, note, rows, max }: { title: string; note: string; rows
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold text-slate-900">{title}</h2>
         <button onClick={() => exportToExcel(rows.map((r) => ({ Name: r.label, Units: r.units, "Value (EGP)": r.value, "Verified calls": r.verified_calls, "Value per call": r.value_per_call ?? "" })), `sales-${title.replace(/\s+/g, "-").toLowerCase()}`)}
-          className="text-xs text-brand-700 inline-flex items-center gap-1 hover:underline"><Download className="w-3.5 h-3.5" /> Excel</button>
+          className="text-xs text-brand-700 inline-flex items-center gap-1 hover:underline"><Download className="w-3.5 h-3.5" /> {tr("Excel")}</button>
       </div>
       <p className="text-xs text-slate-500 mb-2">{note}</p>
       <table className="w-full text-sm">
-        <thead className="text-xs text-slate-500"><tr><th className="text-left py-1">Name</th><th className="text-right py-1">Value</th><th className="text-right py-1">Calls</th><th className="text-right py-1">Value / call</th></tr></thead>
+        <thead className="text-xs text-slate-500"><tr><th className="text-start py-1">{tr("Name")}</th><th className="text-end py-1">{tr("Value")}</th><th className="text-end py-1">{tr("Calls")}</th><th className="text-end py-1">{tr("Value / call")}</th></tr></thead>
         <tbody className="divide-y divide-slate-100">
           {rows.map((r) => (
             <tr key={`${r.dimension}-${r.key_id ?? r.label}`}>
-              <td className="py-1.5 pr-2">
-                <div className="text-slate-900">{r.label}</div>
+              <td className="py-1.5 pe-2">
+                <div className="text-slate-900">{tr(r.label)}</div>
                 <div className="h-1 bg-slate-100 rounded mt-1"><div className="h-1 rounded bg-cyan-500" style={{ width: `${(100 * Number(r.value)) / max}%` }} /></div>
               </td>
-              <td className="py-1.5 text-right whitespace-nowrap">{fmt(r.value)}</td>
-              <td className={`py-1.5 text-right ${r.verified_calls === 0 ? "text-amber-600 font-semibold" : ""}`}>{r.verified_calls}</td>
-              <td className="py-1.5 text-right whitespace-nowrap">{fmt(r.value_per_call)}</td>
+              <td className="py-1.5 text-end whitespace-nowrap">{fmt(r.value)}</td>
+              <td className={`py-1.5 text-end ${r.verified_calls === 0 ? "text-amber-600 font-semibold" : ""}`}>{r.verified_calls}</td>
+              <td className="py-1.5 text-end whitespace-nowrap">{fmt(r.value_per_call)}</td>
             </tr>
           ))}
         </tbody>
@@ -218,7 +219,7 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
     setError(null);
     const wb = XLSX.read(await f.arrayBuffer(), { cellDates: false });
     const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0]], { defval: "" });
-    if (!data.length) { setError("The first sheet is empty."); return; }
+    if (!data.length) { setError(tr("The first sheet is empty.")); return; }
     const hs = Object.keys(data[0]);
     const guess = { ...map };
     for (const fd of FIELDS) guess[fd.key] = hs.find((h) => fd.hints.some((k) => norm(h).includes(k))) ?? "";
@@ -263,7 +264,7 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
   }
 
   async function undo(batch: string) {
-    if (!confirm("Remove every row from this import?")) return;
+    if (!confirm(tr("Remove every row from this import?"))) return;
     await supabase.from("sales_data").delete().eq("batch_id", batch);
     setBatches((b) => b.filter((x) => x.batch_id !== batch));
   }
@@ -282,27 +283,27 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
       <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 p-4 border-b border-slate-200">
           <FileSpreadsheet className="w-5 h-5 text-brand-600" />
-          <h2 className="font-semibold text-slate-900 flex-1">Import sales</h2>
+          <h2 className="font-semibold text-slate-900 flex-1">{tr("Import sales")}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-slate-400" /></button>
         </div>
         <div className="p-4 overflow-y-auto flex-1 space-y-4 text-sm">
           {!sheet ? (
             <>
-              <p className="text-slate-600">Upload the Excel or CSV file you get from your distributor or pharmacy chains. Any column layout works — you match the columns on the next step, and nothing is saved until you check the preview.</p>
+              <p className="text-slate-600">{tr("Upload the Excel or CSV file you get from your distributor or pharmacy chains. Any column layout works — you match the columns on the next step, and nothing is saved until you check the preview.")}</p>
               <div className="flex gap-2 flex-wrap">
                 <label className="bg-brand-600 hover:bg-brand-700 text-white rounded-lg px-4 py-2.5 font-medium inline-flex items-center gap-2 cursor-pointer">
-                  <Upload className="w-4 h-4" /> Choose file
+                  <Upload className="w-4 h-4" /> {tr("Choose file")}
                   <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => e.target.files?.[0] && readFile(e.target.files[0])} />
                 </label>
-                <button onClick={template} className="border border-slate-300 rounded-lg px-4 py-2.5 inline-flex items-center gap-2 hover:bg-slate-50"><Download className="w-4 h-4" /> Template</button>
+                <button onClick={template} className="border border-slate-300 rounded-lg px-4 py-2.5 inline-flex items-center gap-2 hover:bg-slate-50"><Download className="w-4 h-4" /> {tr("Template")}</button>
               </div>
               {batches.length > 0 && (
                 <div>
-                  <div className="font-semibold text-slate-800 mb-1">Recent imports</div>
+                  <div className="font-semibold text-slate-800 mb-1">{tr("Recent imports")}</div>
                   {batches.map((b) => (
                     <div key={b.batch_id} className="flex items-center justify-between border-b border-slate-100 py-1.5">
-                      <span>{b.source ?? "Import"} <span className="text-slate-500">· {b.n}{b.n >= 2000 ? "+" : ""} rows</span></span>
-                      <button onClick={() => undo(b.batch_id)} className="text-xs text-red-600 inline-flex items-center gap-1 hover:underline"><Trash2 className="w-3.5 h-3.5" /> Undo</button>
+                      <span>{b.source ?? tr("Import")} <span className="text-slate-500">· {b.n}{b.n >= 2000 ? "+" : ""} rows</span></span>
+                      <button onClick={() => undo(b.batch_id)} className="text-xs text-red-600 inline-flex items-center gap-1 hover:underline"><Trash2 className="w-3.5 h-3.5" /> {tr("Undo")}</button>
                     </div>
                   ))}
                 </div>
@@ -310,10 +311,10 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
             </>
           ) : (
             <>
-              <div className="font-medium text-slate-800">{fileName} — {sheet.length} rows. Match the columns:</div>
+              <div className="font-medium text-slate-800">{fileName} — {sheet.length} {tr("rows. Match the columns:")}</div>
               <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-2">
                 {FIELDS.map((fd) => (
-                  <label key={fd.key} className="text-xs text-slate-600">{fd.label}
+                  <label key={fd.key} className="text-xs text-slate-600">{tr(fd.label)}
                     <select value={map[fd.key]} onChange={(e) => setMap({ ...map, [fd.key]: e.target.value })} className="mt-1 w-full border border-slate-300 rounded px-2 py-1.5 text-sm">
                       <option value="">—</option>
                       {headers.map((h) => <option key={h} value={h}>{h}</option>)}
@@ -323,37 +324,37 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
               </div>
               <div className="flex gap-4 text-xs">
                 <span className="inline-flex items-center gap-1 text-cyan-700"><CheckCircle2 className="w-3.5 h-3.5" /> {good.length} ready</span>
-                <span className="text-slate-600">{good.filter((r) => r.product_id).length} matched to a product · {good.filter((r) => r.institution_id).length} to a customer</span>
-                {parsed.length - good.length > 0 && <span className="inline-flex items-center gap-1 text-amber-700"><AlertTriangle className="w-3.5 h-3.5" /> {parsed.length - good.length} will be skipped</span>}
+                <span className="text-slate-600">{good.filter((r) => r.product_id).length} {tr("matched to a product ·")} {good.filter((r) => r.institution_id).length} {tr("to a customer")}</span>
+                {parsed.length - good.length > 0 && <span className="inline-flex items-center gap-1 text-amber-700"><AlertTriangle className="w-3.5 h-3.5" /> {parsed.length - good.length} {tr("will be skipped")}</span>}
               </div>
               <div className="border border-slate-200 rounded-lg overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-slate-50 text-slate-600"><tr><th className="text-left p-2">Month</th><th className="text-left p-2">Product</th><th className="text-left p-2">Customer</th><th className="text-right p-2">Units</th><th className="text-right p-2">Value</th><th className="text-left p-2">Check</th></tr></thead>
+                  <thead className="bg-slate-50 text-slate-600"><tr><th className="text-start p-2">{tr("Month")}</th><th className="text-start p-2">{tr("Product")}</th><th className="text-start p-2">{tr("Customer")}</th><th className="text-end p-2">{tr("Units")}</th><th className="text-end p-2">{tr("Value")}</th><th className="text-start p-2">{tr("Check")}</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
                     {parsed.slice(0, 12).map((r, i) => (
                       <tr key={i} className={r.problem ? "bg-amber-50" : ""}>
                         <td className="p-2">{r.month ?? "?"}</td>
-                        <td className="p-2">{r.product}{r.product && !r.product_id && <span className="text-slate-400"> (new name)</span>}</td>
-                        <td className="p-2">{r.customer}{r.customer && !r.institution_id && <span className="text-slate-400"> (not in CRM)</span>}</td>
-                        <td className="p-2 text-right">{fmt(r.units)}</td>
-                        <td className="p-2 text-right">{fmt(r.value)}</td>
+                        <td className="p-2">{r.product}{r.product && !r.product_id && <span className="text-slate-400"> {tr("(new name)")}</span>}</td>
+                        <td className="p-2">{r.customer}{r.customer && !r.institution_id && <span className="text-slate-400"> {tr("(not in CRM)")}</span>}</td>
+                        <td className="p-2 text-end">{fmt(r.units)}</td>
+                        <td className="p-2 text-end">{fmt(r.value)}</td>
                         <td className="p-2">{r.problem ?? "ok"}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              {parsed.length > 12 && <p className="text-xs text-slate-500">Showing the first 12 rows.</p>}
+              {parsed.length > 12 && <p className="text-xs text-slate-500">{tr("Showing the first 12 rows.")}</p>}
             </>
           )}
           {error && <p className="text-red-600">{error}</p>}
         </div>
         {sheet && (
           <div className="p-4 border-t border-slate-200 flex gap-2">
-            <button onClick={() => setSheet(null)} className="border border-slate-300 rounded-lg px-4 py-2">Back</button>
+            <button onClick={() => setSheet(null)} className="border border-slate-300 rounded-lg px-4 py-2">{tr("Back")}</button>
             <button onClick={save} disabled={saving || !good.length || !map.month || !map.product}
               className="flex-1 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 text-white rounded-lg py-2 font-medium inline-flex items-center justify-center gap-2">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} Import {good.length} rows
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} {tr("Import")} {good.length} rows
             </button>
           </div>
         )}

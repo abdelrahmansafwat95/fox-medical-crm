@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Users, AlertTriangle } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface CoverageRow {
   id: string;
   full_name: string;
@@ -58,17 +59,17 @@ export default function CoveragePage() {
         <div className="p-2 rounded-lg bg-brand-50 text-brand-700">
           <Users className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">HCP Coverage</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("HCP Coverage")}</h1>
       </div>
       <p className="text-slate-500 mb-4">
-        Last visit per HCP. Uncovered HCPs are red flags.
+        {tr("Last visit per HCP. Uncovered HCPs are red flags.")}
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <Stat label="Total HCPs" value={stats.total} />
-        <Stat label="Covered (90d)" value={stats.covered} cls="text-emerald-700" />
-        <Stat label="Uncovered (>30d)" value={stats.uncovered} cls="text-red-700" />
-        <Stat label="KOL + Segment A" value={stats.kolACoverage} cls="text-purple-700" />
+        <Stat label={tr("Total HCPs")} value={stats.total} />
+        <Stat label={tr("Covered (90d)")} value={stats.covered} cls="text-emerald-700" />
+        <Stat label={tr("Uncovered (>30d)")} value={stats.uncovered} cls="text-red-700" />
+        <Stat label={tr("KOL + Segment A")} value={stats.kolACoverage} cls="text-purple-700" />
       </div>
 
       <div className="flex gap-2 mb-4">
@@ -82,27 +83,27 @@ export default function CoveragePage() {
                 : "bg-white border border-slate-200 text-slate-700"
             }`}
           >
-            {f === "all" ? "All" : f === "uncovered" ? "Uncovered" : "KOL + A only"}
+            {f === "all" ? tr("All") : f === "uncovered" ? tr("Uncovered") : tr("KOL + A only")}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("Loading…")}</div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          No HCPs match this filter.
+          {tr("No HCPs match this filter.")}
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-600 text-xs">
               <tr>
-                <th className="text-left p-3">HCP</th>
-                <th className="text-left p-3">Specialty</th>
-                <th className="text-center p-3">Segment</th>
-                <th className="text-right p-3">Visits (90d)</th>
-                <th className="text-right p-3">Last visit</th>
+                <th className="text-start p-3">{tr("HCP")}</th>
+                <th className="text-start p-3">{tr("Specialty")}</th>
+                <th className="text-center p-3">{tr("Segment")}</th>
+                <th className="text-end p-3">{tr("Visits (90d)")}</th>
+                <th className="text-end p-3">{tr("Last visit")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -117,11 +118,11 @@ export default function CoveragePage() {
                       </span>
                     ) : "—"}
                   </td>
-                  <td className="p-3 text-right">{r.total_visits_last_90d}</td>
-                  <td className="p-3 text-right">
+                  <td className="p-3 text-end">{r.total_visits_last_90d}</td>
+                  <td className="p-3 text-end">
                     {r.last_visit_at ? (
                       <span className={(r.days_since_last_visit ?? 0) > 30 ? "text-red-700 font-semibold" : "text-slate-700"}>
-                        {r.days_since_last_visit}d ago
+                        {r.days_since_last_visit}{tr("d ago")}
                       </span>
                     ) : (
                       <span className="text-red-700 font-semibold inline-flex items-center gap-1">

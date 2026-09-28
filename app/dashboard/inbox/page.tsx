@@ -20,6 +20,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
+import { tr, timeAgo, trf } from "@/lib/i18n";
 // ----------- Types ----------------------------------------------------
 
 interface TourPlanItem {
@@ -208,7 +209,7 @@ export default function InboxPage() {
   }
 
   async function rejectTourPlan(id: string) {
-    const reason = prompt("Reason for rejection?");
+    const reason = prompt(tr("Reason for rejection?"));
     if (reason === null) return;
     setBusyId(id);
     const plan = tourPlans.find((p) => p.id === id);
@@ -241,7 +242,7 @@ export default function InboxPage() {
   }
 
   async function rejectVisit(id: string) {
-    const reason = prompt("Reason for rejection?");
+    const reason = prompt(tr("Reason for rejection?"));
     if (reason === null) return;
     setBusyId(id);
     const v = flaggedVisits.find((x) => x.id === id);
@@ -282,7 +283,7 @@ export default function InboxPage() {
   }
 
   async function rejectExpense(id: string) {
-    const reason = prompt("Reason for rejection?");
+    const reason = prompt(tr("Reason for rejection?"));
     if (reason === null) return;
     setBusyId(id);
     const ex = expenses.find((x) => x.id === id);
@@ -385,7 +386,7 @@ export default function InboxPage() {
     return (
       <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -397,17 +398,17 @@ export default function InboxPage() {
           <div className="p-2 rounded-lg bg-brand-50 text-brand-700 relative">
             <Inbox className="w-6 h-6" />
             {totalPending > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
+              <span className="absolute -top-1 -end-1 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
                 {totalPending}
               </span>
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Approval Inbox</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{tr("Approval Inbox")}</h1>
             <p className="text-xs text-slate-500">
               {totalPending === 0
-                ? "All caught up — nothing pending"
-                : `${totalPending} item${totalPending === 1 ? "" : "s"} need your attention`}
+                ? tr("All caught up — nothing pending")
+                : trf(totalPending === 1 ? "{n} item needs your attention" : "{n} items need your attention", { n: totalPending })}
             </p>
           </div>
         </div>
@@ -421,10 +422,10 @@ export default function InboxPage() {
               onChange={(e) => setFilterRep(e.target.value)}
               className="text-sm bg-transparent outline-none"
             >
-              <option value="all">All reps</option>
+              <option value="all">{tr("All reps")}</option>
               {reps.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {r.full_name ?? "Rep"}
+                  {r.full_name ?? tr("Rep")}
                 </option>
               ))}
             </select>
@@ -434,37 +435,37 @@ export default function InboxPage() {
             disabled={loading}
             className="text-xs px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1"
           >
-            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> {tr("Refresh")}
           </button>
         </div>
       </div>
 
       {/* Quick stats strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <StatTile icon={Calendar}     count={f.tourPlans.length}     label="Tour plans"     cls="bg-purple-50 text-purple-700" />
-        <StatTile icon={AlertTriangle} count={f.flaggedVisits.length} label="Flagged visits" cls="bg-red-50 text-red-700" />
-        <StatTile icon={Receipt}      count={f.expenses.length}      label="Expenses"       cls="bg-orange-50 text-orange-700" />
-        <StatTile icon={Shield}       count={f.alerts.length}        label="Critical alerts" cls="bg-red-50 text-red-700" />
+        <StatTile icon={Calendar}     count={f.tourPlans.length}     label={tr("Tour plans")}     cls="bg-purple-50 text-purple-700" />
+        <StatTile icon={AlertTriangle} count={f.flaggedVisits.length} label={tr("Flagged visits")} cls="bg-red-50 text-red-700" />
+        <StatTile icon={Receipt}      count={f.expenses.length}      label={tr("Expenses")}       cls="bg-orange-50 text-orange-700" />
+        <StatTile icon={Shield}       count={f.alerts.length}        label={tr("Critical alerts")} cls="bg-red-50 text-red-700" />
       </div>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
           <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-          Loading approval queue…
+          {tr("Loading approval queue…")}
         </div>
       ) : totalPending === 0 ? (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-12 text-center">
           <div className="text-6xl mb-2">🎉</div>
-          <p className="font-semibold text-emerald-900">All caught up!</p>
+          <p className="font-semibold text-emerald-900">{tr("All caught up!")}</p>
           <p className="text-sm text-emerald-700 mt-1">
-            No pending tour plans, flagged visits, expenses, or alerts.
+            {tr("No pending tour plans, flagged visits, expenses, or alerts.")}
           </p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* ============ TOUR PLANS =================== */}
           <Section
-            title="Tour plans"
+            title={tr("Tour plans")}
             icon={Calendar}
             count={f.tourPlans.length}
             expanded={expanded.tour_plans}
@@ -492,11 +493,11 @@ export default function InboxPage() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-slate-900">
-                      {p.profiles?.full_name ?? "Rep"}
+                      {p.profiles?.full_name ?? tr("Rep")}
                     </div>
                     <div className="text-xs text-slate-500">
-                      {p.plan_date} · {p.planned_hcps?.length ?? 0} HCPs planned
-                      {p.submitted_at && ` · submitted ${timeAgo(p.submitted_at)}`}
+                      {p.plan_date} · {p.planned_hcps?.length ?? 0} {tr("HCPs planned")}
+                      {p.submitted_at && trf(" · submitted {t}", { t: timeAgo(p.submitted_at) })}
                     </div>
                     {p.notes && (
                       <div className="text-sm text-slate-600 mt-1 italic">
@@ -516,7 +517,7 @@ export default function InboxPage() {
 
           {/* ============ FLAGGED VISITS =============== */}
           <Section
-            title="Visits needing review"
+            title={tr("Visits needing review")}
             icon={AlertTriangle}
             count={f.flaggedVisits.length}
             expanded={expanded.flagged_visits}
@@ -528,7 +529,7 @@ export default function InboxPage() {
                 <div key={v.id} className="p-4 flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-slate-900">
-                      {v.profiles?.full_name ?? "Rep"} → {v.hcps?.full_name ?? "—"}
+                      {v.profiles?.full_name ?? tr("Rep")} → {v.hcps?.full_name ?? "—"}
                     </div>
                     <div className="text-xs text-slate-500">
                       {v.institutions?.name ?? "—"} ·{" "}
@@ -537,17 +538,17 @@ export default function InboxPage() {
                     <div className="flex flex-wrap gap-2 mt-1.5">
                       {!v.check_in_within_geofence && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">
-                          OUTSIDE GEOFENCE ({v.check_in_distance_m?.toFixed(0)}m)
+                          {tr("OUTSIDE GEOFENCE (")}{v.check_in_distance_m?.toFixed(0)}m)
                         </span>
                       )}
                       {v.duration_minutes !== null && v.duration_minutes < 3 && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-700">
-                          ONLY {v.duration_minutes} MIN
+                          {tr("ONLY")} {v.duration_minutes} {tr("MIN")}
                         </span>
                       )}
                       {v.ai_quality_score !== null && v.ai_quality_score <= 4 && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">
-                          LOW QUALITY ({v.ai_quality_score}/10)
+                          {tr("LOW QUALITY (")}{v.ai_quality_score}/10)
                         </span>
                       )}
                     </div>
@@ -555,7 +556,7 @@ export default function InboxPage() {
                       href={`/dashboard/visits/${v.id}`}
                       className="text-xs text-brand-700 underline mt-1 inline-block"
                     >
-                      View visit details
+                      {tr("View visit details")}
                     </Link>
                   </div>
                   <ActionButtons
@@ -572,7 +573,7 @@ export default function InboxPage() {
 
           {/* ============ EXPENSES ===================== */}
           <Section
-            title="Expenses"
+            title={tr("Expenses")}
             icon={Receipt}
             count={f.expenses.length}
             expanded={expanded.expenses}
@@ -605,18 +606,18 @@ export default function InboxPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-slate-900">
-                        {e.profiles?.full_name ?? "Rep"}
+                        {e.profiles?.full_name ?? tr("Rep")}
                       </span>
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 capitalize">
-                        {e.category}
+                        {tr(e.category)}
                       </span>
-                      <span className="font-bold text-slate-900 ml-auto">
+                      <span className="font-bold text-slate-900 ms-auto">
                         {e.amount.toLocaleString('en-US')} {e.currency}
                       </span>
                     </div>
                     <div className="text-xs text-slate-500 mt-0.5">{e.expense_date}</div>
                     {e.description && (
-                      <div className="text-sm text-slate-600 mt-1">{e.description}</div>
+                      <div className="text-sm text-slate-600 mt-1">{tr(e.description)}</div>
                     )}
                     {e.receipt_photo_url && (
                       <a
@@ -625,7 +626,7 @@ export default function InboxPage() {
                         rel="noreferrer"
                         className="text-xs text-brand-700 underline mt-1 inline-block"
                       >
-                        View receipt
+                        {tr("View receipt")}
                       </a>
                     )}
                   </div>
@@ -641,7 +642,7 @@ export default function InboxPage() {
 
           {/* ============ COMPLIANCE ALERTS ============ */}
           <Section
-            title="Critical compliance alerts"
+            title={tr("Critical compliance alerts")}
             icon={Shield}
             count={f.alerts.length}
             expanded={expanded.alerts}
@@ -663,7 +664,7 @@ export default function InboxPage() {
                       </span>
                     </div>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      {a.profiles?.full_name ?? "Rep"} · {timeAgo(a.detected_at)}
+                      {a.profiles?.full_name ?? tr("Rep")} · {timeAgo(a.detected_at)}
                     </div>
                     {a.evidence && (
                       <pre className="mt-2 text-[11px] text-slate-700 bg-slate-50 rounded p-2 overflow-x-auto">
@@ -678,14 +679,14 @@ export default function InboxPage() {
                       className="text-xs px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 font-medium inline-flex items-center gap-1 disabled:opacity-50"
                     >
                       {busyId === a.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-                      Resolve
+                      {tr("Resolve")}
                     </button>
                     <button
                       onClick={() => resolveAlert(a.id, "false_positive")}
                       disabled={busyId === a.id}
                       className="text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium disabled:opacity-50"
                     >
-                      False positive
+                      {tr("False positive")}
                     </button>
                   </div>
                 </div>
@@ -746,14 +747,14 @@ function Section({
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full p-4 flex items-center gap-3 hover:bg-slate-50 transition text-left"
+        className="w-full p-4 flex items-center gap-3 hover:bg-slate-50 transition text-start"
       >
         <Icon className={`w-5 h-5 ${color}`} />
         <span className="font-semibold text-slate-900">{title}</span>
         <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
           {count}
         </span>
-        <span className="ml-auto">
+        <span className="ms-auto">
           {expanded ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
         </span>
       </button>
@@ -783,7 +784,7 @@ function BulkBar({
     return (
       <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 text-xs text-slate-500 flex items-center gap-3">
         <button onClick={onSelectAll} className="text-brand-700 underline font-medium">
-          Select all {allIds.length}
+          {tr("Select all")} {allIds.length}
         </button>
       </div>
     );
@@ -792,8 +793,8 @@ function BulkBar({
     <div className="px-4 py-2 bg-brand-50 border-b border-brand-200 text-sm flex items-center gap-3 flex-wrap">
       <span className="font-medium text-brand-900">{selected.size} selected</span>
       {totalLabel && <span className="text-xs text-brand-700">{totalLabel}</span>}
-      <button onClick={onClear} className="text-xs text-slate-600 underline ml-auto">
-        Clear
+      <button onClick={onClear} className="text-xs text-slate-600 underline ms-auto">
+        {tr("Clear")}
       </button>
       <button
         onClick={onApprove}
@@ -801,7 +802,7 @@ function BulkBar({
         className="text-xs px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold inline-flex items-center gap-1"
       >
         {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-        Approve {selected.size}
+        {tr("Approve")} {selected.size}
       </button>
     </div>
   );
@@ -844,13 +845,4 @@ function ActionButtons({
 
 // ----------- Helpers --------------------------------------------------
 
-function timeAgo(iso: string) {
-  const ms = Date.now() - new Date(iso).getTime();
-  const m = Math.round(ms / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.round(h / 24);
-  return `${d}d ago`;
-}
+// timeAgo: shared bilingual helper in lib/i18n

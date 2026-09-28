@@ -6,6 +6,7 @@ import { useRequirePermission } from "@/lib/permissions";
 import { Shield, AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
 import type { ComplianceAlert } from "@/lib/types";
 
+import { tr, trf } from "@/lib/i18n";
 const SEVERITY_COLORS: Record<string, string> = {
   low: "bg-blue-100 text-blue-700",
   medium: "bg-amber-100 text-amber-700",
@@ -57,7 +58,7 @@ export default function CompliancePage() {
     const j = await res.json();
     setScanning(false);
     if (j.ok) {
-      alert(`Scan complete. ${j.alerts_inserted} new alerts found.`);
+      alert(trf("Scan complete. {n} new alerts found.", { n: j.alerts_inserted }));
       load();
     } else {
       alert("Scan failed: " + (j.error ?? "unknown"));
@@ -78,7 +79,7 @@ export default function CompliancePage() {
     return (
       <div className="max-w-5xl mx-auto p-12 text-center text-slate-500">
         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-        Loading…
+        {tr("Loading…")}
       </div>
     );
   }
@@ -90,34 +91,34 @@ export default function CompliancePage() {
           <div className="p-2 rounded-lg bg-red-50 text-red-700">
             <Shield className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Compliance</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Compliance")}</h1>
         </div>
         <button
           onClick={runScan}
           disabled={scanning}
           className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
         >
-          {scanning ? <><Loader2 className="w-4 h-4 animate-spin" /> Scanning…</> : <><RefreshCw className="w-4 h-4" /> Run scan</>}
+          {scanning ? <><Loader2 className="w-4 h-4 animate-spin" /> {tr("Scanning…")}</> : <><RefreshCw className="w-4 h-4" /> {tr("Run scan")}</>}
         </button>
       </div>
       <p className="text-slate-500 mb-4">
-        Anomaly detection: outside-geofence, impossible travel speed, duplicate visits, etc.
+        {tr("Anomaly detection: outside-geofence, impossible travel speed, duplicate visits, etc.")}
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <StatCard label="Open" value={open.length} cls="bg-red-50 text-red-700" />
-        <StatCard label="Critical" value={open.filter((a) => a.severity === "critical").length} cls="bg-red-100 text-red-800" />
-        <StatCard label="High" value={open.filter((a) => a.severity === "high").length} cls="bg-orange-50 text-orange-700" />
-        <StatCard label="Resolved" value={alerts.filter((a) => a.status === "resolved").length} cls="bg-emerald-50 text-emerald-700" />
+        <StatCard label={tr("Open")} value={open.length} cls="bg-red-50 text-red-700" />
+        <StatCard label={tr("Critical")} value={open.filter((a) => a.severity === "critical").length} cls="bg-red-100 text-red-800" />
+        <StatCard label={tr("High")} value={open.filter((a) => a.severity === "high").length} cls="bg-orange-50 text-orange-700" />
+        <StatCard label={tr("Resolved")} value={alerts.filter((a) => a.status === "resolved").length} cls="bg-emerald-50 text-emerald-700" />
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("Loading…")}</div>
       ) : alerts.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">✅</div>
-          <p className="text-slate-700 font-medium">No alerts</p>
-          <p className="text-sm text-slate-500 mt-1">Run a scan to check for anomalies.</p>
+          <p className="text-slate-700 font-medium">{tr("No alerts")}</p>
+          <p className="text-sm text-slate-500 mt-1">{tr("Run a scan to check for anomalies.")}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
@@ -136,11 +137,11 @@ export default function CompliancePage() {
                       {a.severity.toUpperCase()}
                     </span>
                     <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600">
-                      {a.status}
+                      {tr(a.status)}
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
-                    {a.profiles?.full_name ?? "Unknown rep"} · {new Date(a.detected_at).toLocaleString('en-US')}
+                    {a.profiles?.full_name ?? tr("Unknown rep")} · {new Date(a.detected_at).toLocaleString('en-US')}
                   </div>
                   {a.evidence && (
                     <pre className="mt-2 text-xs text-slate-700 bg-slate-50 rounded p-2 overflow-x-auto">
@@ -153,13 +154,13 @@ export default function CompliancePage() {
                         onClick={() => resolveAlert(a.id, "resolved")}
                         className="text-xs px-2.5 py-1 rounded bg-emerald-100 text-emerald-700 hover:bg-emerald-200 font-medium"
                       >
-                        Mark resolved
+                        {tr("Mark resolved")}
                       </button>
                       <button
                         onClick={() => resolveAlert(a.id, "false_positive")}
                         className="text-xs px-2.5 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium"
                       >
-                        False positive
+                        {tr("False positive")}
                       </button>
                     </div>
                   )}

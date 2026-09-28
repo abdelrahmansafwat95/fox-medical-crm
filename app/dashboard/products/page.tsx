@@ -9,6 +9,7 @@ import EditModal, { type FieldConfig } from "@/components/EditModal";
 import { usePerms } from "@/lib/permissions";
 import { downloadCsv } from "@/lib/csv";
 
+import { tr } from "@/lib/i18n";
 const CATEGORY_COLORS: Record<string, string> = {
   Rx: "bg-red-50 text-red-700",
   OTC: "bg-emerald-50 text-emerald-700",
@@ -103,7 +104,7 @@ export default function ProductsPage() {
           <div className="p-2 rounded-lg bg-purple-50 text-purple-700">
             <Pill className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Products</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Products")}</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -125,25 +126,25 @@ export default function ProductsPage() {
             }
             className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
           >
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> {tr("Export")}
           </button>
           {can("products", "create") && (
             <button
               onClick={() => setCreating(true)}
               className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 font-medium"
             >
-              <Plus className="w-4 h-4" /> Add product
+              <Plus className="w-4 h-4" /> {tr("Add product")}
             </button>
           )}
         </div>
       </div>
       <p className="text-slate-500 mb-6">
-        Drug & device catalog with key messages for detailing.
+        {tr("Drug & device catalog with key messages for detailing.")}
       </p>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : (
         <div className="space-y-3">
@@ -154,7 +155,7 @@ export default function ProductsPage() {
                 <div className="w-full p-4 flex items-center gap-4">
                   <button
                     onClick={() => setExpanded(isOpen ? null : p.id)}
-                    className="flex items-center gap-4 flex-1 min-w-0 text-left"
+                    className="flex items-center gap-4 flex-1 min-w-0 text-start"
                   >
                     <div className="w-12 h-12 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
                       <Pill className="w-6 h-6" />
@@ -163,17 +164,17 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-slate-900">{p.brand_name ?? p.name}</span>
                         <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${CATEGORY_COLORS[p.category]}`}>
-                          {p.category}
+                          {tr(p.category)}
                         </span>
                       </div>
                       <div className="text-xs text-slate-500 mt-0.5">
                         {p.generic_name} {p.strength && `· ${p.strength}`} {p.dosage_form && `· ${p.dosage_form}`}
                       </div>
                     </div>
-                    <div className="shrink-0 text-right">
+                    <div className="shrink-0 text-end">
                       {p.list_price && (
                         <div className="font-semibold text-slate-900">
-                          {p.list_price.toLocaleString('en-US')} {p.currency ?? "EGP"}
+                          {p.list_price.toLocaleString('en-US')} {p.currency ?? tr("EGP")}
                         </div>
                       )}
                       <div className="text-xs text-slate-500">{p.pack_size}</div>
@@ -183,7 +184,7 @@ export default function ProductsPage() {
                     <button
                       onClick={() => setSlidesFor(p)}
                       className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                      title="E-detailing slides"
+                      title={tr("E-detailing slides")}
                     >
                       <Presentation className="w-4 h-4" />
                     </button>
@@ -192,7 +193,7 @@ export default function ProductsPage() {
                     <button
                       onClick={() => openMessages(p)}
                       className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                      title="Edit key messages"
+                      title={tr("Edit key messages")}
                     >
                       <MessageSquare className="w-4 h-4" />
                     </button>
@@ -201,7 +202,7 @@ export default function ProductsPage() {
                     <button
                       onClick={() => setEditing(p)}
                       className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
-                      title="Edit"
+                      title={tr("Edit")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -217,16 +218,16 @@ export default function ProductsPage() {
                 {isOpen && p.key_messages && p.key_messages.length > 0 && (
                   <div className="border-t border-slate-100 p-4 bg-slate-50/50">
                     <div className="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
-                      Key messages for detailing
+                      {tr("Key messages for detailing")}
                     </div>
                     <div className="space-y-2">
                       {p.key_messages.map((m, idx) => (
                         <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3">
-                          <div className="font-semibold text-sm text-slate-900">{m.title}</div>
+                          <div className="font-semibold text-sm text-slate-900">{tr(m.title)}</div>
                           <div className="text-sm text-slate-600 mt-0.5">{m.message}</div>
                           {m.evidence_label && (
                             <div className="mt-1 text-xs text-brand-700 font-medium">
-                              📚 Evidence: {m.evidence_label}
+                              {tr("📚 Evidence:")} {m.evidence_label}
                             </div>
                           )}
                         </div>
@@ -255,7 +256,7 @@ export default function ProductsPage() {
           >
             <div className="p-4 border-b border-slate-200 flex items-center justify-between">
               <h2 className="font-semibold text-slate-900">
-                Key messages — {msgEditing.brand_name ?? msgEditing.name}
+                {tr("Key messages —")} {msgEditing.brand_name ?? msgEditing.name}
               </h2>
               <button onClick={() => setMsgEditing(null)} className="p-1 text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
@@ -263,7 +264,7 @@ export default function ProductsPage() {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {msgs.length === 0 && (
-                <p className="text-sm text-slate-400 text-center py-4">No messages yet. Add one below.</p>
+                <p className="text-sm text-slate-400 text-center py-4">{tr("No messages yet. Add one below.")}</p>
               )}
               {msgs.map((m, idx) => (
                 <div key={idx} className="border border-slate-200 rounded-lg p-3 space-y-2">
@@ -271,7 +272,7 @@ export default function ProductsPage() {
                     <input
                       value={m.title}
                       onChange={(e) => setMsgs((a) => a.map((x, i) => (i === idx ? { ...x, title: e.target.value } : x)))}
-                      placeholder="Title (e.g. Once-daily dosing)"
+                      placeholder={tr("Title (e.g. Once-daily dosing)")}
                       className="flex-1 p-2 border border-slate-300 rounded text-sm font-medium"
                     />
                     <button onClick={() => setMsgs((a) => a.filter((_, i) => i !== idx))} className="p-1 text-slate-400 hover:text-red-600">
@@ -281,14 +282,14 @@ export default function ProductsPage() {
                   <textarea
                     value={m.message}
                     onChange={(e) => setMsgs((a) => a.map((x, i) => (i === idx ? { ...x, message: e.target.value } : x)))}
-                    placeholder="The detailing message"
+                    placeholder={tr("The detailing message")}
                     rows={2}
                     className="w-full p-2 border border-slate-300 rounded text-sm"
                   />
                   <input
                     value={m.evidence_label ?? ""}
                     onChange={(e) => setMsgs((a) => a.map((x, i) => (i === idx ? { ...x, evidence_label: e.target.value } : x)))}
-                    placeholder="Evidence label (optional, e.g. NEJM 2023)"
+                    placeholder={tr("Evidence label (optional, e.g. NEJM 2023)")}
                     className="w-full p-2 border border-slate-300 rounded text-sm"
                   />
                 </div>
@@ -297,19 +298,19 @@ export default function ProductsPage() {
                 onClick={() => setMsgs((a) => [...a, { title: "", message: "", evidence_label: "" }])}
                 className="w-full border border-dashed border-slate-300 rounded-lg py-2 text-sm text-slate-600 hover:bg-slate-50 inline-flex items-center justify-center gap-1"
               >
-                <Plus className="w-4 h-4" /> Add message
+                <Plus className="w-4 h-4" /> {tr("Add message")}
               </button>
             </div>
             <div className="p-4 border-t border-slate-200 flex gap-2">
-              <button onClick={() => setMsgEditing(null)} className="ml-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50">
-                Cancel
+              <button onClick={() => setMsgEditing(null)} className="ms-auto px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50">
+                {tr("Cancel")}
               </button>
               <button
                 onClick={saveMessages}
                 disabled={msgSaving}
                 className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white font-medium px-4 py-2 rounded-lg inline-flex items-center gap-2"
               >
-                {msgSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
+                {msgSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {tr("Save")}
               </button>
             </div>
           </div>
@@ -318,7 +319,7 @@ export default function ProductsPage() {
 
       <EditModal
         open={creating}
-        title="Add product"
+        title={tr("Add product")}
         table="products"
         fields={PRODUCT_FIELDS}
         initialValues={{ category: "Rx", currency: "EGP", is_active: true }}
@@ -328,7 +329,7 @@ export default function ProductsPage() {
 
       <EditModal
         open={!!editing}
-        title="Edit product"
+        title={tr("Edit product")}
         table="products"
         recordId={editing?.id}
         fields={PRODUCT_FIELDS}

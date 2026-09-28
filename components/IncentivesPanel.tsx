@@ -11,6 +11,7 @@ import { exportToExcel } from "@/lib/export";
 import { isManager, useRole } from "@/lib/roles";
 import { BadgeCheck, Banknote, Download, Loader2, Pencil, Save, X } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface Row {
   rep_id: string; rep_name: string; role: string;
   calls_target: number | null; verified_calls: number; calls_pct: number | null;
@@ -87,20 +88,20 @@ export default function IncentivesPanel({ month }: { month: string }) {
             <span className="text-slate-500">from {plan.effective_from}</span>
             <span className="flex-1" />
             {role && PLAN_EDITORS.includes(role) && (
-              <button onClick={() => setEditPlan(true)} className="inline-flex items-center gap-1 text-brand-700 hover:underline"><Pencil className="w-3.5 h-3.5" /> Edit plan</button>
+              <button onClick={() => setEditPlan(true)} className="inline-flex items-center gap-1 text-brand-700 hover:underline"><Pencil className="w-3.5 h-3.5" /> {tr("Edit plan")}</button>
             )}
           </div>
           <div className="mt-2 grid sm:grid-cols-3 gap-2 text-slate-600">
-            <div><b className="text-slate-800">Verified calls:</b> {plan.calls_tiers.map((t) => `${t.from_pct}% → ${fmt(t.amount)}`).join(" · ")}</div>
-            <div><b className="text-slate-800">Coverage:</b> {plan.coverage_tiers.map((t) => `${t.from_pct}% → ${fmt(t.amount)}`).join(" · ")}</div>
-            <div><b className="text-slate-800">Quality floor:</b> avg {plan.quality_min}/10, else × {plan.quality_factor}</div>
+            <div><b className="text-slate-800">{tr("Verified calls:")}</b> {plan.calls_tiers.map((t) => `${t.from_pct}% → ${fmt(t.amount)}`).join(" · ")}</div>
+            <div><b className="text-slate-800">{tr("Coverage:")}</b> {plan.coverage_tiers.map((t) => `${t.from_pct}% → ${fmt(t.amount)}`).join(" · ")}</div>
+            <div><b className="text-slate-800">{tr("Quality floor:")}</b> avg {plan.quality_min}{tr("/10, else ×")} {plan.quality_factor}</div>
           </div>
-          <p className="text-xs text-slate-400 mt-2">Only completed, GPS-verified visits that weren&apos;t rejected by a manager count. Amounts in {plan.currency}.</p>
+          <p className="text-xs text-slate-400 mt-2">{tr("Only completed, GPS-verified visits that weren't rejected by a manager count. Amounts in")} {plan.currency}.</p>
         </div>
       )}
 
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="text-sm text-slate-600">Total for {month}: <b className="text-slate-900">{fmt(total)} {plan?.currency ?? "EGP"}</b></div>
+        <div className="text-sm text-slate-600">{tr("Total for")} {month}: <b className="text-slate-900">{fmt(total)} {plan?.currency ?? tr("EGP")}</b></div>
         <span className="flex-1" />
         <button onClick={() => exportToExcel(visible.map((r) => ({
           Rep: r.rep_name, "Calls target": r.calls_target ?? "", "Verified calls": r.verified_calls, "Calls %": r.calls_pct ?? "",
@@ -109,33 +110,33 @@ export default function IncentivesPanel({ month }: { month: string }) {
           "Quality floor met": r.quality_ok ? "Yes" : "No", Total: r.total, Currency: r.currency, Status: r.payout_status ?? "not approved"
         })), `incentives-${month}`, "Incentives")}
           className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium">
-          <Download className="w-4 h-4" /> Excel
+          <Download className="w-4 h-4" /> {tr("Excel")}
         </button>
         {manager && visible.some((r) => !r.payout_status) && (
           <button onClick={() => approve(visible)} disabled={busy === "approve"}
             className="bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-3 py-2 rounded-lg inline-flex items-center gap-2 text-sm font-medium">
-            {busy === "approve" ? <Loader2 className="w-4 h-4 animate-spin" /> : <BadgeCheck className="w-4 h-4" />} Approve all
+            {busy === "approve" ? <Loader2 className="w-4 h-4 animate-spin" /> : <BadgeCheck className="w-4 h-4" />} {tr("Approve all")}
           </button>
         )}
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("Loading…")}</div>
       ) : visible.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">No incentive plan or reps for this month.</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">{tr("No incentive plan or reps for this month.")}</div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
           <table className="w-full text-sm min-w-[820px]">
             <thead className="bg-slate-50 text-slate-600 text-xs">
               <tr>
-                <th className="text-left p-3">Rep</th>
-                <th className="text-right p-3">Verified calls</th>
-                <th className="text-right p-3">Coverage</th>
-                <th className="text-right p-3">Quality</th>
-                <th className="text-right p-3">Calls bonus</th>
-                <th className="text-right p-3">Coverage bonus</th>
-                <th className="text-right p-3">Total</th>
+                <th className="text-start p-3">{tr("Rep")}</th>
+                <th className="text-end p-3">{tr("Verified calls")}</th>
+                <th className="text-end p-3">{tr("Coverage")}</th>
+                <th className="text-end p-3">{tr("Quality")}</th>
+                <th className="text-end p-3">{tr("Calls bonus")}</th>
+                <th className="text-end p-3">{tr("Coverage bonus")}</th>
+                <th className="text-end p-3">{tr("Total")}</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
@@ -143,26 +144,26 @@ export default function IncentivesPanel({ month }: { month: string }) {
               {visible.map((r) => (
                 <tr key={r.rep_id} className="hover:bg-slate-50">
                   <td className="p-3 font-medium text-slate-900">{r.rep_name}</td>
-                  <td className="p-3 text-right">{r.verified_calls}{r.calls_target ? ` / ${r.calls_target}` : ""}<div className="text-xs text-slate-500">{r.calls_pct != null ? `${r.calls_pct}%` : "no target"}</div></td>
-                  <td className="p-3 text-right">{r.hcps_covered}{r.coverage_target ? ` / ${r.coverage_target}` : ""}<div className="text-xs text-slate-500">{r.coverage_pct != null ? `${r.coverage_pct}%` : "no target"}</div></td>
-                  <td className={`p-3 text-right ${r.quality_ok ? "" : "text-amber-700 font-semibold"}`}>{r.avg_quality ?? "—"}{!r.quality_ok && <div className="text-xs">below floor</div>}</td>
-                  <td className="p-3 text-right">{fmt(r.calls_bonus)}</td>
-                  <td className="p-3 text-right">{fmt(r.coverage_bonus)}</td>
-                  <td className="p-3 text-right font-bold text-slate-900">{fmt(r.total)} <span className="text-xs font-normal text-slate-500">{r.currency}</span></td>
-                  <td className="p-3 text-right whitespace-nowrap">
+                  <td className="p-3 text-end">{r.verified_calls}{r.calls_target ? ` / ${r.calls_target}` : ""}<div className="text-xs text-slate-500">{r.calls_pct != null ? `${r.calls_pct}%` : tr("no target")}</div></td>
+                  <td className="p-3 text-end">{r.hcps_covered}{r.coverage_target ? ` / ${r.coverage_target}` : ""}<div className="text-xs text-slate-500">{r.coverage_pct != null ? `${r.coverage_pct}%` : tr("no target")}</div></td>
+                  <td className={`p-3 text-end ${r.quality_ok ? "" : "text-amber-700 font-semibold"}`}>{r.avg_quality ?? "—"}{!r.quality_ok && <div className="text-xs">{tr("below floor")}</div>}</td>
+                  <td className="p-3 text-end">{fmt(r.calls_bonus)}</td>
+                  <td className="p-3 text-end">{fmt(r.coverage_bonus)}</td>
+                  <td className="p-3 text-end font-bold text-slate-900">{fmt(r.total)} <span className="text-xs font-normal text-slate-500">{r.currency}</span></td>
+                  <td className="p-3 text-end whitespace-nowrap">
                     {r.payout_status === "paid" ? (
-                      <span className="text-xs font-bold px-2 py-1 rounded bg-cyan-100 text-cyan-800">Paid</span>
+                      <span className="text-xs font-bold px-2 py-1 rounded bg-cyan-100 text-cyan-800">{tr("Paid")}</span>
                     ) : r.payout_status === "approved" ? (
                       manager ? (
                         <button onClick={() => markPaid(r)} disabled={busy === r.rep_id} className="text-xs border border-slate-300 rounded px-2 py-1 inline-flex items-center gap-1 hover:bg-slate-50">
-                          {busy === r.rep_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Banknote className="w-3 h-3" />} Mark paid
+                          {busy === r.rep_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Banknote className="w-3 h-3" />} {tr("Mark paid")}
                         </button>
-                      ) : <span className="text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700">Approved</span>
+                      ) : <span className="text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700">{tr("Approved")}</span>
                     ) : manager ? (
                       <button onClick={() => approve([r])} disabled={busy === "approve"} className="text-xs bg-brand-600 text-white rounded px-2 py-1 inline-flex items-center gap-1">
-                        <BadgeCheck className="w-3 h-3" /> Approve
+                        <BadgeCheck className="w-3 h-3" /> {tr("Approve")}
                       </button>
-                    ) : <span className="text-xs text-slate-500">Pending approval</span>}
+                    ) : <span className="text-xs text-slate-500">{tr("Pending approval")}</span>}
                   </td>
                 </tr>
               ))}
@@ -185,12 +186,11 @@ function PlanEditor({ plan, onClose, onSaved }: { plan: Plan; onClose: () => voi
       <div className="text-sm font-semibold text-slate-800 mb-1">{label}</div>
       {p[key].map((t, i) => (
         <div key={i} className="flex items-center gap-2 mb-1 text-sm">
-          from <input type="number" value={t.from_pct} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, from_pct: Number(e.target.value) } : x)) })} className="w-20 border border-slate-300 rounded px-2 py-1 text-right" />%
-          pays <input type="number" value={t.amount} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, amount: Number(e.target.value) } : x)) })} className="w-28 border border-slate-300 rounded px-2 py-1 text-right" /> {p.currency}
+          from <input type="number" value={t.from_pct} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, from_pct: Number(e.target.value) } : x)) })} className="w-20 border border-slate-300 rounded px-2 py-1 text-end" />{tr("% pays")} <input type="number" value={t.amount} onChange={(e) => setP({ ...p, [key]: p[key].map((x, j) => (j === i ? { ...x, amount: Number(e.target.value) } : x)) })} className="w-28 border border-slate-300 rounded px-2 py-1 text-end" /> {p.currency}
           <button onClick={() => setP({ ...p, [key]: p[key].filter((_, j) => j !== i) })} className="text-slate-400 hover:text-red-600"><X className="w-4 h-4" /></button>
         </div>
       ))}
-      <button onClick={() => setP({ ...p, [key]: [...p[key], { from_pct: 100, amount: 0 }] })} className="text-xs text-brand-700 hover:underline">+ Add tier</button>
+      <button onClick={() => setP({ ...p, [key]: [...p[key], { from_pct: 100, amount: 0 }] })} className="text-xs text-brand-700 hover:underline">{tr("+ Add tier")}</button>
     </div>
   );
   async function save() {
@@ -206,19 +206,19 @@ function PlanEditor({ plan, onClose, onSaved }: { plan: Plan; onClose: () => voi
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center"><h2 className="font-semibold text-slate-900 flex-1">Incentive plan</h2><button onClick={onClose}><X className="w-5 h-5 text-slate-400" /></button></div>
+        <div className="flex items-center"><h2 className="font-semibold text-slate-900 flex-1">{tr("Incentive plan")}</h2><button onClick={onClose}><X className="w-5 h-5 text-slate-400" /></button></div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <label className="col-span-2">Name <input value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
-          <label>Effective from <input type="date" value={p.effective_from} onChange={(e) => setP({ ...p, effective_from: e.target.value })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
-          <label>Currency <input value={p.currency} onChange={(e) => setP({ ...p, currency: e.target.value.toUpperCase().slice(0, 3) })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
-          <label>Quality floor (0-10) <input type="number" step="0.5" value={p.quality_min} onChange={(e) => setP({ ...p, quality_min: Number(e.target.value) })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
-          <label>Below floor, × <input type="number" step="0.1" min={0} max={1} value={p.quality_factor} onChange={(e) => setP({ ...p, quality_factor: Number(e.target.value) })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
+          <label className="col-span-2">{tr("Name")} <input value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
+          <label>{tr("Effective from")} <input type="date" value={p.effective_from} onChange={(e) => setP({ ...p, effective_from: e.target.value })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
+          <label>{tr("Currency")} <input value={p.currency} onChange={(e) => setP({ ...p, currency: e.target.value.toUpperCase().slice(0, 3) })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
+          <label>{tr("Quality floor (0-10)")} <input type="number" step="0.5" value={p.quality_min} onChange={(e) => setP({ ...p, quality_min: Number(e.target.value) })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
+          <label>{tr("Below floor, ×")} <input type="number" step="0.1" min={0} max={1} value={p.quality_factor} onChange={(e) => setP({ ...p, quality_factor: Number(e.target.value) })} className="w-full border border-slate-300 rounded px-2 py-1" /></label>
         </div>
         {tiers("calls_tiers", "Verified calls vs target")}
         {tiers("coverage_tiers", "HCP coverage vs target")}
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button onClick={save} disabled={saving} className="w-full bg-brand-600 hover:bg-brand-700 text-white rounded-lg py-2 font-medium inline-flex items-center justify-center gap-2">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save plan
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {tr("Save plan")}
         </button>
       </div>
     </div>

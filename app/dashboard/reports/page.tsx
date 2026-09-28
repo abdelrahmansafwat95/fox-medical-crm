@@ -6,6 +6,7 @@ import { useRequirePermission } from "@/lib/permissions";
 import { BarChart3, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { exportToExcel, exportToPDF } from "@/lib/export";
 
+import { tr } from "@/lib/i18n";
 interface ReportRow {
   rep_id: string;
   rep_name: string;
@@ -126,7 +127,7 @@ export default function ReportsPage() {
   }
 
   if (checking) {
-    return <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">Loading…</div>;
+    return <div className="max-w-6xl mx-auto p-12 text-center text-slate-500">{tr("Loading…")}</div>;
   }
 
   return (
@@ -136,7 +137,7 @@ export default function ReportsPage() {
           <div className="p-2 rounded-lg bg-blue-50 text-blue-700">
             <BarChart3 className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Reports</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{tr("Reports")}</h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <select
@@ -144,52 +145,52 @@ export default function ReportsPage() {
             onChange={(e) => setDays(parseInt(e.target.value))}
             className="text-sm px-3 py-2 border border-slate-300 rounded-lg"
           >
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
+            <option value="7">{tr("Last 7 days")}</option>
+            <option value="30">{tr("Last 30 days")}</option>
+            <option value="90">{tr("Last 90 days")}</option>
           </select>
           <button
             onClick={downloadXlsx}
             disabled={data.length === 0}
             className="text-sm bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white px-3 py-2 rounded-lg inline-flex items-center gap-1.5"
           >
-            <FileSpreadsheet className="w-4 h-4" /> Excel
+            <FileSpreadsheet className="w-4 h-4" /> {tr("Excel")}
           </button>
           <button
             onClick={downloadPdf}
             disabled={data.length === 0}
             className="text-sm bg-red-600 hover:bg-red-700 disabled:bg-slate-300 text-white px-3 py-2 rounded-lg inline-flex items-center gap-1.5"
           >
-            <FileText className="w-4 h-4" /> PDF
+            <FileText className="w-4 h-4" /> {tr("PDF")}
           </button>
         </div>
       </div>
       <p className="text-slate-500 mb-4">
-        Field force performance, GPS verification rate, and quality scores.
+        {tr("Field force performance, GPS verification rate, and quality scores.")}
       </p>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
-          Loading…
+          {tr("Loading…")}
         </div>
       ) : data.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
           <div className="text-5xl mb-2">📊</div>
-          <p className="text-slate-700 font-medium">No data in this period</p>
-          <p className="text-sm text-slate-500 mt-1">Reps need to log visits first.</p>
+          <p className="text-slate-700 font-medium">{tr("No data in this period")}</p>
+          <p className="text-sm text-slate-500 mt-1">{tr("Reps need to log visits first.")}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-600 text-xs">
               <tr>
-                <th className="text-left p-3">Rep</th>
-                <th className="text-right p-3">Visits</th>
-                <th className="text-right p-3">Verified ✓</th>
-                <th className="text-right p-3">Flagged ⚠️</th>
-                <th className="text-right p-3">Unique HCPs</th>
-                <th className="text-right p-3">Avg Quality</th>
-                <th className="text-right p-3">Verify Rate</th>
+                <th className="text-start p-3">{tr("Rep")}</th>
+                <th className="text-end p-3">{tr("Visits")}</th>
+                <th className="text-end p-3">{tr("Verified ✓")}</th>
+                <th className="text-end p-3">{tr("Flagged ⚠️")}</th>
+                <th className="text-end p-3">{tr("Unique HCPs")}</th>
+                <th className="text-end p-3">{tr("Avg Quality")}</th>
+                <th className="text-end p-3">{tr("Verify Rate")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -198,12 +199,12 @@ export default function ReportsPage() {
                 return (
                   <tr key={r.rep_id} className="hover:bg-slate-50">
                     <td className="p-3 font-medium text-slate-900">{r.rep_name}</td>
-                    <td className="p-3 text-right">{r.visits}</td>
-                    <td className="p-3 text-right text-emerald-700">{r.verified}</td>
-                    <td className="p-3 text-right text-red-700">{r.flagged}</td>
-                    <td className="p-3 text-right">{r.unique_hcps}</td>
-                    <td className="p-3 text-right">{r.avg_quality ?? "—"}</td>
-                    <td className="p-3 text-right">
+                    <td className="p-3 text-end">{r.visits}</td>
+                    <td className="p-3 text-end text-emerald-700">{r.verified}</td>
+                    <td className="p-3 text-end text-red-700">{r.flagged}</td>
+                    <td className="p-3 text-end">{r.unique_hcps}</td>
+                    <td className="p-3 text-end">{r.avg_quality ?? "—"}</td>
+                    <td className="p-3 text-end">
                       <span
                         className={`px-2 py-0.5 rounded text-xs font-bold ${
                           verifyRate >= 90

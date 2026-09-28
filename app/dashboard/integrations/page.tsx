@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Plug, KeyRound, Webhook, Plus, Trash2, Copy, Check, Send, Eye, BookOpen, X } from 'lucide-react'
 
+import { tr } from "@/lib/i18n";
 const SCOPES: { res: string; en: string; ar: string; write: boolean; writeLabel?: string }[] = [
   { res: 'hcps', en: 'HCPs', ar: '', write: true },
   { res: 'institutions', en: 'Institutions', ar: '', write: true },
@@ -116,7 +117,7 @@ export default function IntegrationsPage() {
     <div className="max-w-5xl mx-auto space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Plug size={22} className="text-brand-500" /> API & Webhooks
+          <Plug size={22} className="text-brand-500" /> {tr("API & Webhooks")}
         </h1>
         <p className="text-gray-400 text-sm mt-0.5">
           {t('Connect the CRM to your website, forms, accounting or any system: read and write records with an API key, and get told the moment something happens.',
@@ -158,7 +159,7 @@ export default function IntegrationsPage() {
         <div className="grid md:grid-cols-2 gap-4 mb-5">
           <div>
             <label className="text-xs font-medium text-gray-500">{t('Key name', 'اسم المفتاح')}</label>
-            <input value={keyName} onChange={e => setKeyName(e.target.value)} placeholder='e.g. ERP sync' className={input} disabled={demo} />
+            <input value={keyName} onChange={e => setKeyName(e.target.value)} placeholder={tr("e.g. ERP sync")} className={input} disabled={demo} />
             <button onClick={createKey} disabled={locked || noPlan || !keyName.trim() || !keyScopes.length} className={`${btn} mt-3`}>
               <Plus size={15} /> {t('Create key', 'إنشاء مفتاح')}
             </button>
@@ -269,7 +270,7 @@ export default function IntegrationsPage() {
                   <tr key={d.id} className="border-b border-gray-50">
                     <td className="py-1.5 text-gray-500">{fmt(d.created_at)}</td>
                     <td dir="ltr"><code>{d.event}</code></td>
-                    <td className={d.status === 'sent' ? 'text-green-600' : d.status === 'failed' ? 'text-red-600' : 'text-amber-600'}>{d.status}</td>
+                    <td className={d.status === 'sent' ? 'text-green-600' : d.status === 'failed' ? 'text-red-600' : 'text-amber-600'}>{tr(d.status)}</td>
                     <td className="text-gray-500">{d.response_status ? `HTTP ${d.response_status}` : ''}</td>
                     <td className="text-gray-400">{t('attempts', 'محاولات')}: {d.attempts}</td>
                   </tr>
@@ -285,45 +286,28 @@ export default function IntegrationsPage() {
         <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-3"><BookOpen size={18} className="text-brand-500" /> {t('Quick reference', 'مرجع سريع')}</h2>
         <div className="space-y-4 text-sm text-gray-700" dir="ltr">
           <div>
-            <p className="font-medium mb-1">Base URL</p>
+            <p className="font-medium mb-1">{tr("Base URL")}</p>
             <div className="flex gap-2 items-center"><code className="flex-1 bg-gray-50 rounded px-2 py-1.5 text-xs break-all">{API_BASE}</code>
               <button onClick={() => copy(API_BASE, 'base')} className="p-1.5 rounded-lg border border-gray-200">{copied === 'base' ? <Check size={14} /> : <Copy size={14} />}</button></div>
           </div>
           <div>
-            <p className="font-medium mb-1">Endpoints</p>
-            <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{`GET    /v1                         your key and its permissions
-GET    /v1/{resource}              list: ?limit=50&offset=0&updated_since=2026-01-01
-GET    /v1/{resource}/{id}         one record
-POST   /v1/{resource}              create (hcps, institutions)
-PATCH  /v1/{resource}/{id}         update the fields you send (hcps, institutions, orders)
-
-read:      hcps, institutions, orders, products, visits, events, expenses, tour_plans
-filters:   hcps ?segment= ?specialty= ?assigned_rep_id=   visits ?status= ?rep_id=   orders ?status=
-limits:    120 requests a minute per key; no deletes; visits are read-only (GPS-verified)`}</pre>
+            <p className="font-medium mb-1">{tr("Endpoints")}</p>
+            <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{tr("GET    /v1                         your key and its permissions\nGET    /v1/{resource}              list: ?limit=50&offset=0&updated_since=2026-01-01\nGET    /v1/{resource}/{id}         one record\nPOST   /v1/{resource}              create (hcps, institutions)\nPATCH  /v1/{resource}/{id}         update the fields you send (hcps, institutions, orders)\n\nread:      hcps, institutions, orders, products, visits, events, expenses, tour_plans\nfilters:   hcps ?segment= ?specialty= ?assigned_rep_id=   visits ?status= ?rep_id=   orders ?status=\nlimits:    120 requests a minute per key; no deletes; visits are read-only (GPS-verified)")}</pre>
           </div>
           <div>
-            <p className="font-medium mb-1">Example</p>
+            <p className="font-medium mb-1">{tr("Example")}</p>
             <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{`curl -X PATCH ${API_BASE}/orders/ORDER_ID \
   -H "Authorization: Bearer fox_md_…" \
   -H "Content-Type: application/json" \
   -d '{"status":"delivered"}'`}</pre>
           </div>
           <div>
-            <p className="font-medium mb-1">Allowed values</p>
-            <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{`hcp.title           Dr., Prof., Pharm.D, Pharm., Nurse, Other
-hcp.segment         A, B, C, D, KOL        hcp.decile  1–10
-institution.type    private_clinic, polyclinic, hospital_govt, hospital_private, hospital_university,
-                    hospital_military, pharmacy_independent, pharmacy_chain, distributor, wholesaler, lab, warehouse
-order.status        draft, submitted, approved, dispatched, delivered, paid, cancelled, returned`}</pre>
+            <p className="font-medium mb-1">{tr("Allowed values")}</p>
+            <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{tr("hcp.title           Dr., Prof., Pharm.D, Pharm., Nurse, Other\nhcp.segment         A, B, C, D, KOL        hcp.decile  1–10\ninstitution.type    private_clinic, polyclinic, hospital_govt, hospital_private, hospital_university,\n                    hospital_military, pharmacy_independent, pharmacy_chain, distributor, wholesaler, lab, warehouse\norder.status        draft, submitted, approved, dispatched, delivered, paid, cancelled, returned")}</pre>
           </div>
           <div>
-            <p className="font-medium mb-1">Verifying a webhook (Node.js)</p>
-            <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{`const crypto = require('crypto')
-// rawBody: the request body exactly as received, as a string
-const expected = 'sha256=' + crypto.createHmac('sha256', SECRET)
-  .update(req.headers['x-fox-timestamp'] + '.' + rawBody).digest('hex')
-const ok = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers['x-fox-signature']))
-// body: { id, event, created_at, data: { …the record… } }`}</pre>
+            <p className="font-medium mb-1">{tr("Verifying a webhook (Node.js)")}</p>
+            <pre className="bg-gray-50 rounded p-3 text-xs overflow-x-auto">{tr("const crypto = require('crypto')\n// rawBody: the request body exactly as received, as a string\nconst expected = 'sha256=' + crypto.createHmac('sha256', SECRET)\n  .update(req.headers['x-fox-timestamp'] + '.' + rawBody).digest('hex')\nconst ok = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers['x-fox-signature']))\n// body: { id, event, created_at, data: { …the record… } }")}</pre>
           </div>
         </div>
       </div>

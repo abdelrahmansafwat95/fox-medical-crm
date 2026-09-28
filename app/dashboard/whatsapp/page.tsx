@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { MessageCircle, Send, Loader2 } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 interface MessageRow {
   id: string;
   phone: string;
@@ -64,15 +65,15 @@ export default function WhatsAppPage() {
         <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
           <MessageCircle className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">WhatsApp</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{tr("WhatsApp")}</h1>
       </div>
       <p className="text-slate-500 mb-4">
-        Quick-send to HCPs via WhatsApp. Each message is logged for audit.
+        {tr("Quick-send to HCPs via WhatsApp. Each message is logged for audit.")}
       </p>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 space-y-3">
         <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Phone (with country code)</label>
+          <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Phone (with country code)")}</label>
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -81,12 +82,12 @@ export default function WhatsAppPage() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1">Message</label>
+          <label className="block text-xs font-medium text-slate-700 mb-1">{tr("Message")}</label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
-            placeholder="Type your message…"
+            placeholder={tr("Type your message…")}
             className="w-full p-2 border border-slate-300 rounded-lg text-sm"
           />
         </div>
@@ -95,16 +96,16 @@ export default function WhatsAppPage() {
           disabled={sending || !phone || !message}
           className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-2 rounded-lg inline-flex items-center justify-center gap-2"
         >
-          {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening…</> : <><Send className="w-4 h-4" /> Open in WhatsApp</>}
+          {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> {tr("Opening…")}</> : <><Send className="w-4 h-4" /> {tr("Open in WhatsApp")}</>}
         </button>
       </div>
 
-      <h2 className="text-sm font-semibold text-slate-700 mb-2">Recent messages</h2>
+      <h2 className="text-sm font-semibold text-slate-700 mb-2">{tr("Recent messages")}</h2>
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center text-slate-500">Loading…</div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center text-slate-500">{tr("Loading…")}</div>
       ) : messages.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center text-slate-500">
-          No messages yet.
+          {tr("No messages yet.")}
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
@@ -113,9 +114,9 @@ export default function WhatsAppPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-slate-900">{m.hcps?.full_name ?? m.phone}</span>
                 <span className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                  {m.direction === "out" ? "→ sent" : "← received"}
+                  {m.direction === "out" ? tr("→ sent") : tr("← received")}
                 </span>
-                <span className="text-xs text-slate-500 ml-auto">
+                <span className="text-xs text-slate-500 ms-auto">
                   {new Date(m.created_at).toLocaleString('en-US')}
                 </span>
               </div>

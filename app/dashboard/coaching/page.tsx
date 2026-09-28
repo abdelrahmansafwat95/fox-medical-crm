@@ -12,6 +12,7 @@ import { exportToExcel } from "@/lib/export";
 import { isManager, useRole } from "@/lib/roles";
 import { CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, Download, Loader2, Plus, X } from "lucide-react";
 
+import { tr } from "@/lib/i18n";
 const SKILLS = [
   { key: "planning", label: "Pre-call planning", hint: "Knew the doctor, the last visit and the goal" },
   { key: "opening", label: "Opening", hint: "Built rapport, linked to the last commitment" },
@@ -99,18 +100,18 @@ export default function CoachingPage() {
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-violet-50 text-violet-700"><ClipboardCheck className="w-6 h-6" /></div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Field Coaching</h1>
-            <p className="text-sm text-slate-500">{manager ? "Joint visits: rate the call skills, agree an action plan, follow progress." : "Feedback from your joint visits with your manager."}</p>
+            <h1 className="text-2xl font-bold text-slate-900">{tr("Field Coaching")}</h1>
+            <p className="text-sm text-slate-500">{manager ? tr("Joint visits: rate the call skills, agree an action plan, follow progress.") : tr("Feedback from your joint visits with your manager.")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap text-sm">
           <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
           <span className="text-slate-400">to</span>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg" />
-          <button onClick={exportRows} className="px-3 py-2 border border-slate-300 rounded-lg inline-flex items-center gap-2 hover:bg-slate-50"><Download className="w-4 h-4" /> Excel</button>
+          <button onClick={exportRows} className="px-3 py-2 border border-slate-300 rounded-lg inline-flex items-center gap-2 hover:bg-slate-50"><Download className="w-4 h-4" /> {tr("Excel")}</button>
           {manager && (
             <button onClick={() => setCreating(true)} className="bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-lg inline-flex items-center gap-2 font-medium">
-              <Plus className="w-4 h-4" /> New coaching session
+              <Plus className="w-4 h-4" /> {tr("New coaching session")}
             </button>
           )}
         </div>
@@ -127,8 +128,8 @@ export default function CoachingPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 text-slate-500 text-xs">
                     <tr>
-                      <th className="p-3 text-left">Rep</th><th className="p-3 text-right">Sessions</th><th className="p-3 text-right">Overall</th>
-                      <th className="p-3 text-left">Weakest skill</th><th className="p-3 text-left">Last</th><th className="p-3 text-right">Awaiting rep</th>
+                      <th className="p-3 text-start">{tr("Rep")}</th><th className="p-3 text-end">{tr("Sessions")}</th><th className="p-3 text-end">{tr("Overall")}</th>
+                      <th className="p-3 text-start">{tr("Weakest skill")}</th><th className="p-3 text-start">{tr("Last")}</th><th className="p-3 text-end">{tr("Awaiting rep")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,11 +138,11 @@ export default function CoachingPage() {
                       return (
                         <tr key={r.rep_id} className="border-t border-slate-100 hover:bg-slate-50 cursor-pointer" onClick={() => setRepFilter(repFilter === r.rep_id ? "" : r.rep_id)}>
                           <td className={`p-3 font-medium ${repFilter === r.rep_id ? "text-brand-700" : "text-slate-900"}`}>{name(r.rep_id)}</td>
-                          <td className="p-3 text-right">{r.sessions}</td>
-                          <td className="p-3 text-right font-semibold">{Number(r.overall).toFixed(2)}</td>
-                          <td className="p-3">{weakest.label} <span className="text-slate-400">({Number(r[weakest.key]).toFixed(1)})</span></td>
+                          <td className="p-3 text-end">{r.sessions}</td>
+                          <td className="p-3 text-end font-semibold">{Number(r.overall).toFixed(2)}</td>
+                          <td className="p-3">{tr(weakest.label)} <span className="text-slate-400">({Number(r[weakest.key]).toFixed(1)})</span></td>
                           <td className="p-3 text-slate-500">{r.last_on}</td>
-                          <td className="p-3 text-right">{r.open_acknowledgements > 0 ? <span className="text-amber-600 font-semibold">{r.open_acknowledgements}</span> : "—"}</td>
+                          <td className="p-3 text-end">{r.open_acknowledgements > 0 ? <span className="text-amber-600 font-semibold">{r.open_acknowledgements}</span> : "—"}</td>
                         </tr>
                       );
                     })}
@@ -150,12 +151,12 @@ export default function CoachingPage() {
               </div>
               {teamAvg && (
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-                  <div className="font-semibold text-slate-900 mb-1">Team skills</div>
-                  <div className="text-xs text-slate-500 mb-3">Average of all sessions in the period, weakest first.</div>
+                  <div className="font-semibold text-slate-900 mb-1">{tr("Team skills")}</div>
+                  <div className="text-xs text-slate-500 mb-3">{tr("Average of all sessions in the period, weakest first.")}</div>
                   <div className="space-y-2">
                     {teamAvg.map((s) => (
                       <div key={s.key} className="text-xs">
-                        <div className="flex justify-between text-slate-600"><span>{s.label}</span><span>{s.avg.toFixed(2)}</span></div>
+                        <div className="flex justify-between text-slate-600"><span>{tr(s.label)}</span><span>{s.avg.toFixed(2)}</span></div>
                         <div className="h-1.5 bg-slate-100 rounded"><div className={`h-1.5 rounded ${tone(s.avg)}`} style={{ width: `${(s.avg / 5) * 100}%` }} /></div>
                       </div>
                     ))}
@@ -167,20 +168,20 @@ export default function CoachingPage() {
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
             <div className="p-3 flex items-center justify-between text-sm">
-              <span className="font-semibold text-slate-900">Sessions {repFilter && <>· {name(repFilter)} <button onClick={() => setRepFilter("")} className="text-brand-600 ml-1">show all</button></>}</span>
+              <span className="font-semibold text-slate-900">{tr("Sessions")} {repFilter && <>· {name(repFilter)} <button onClick={() => setRepFilter("")} className="text-brand-600 ms-1">{tr("show all")}</button></>}</span>
               <span className="text-slate-500">{shown.length}</span>
             </div>
-            {shown.length === 0 && <div className="p-8 text-center text-slate-400 text-sm">No coaching sessions in this period.</div>}
+            {shown.length === 0 && <div className="p-8 text-center text-slate-400 text-sm">{tr("No coaching sessions in this period.")}</div>}
             {shown.map((s) => (
               <div key={s.id}>
-                <button onClick={() => setOpen(open === s.id ? null : s.id)} className="w-full p-3 flex items-center gap-3 text-left hover:bg-slate-50">
+                <button onClick={() => setOpen(open === s.id ? null : s.id)} className="w-full p-3 flex items-center gap-3 text-start hover:bg-slate-50">
                   <span className="text-sm text-slate-500 w-24 shrink-0">{s.coached_on}</span>
                   <span className="font-medium text-slate-900 flex-1 min-w-0 truncate">{name(s.rep_id)} <span className="text-slate-400 font-normal">with {name(s.manager_id)}</span></span>
                   <span className="hidden sm:flex gap-0.5" aria-hidden="true">
                     {SKILLS.map((sk) => <span key={sk.key} title={`${sk.label}: ${s.scores[sk.key]}`} className={`w-2 rounded-sm ${tone(s.scores[sk.key])}`} style={{ height: 4 + s.scores[sk.key] * 4 }} />)}
                   </span>
-                  <span className="font-semibold w-10 text-right">{Number(s.overall).toFixed(1)}</span>
-                  {s.acknowledged_at ? <CheckCircle2 className="w-4 h-4 text-emerald-500" aria-label="Acknowledged" /> : <span className="w-2 h-2 rounded-full bg-amber-400" title="Awaiting the rep" />}
+                  <span className="font-semibold w-10 text-end">{Number(s.overall).toFixed(1)}</span>
+                  {s.acknowledged_at ? <CheckCircle2 className="w-4 h-4 text-emerald-500" aria-label={tr("Acknowledged")} /> : <span className="w-2 h-2 rounded-full bg-amber-400" title={tr("Awaiting the rep")} />}
                   {open === s.id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </button>
                 {open === s.id && (
@@ -188,12 +189,12 @@ export default function CoachingPage() {
                     <div className="space-y-1.5">
                       {SKILLS.map((sk) => (
                         <div key={sk.key} className="flex items-center gap-2">
-                          <span className="w-40 text-slate-600">{sk.label}</span>
+                          <span className="w-40 text-slate-600">{tr(sk.label)}</span>
                           <span className="flex gap-1">{[1, 2, 3, 4, 5].map((n) => <span key={n} className={`w-5 h-2 rounded ${n <= s.scores[sk.key] ? tone(s.scores[sk.key]) : "bg-slate-100"}`} />)}</span>
                           <span className="text-slate-500">{s.scores[sk.key]}</span>
                         </div>
                       ))}
-                      <div className="text-xs text-slate-500 pt-1">{s.visits_observed} visits observed{s.follow_up_on && <> · follow-up {s.follow_up_on}</>}</div>
+                      <div className="text-xs text-slate-500 pt-1">{s.visits_observed} {tr("visits observed")}{s.follow_up_on && <> {tr("· follow-up")} {s.follow_up_on}</>}</div>
                     </div>
                     <div className="space-y-2">
                       {[["Strengths", s.strengths], ["To improve", s.improvements], ["Action plan", s.action_plan]].map(([k, v]) => v && (
@@ -201,12 +202,12 @@ export default function CoachingPage() {
                       ))}
                       {s.acknowledged_at && (
                         <div className="text-xs text-emerald-700 bg-emerald-50 rounded p-2">
-                          Acknowledged {s.acknowledged_at.slice(0, 10)}{s.rep_comment && <>: “{s.rep_comment}”</>}
+                          {tr("Acknowledged")} {s.acknowledged_at.slice(0, 10)}{s.rep_comment && <>: “{s.rep_comment}”</>}
                         </div>
                       )}
                       {manager && s.manager_id === me && !s.acknowledged_at && (
-                        <button onClick={async () => { if (confirm("Delete this coaching session?")) { await supabase.from("coaching_sessions").delete().eq("id", s.id); load(); } }}
-                          className="text-xs text-rose-600 hover:underline">Delete (possible until the rep acknowledges it)</button>
+                        <button onClick={async () => { if (confirm(tr("Delete this coaching session?"))) { await supabase.from("coaching_sessions").delete().eq("id", s.id); load(); } }}
+                          className="text-xs text-rose-600 hover:underline">{tr("Delete (possible until the rep acknowledges it)")}</button>
                       )}
                     </div>
                   </div>
@@ -228,11 +229,11 @@ function Acknowledge({ session, managerName, onDone }: { session: Session; manag
   const [err, setErr] = useState<string | null>(null);
   return (
     <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 space-y-2">
-      <div className="font-semibold text-slate-900">New feedback from {managerName} · {session.coached_on} · overall {Number(session.overall).toFixed(1)}</div>
-      {session.improvements && <div className="text-sm"><span className="font-semibold">To improve: </span>{session.improvements}</div>}
-      {session.action_plan && <div className="text-sm"><span className="font-semibold">Action plan: </span>{session.action_plan}</div>}
+      <div className="font-semibold text-slate-900">{tr("New feedback from")} {managerName} · {session.coached_on} {tr("· overall")} {Number(session.overall).toFixed(1)}</div>
+      {session.improvements && <div className="text-sm"><span className="font-semibold">{tr("To improve:")} </span>{session.improvements}</div>}
+      {session.action_plan && <div className="text-sm"><span className="font-semibold">{tr("Action plan:")} </span>{session.action_plan}</div>}
       <div className="flex gap-2 flex-wrap">
-        <input value={comment} onChange={(e) => setComment(e.target.value)} maxLength={2000} placeholder="Your comment (optional)"
+        <input value={comment} onChange={(e) => setComment(e.target.value)} maxLength={2000} placeholder={tr("Your comment (optional)")}
           className="flex-1 min-w-[200px] px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white" />
         <button disabled={busy} onClick={async () => {
           setBusy(true); setErr(null);
@@ -240,7 +241,7 @@ function Acknowledge({ session, managerName, onDone }: { session: Session; manag
           setBusy(false);
           if (error) setErr(error.message); else onDone();
         }} className="bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-2 disabled:opacity-60">
-          <CheckCircle2 className="w-4 h-4" /> Acknowledge
+          <CheckCircle2 className="w-4 h-4" /> {tr("Acknowledge")}
         </button>
       </div>
       {err && <div className="text-xs text-rose-700">{err}</div>}
@@ -276,36 +277,36 @@ function NewSession({ me, reps, onClose, onSaved }: { me: string; reps: Person[]
       strengths: text.strengths.trim(), improvements: text.improvements.trim(), action_plan: text.action_plan.trim(), follow_up_on: follow || null,
     });
     setBusy(false);
-    if (error) setErr(error.message.includes("row-level security") ? "You can only coach reps in your own team." : error.message); else onSaved();
+    if (error) setErr(error.message.includes("row-level security") ? tr("You can only coach reps in your own team.") : error.message); else onSaved();
   }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl my-8" onClick={(e) => e.stopPropagation()}>
         <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="font-bold text-lg">New coaching session</h2>
-          <button onClick={onClose} aria-label="Close"><X className="w-5 h-5 text-slate-400" /></button>
+          <h2 className="font-bold text-lg">{tr("New coaching session")}</h2>
+          <button onClick={onClose} aria-label={tr("Close")}><X className="w-5 h-5 text-slate-400" /></button>
         </div>
         <div className="p-4 space-y-4 text-sm">
-          {reps.length === 0 ? <div className="text-slate-500">No reps in your team.</div> : (
+          {reps.length === 0 ? <div className="text-slate-500">{tr("No reps in your team.")}</div> : (
             <>
               <div className="grid sm:grid-cols-3 gap-3">
-                <label className="space-y-1"><span className="text-slate-600">Rep</span>
+                <label className="space-y-1"><span className="text-slate-600">{tr("Rep")}</span>
                   <select value={repId} onChange={(e) => setRepId(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg">
                     {reps.map((r) => <option key={r.id} value={r.id}>{r.full_name}</option>)}
                   </select></label>
-                <label className="space-y-1"><span className="text-slate-600">Day in the field</span>
+                <label className="space-y-1"><span className="text-slate-600">{tr("Day in the field")}</span>
                   <input type="date" value={date} max={iso(new Date())} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg" /></label>
-                <label className="space-y-1"><span className="text-slate-600">Visits observed</span>
+                <label className="space-y-1"><span className="text-slate-600">{tr("Visits observed")}</span>
                   <input type="number" min={0} max={30} value={observed} onChange={(e) => setObserved(Math.max(0, Math.min(30, +e.target.value)))} className="w-full px-3 py-2 border border-slate-300 rounded-lg" /></label>
               </div>
               {visits.length > 0 && (
                 <div>
-                  <div className="text-slate-600 mb-1">Visits that day (tick the ones you joined)</div>
+                  <div className="text-slate-600 mb-1">{tr("Visits that day (tick the ones you joined)")}</div>
                   <div className="flex flex-wrap gap-2">
                     {visits.map((v) => (
                       <label key={v.id} className={`px-2 py-1 rounded-lg border cursor-pointer ${picked.includes(v.id) ? "border-brand-500 bg-brand-50" : "border-slate-200"}`}>
-                        <input type="checkbox" className="mr-1" checked={picked.includes(v.id)} onChange={() => setPicked((p) => p.includes(v.id) ? p.filter((x) => x !== v.id) : [...p, v.id])} />
+                        <input type="checkbox" className="me-1" checked={picked.includes(v.id)} onChange={() => setPicked((p) => p.includes(v.id) ? p.filter((x) => x !== v.id) : [...p, v.id])} />
                         {v.planned_at.slice(11, 16)} {v.hcps?.full_name ?? "—"}
                       </label>
                     ))}
@@ -315,7 +316,7 @@ function NewSession({ me, reps, onClose, onSaved }: { me: string; reps: Person[]
               <div className="space-y-2">
                 {SKILLS.map((sk) => (
                   <div key={sk.key} className="grid sm:grid-cols-[1fr_auto] gap-2 items-center">
-                    <div><div className="font-medium text-slate-900">{sk.label}</div><div className="text-xs text-slate-500">{sk.hint}</div></div>
+                    <div><div className="font-medium text-slate-900">{tr(sk.label)}</div><div className="text-xs text-slate-500">{tr(sk.hint)}</div></div>
                     <div className="flex gap-1" role="radiogroup" aria-label={sk.label}>
                       {[1, 2, 3, 4, 5].map((n) => (
                         <button key={n} type="button" role="radio" aria-checked={scores[sk.key] === n} onClick={() => setScores((s) => ({ ...s, [sk.key]: n }))}
@@ -329,16 +330,16 @@ function NewSession({ me, reps, onClose, onSaved }: { me: string; reps: Person[]
                 <label key={k} className="block space-y-1"><span className="text-slate-600">{l}</span>
                   <textarea rows={2} maxLength={2000} value={text[k]} onChange={(e) => setText((t) => ({ ...t, [k]: e.target.value }))} className="w-full px-3 py-2 border border-slate-300 rounded-lg" /></label>
               ))}
-              <label className="block space-y-1 max-w-xs"><span className="text-slate-600">Follow-up session</span>
+              <label className="block space-y-1 max-w-xs"><span className="text-slate-600">{tr("Follow-up session")}</span>
                 <input type="date" value={follow} onChange={(e) => setFollow(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg" /></label>
               {err && <div className="p-2 rounded bg-rose-50 text-rose-700">{err}</div>}
             </>
           )}
         </div>
         <div className="p-4 border-t flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 border border-slate-300 rounded-lg">Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 border border-slate-300 rounded-lg">{tr("Cancel")}</button>
           <button disabled={busy || !repId} onClick={save} className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-60">
-            {busy ? "Saving…" : "Save and send to rep"}
+            {busy ? tr("Saving…") : tr("Save and send to rep")}
           </button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { clearRoleCache } from "@/lib/roles";
 import { clearPermsCache } from "@/lib/permissions";
 import { Mail, Lock, Loader2, Languages } from "lucide-react";
 
+import { tr, useLang } from "@/lib/i18n";
 const t = {
   en: {
     title: "FoxSystems Medical CRM",
@@ -40,7 +41,8 @@ const t = {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [lang, setLang] = useState<"en" | "ar">("en");
+  // The app-wide language (lib/i18n): choosing Arabic here carries into the app.
+  const { lang, setLang } = useLang();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,12 +55,6 @@ export default function LoginPage() {
       if (data.session) router.replace("/dashboard");
     })();
   }, [router]);
-
-  // Update <html dir/lang> when toggle changes.
-  useEffect(() => {
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = lang;
-  }, [lang]);
 
   const L = t[lang];
 
@@ -89,7 +85,7 @@ export default function LoginPage() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white shadow-sm border border-slate-200 text-sm text-slate-700 hover:bg-slate-50"
         >
           <Languages className="w-4 h-4" />
-          {lang === "en" ? "العربية" : "English"}
+          {lang === "en" ? "العربية" : tr("English")}
         </button>
       </div>
 
@@ -100,17 +96,17 @@ export default function LoginPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo-mark.png"
-              alt="Fox Systems"
+              alt={tr("Fox Systems")}
               className="w-24 h-24 mx-auto mb-3 drop-shadow-[0_0_28px_rgba(0,229,255,0.5)]"
             />
-            <h1 className="text-2xl font-bold text-white">{L.title}</h1>
+            <h1 className="text-2xl font-bold text-white">{tr(L.title)}</h1>
             <p className="text-sm text-brand-200 mt-1">{L.tagline}</p>
           </div>
 
           {/* Card */}
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
             <h2 className="text-xl font-semibold text-slate-900">{L.welcome}</h2>
-            <p className="text-sm text-slate-500 mb-6">{L.subtitle}</p>
+            <p className="text-sm text-slate-500 mb-6">{tr(L.subtitle)}</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
@@ -175,7 +171,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-xs text-slate-300/80 mt-6">
-            {L.poweredBy} · foxsystemstech.com
+            {L.poweredBy} {tr("· foxsystemstech.com")}
           </p>
         </div>
       </div>
