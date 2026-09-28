@@ -178,9 +178,10 @@ export default function DetailingPage() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} Finish
           </button>
         </div>
-        <div className="flex-1 relative flex items-center justify-center px-2">
+        {/* min-h-0 lets the slide shrink to the space left, so it never pushes the dots off screen */}
+        <div className="flex-1 min-h-0 relative flex items-center justify-center px-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={s.image_url} alt={s.title ?? ""} className="max-h-full max-w-full object-contain rounded-lg shadow-2xl" draggable={false} />
+          <img src={s.image_url} alt={s.title ?? ""} className="h-full w-full object-contain" draggable={false} />
           <button aria-label="Previous" onClick={() => go(idx - 1)} disabled={idx === 0} className="absolute left-0 top-0 bottom-0 w-1/4 flex items-center justify-start pl-2 text-white/40 hover:text-white disabled:opacity-0">
             <ChevronLeft className="w-10 h-10" />
           </button>
