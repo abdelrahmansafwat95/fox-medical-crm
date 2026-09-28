@@ -9,7 +9,9 @@
 // country_manager demo visitor via demo_signup_record(), or reuses the login
 // this phone already has during its 3-day trial, and answers with a one-time
 // link to the app's /demo/enter page. A second trial for the same email or
-// company is refused (409 active_trial) until the first ends. Nothing is emailed.
+// company is refused (409 active_trial) until the first ends. The answer also
+// carries the login (address and a readable password, fresh on every sign-up)
+// so the website can email it to the visitor.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const APP = "https://fox-medical-crm.vercel.app";
@@ -18,6 +20,10 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+
+// Readable: no 0/O or 1/l/I, so it can be typed from an email on a phone.
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+const readablePassword = () => "Demo-" + Array.from(crypto.getRandomValues(new Uint8Array(10)), (x) => ALPHABET[x % ALPHABET.length]).join("");
 
 const randomHex = (bytes: number) =>
   Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (x) => x.toString(16).padStart(2, "0")).join("");
@@ -52,16 +58,18 @@ Deno.serve(async (req) => {
         : json({ error: "Unauthorized" }, 401);
     }
 
+    const password = readablePassword();
     let userId: string;
     let email: string;
     const isNew = !prep.existing?.email;
     if (!isNew) {
       userId = prep.existing.user_id;
       email = prep.existing.email;
+      await admin.auth.admin.updateUserById(userId, { password });
     } else {
       email = `visitor-${randomHex(6)}@demo.foxmedical.local`;
       const { data: created, error } = await admin.auth.admin.createUser({
-        email, password: randomHex(24), email_confirm: true,
+        email, password, email_confirm: true,
         user_metadata: { full_name: name.split(/\s+/)[0] },
       });
       if (error || !created.user) return json({ error: "Could not create the demo account" }, 500);
@@ -86,7 +94,8 @@ Deno.serve(async (req) => {
     const url = new URL("/demo/enter", APP);
     url.searchParams.set("token_hash", tokenHash);
     url.searchParams.set("lang", lang);
-    return json({ url: url.toString(), returning: !isNew, ends_at: prep.existing?.ends_at ?? null });
+    return json({ url: url.toString(), returning: !isNew, ends_at: prep.existing?.ends_at ?? null,
+      login: { email, password, url: new URL("/login", APP).toString() } });
   } catch (_e) {
     return json({ error: "Failed" }, 500);
   }
