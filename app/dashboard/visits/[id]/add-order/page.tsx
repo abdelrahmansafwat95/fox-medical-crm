@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { offlineInsert, offlineUpdate } from "@/lib/offlineQueue";
 import {
   ArrowLeft,
   ShoppingCart,
@@ -152,8 +153,10 @@ export default function AddOrderPage() {
     setSubmitting(status === "draft" ? "draft" : "submit");
     setError(null);
 
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) {
+    // getSession reads the phone's copy of the login, so this works offline
+    const { data: sess } = await supabase.auth.getSession();
+    const user = sess.session?.user;
+    if (!user) {
       setError("Not authenticated.");
       setSubmitting(null);
       return;
@@ -167,12 +170,15 @@ export default function AddOrderPage() {
       total: it.total
     }));
 
-    const { data: orderRow, error: insErr } = await supabase
-      .from("orders")
-      .insert({
+    // The id is made here, so the order and the visit's link to it can both be
+    // saved on the phone and synced later, in order.
+    const orderId = crypto.randomUUID();
+    const label = `Order — ${visit.institutions?.name ?? "institution"} (${grandTotal.toLocaleString("en-US")} EGP)`;
+    const saved = await offlineInsert("orders", {
+        id: orderId,
         institution_id: visit.institution_id,
         hcp_id: visit.hcp_id,
-        rep_id: u.user.id,
+        rep_id: user.id,
         visit_id: visit.id,
         status,
         items: itemsPayload,
@@ -183,20 +189,21 @@ export default function AddOrderPage() {
         currency: "EGP",
         payment_terms: paymentTerms || null,
         notes: notes || null
-      })
-      .select("id, order_number")
-      .single();
+      }, label);
 
-    setSubmitting(null);
-
-    if (insErr) {
-      setError(insErr.message);
+    if (saved.error) {
+      setSubmitting(null);
+      setError(saved.error);
       return;
     }
 
     // Mark visit as having an order
-    await supabase.from("visits").update({ order_taken: true, order_id: orderRow.id }).eq("id", visit.id);
+    await offlineUpdate("visits", { id: visit.id }, { order_taken: true, order_id: orderId }, `${label} — link to visit`);
+    setSubmitting(null);
 
+    if (saved.queued) {
+      alert("You're offline. The order is saved on this phone and will be sent automatically when the signal is back.");
+    }
     router.push(`/dashboard/visits/${visit.id}`);
   }
 

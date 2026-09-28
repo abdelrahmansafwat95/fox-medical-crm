@@ -12,6 +12,7 @@ import MobileNav from "@/components/MobileNav";
 import Topbar from "@/components/Topbar";
 import GlobalSearch from "@/components/GlobalSearch";
 import DemoBanner from "@/components/DemoBanner";
+import OfflineStatus from "@/components/OfflineStatus";
 
 export default function DashboardLayout({
   children
@@ -83,6 +84,7 @@ export default function DashboardLayout({
         <Topbar />
         <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6">
           <DemoBanner />
+          <OfflineStatus />
           {resource && (permsLoading || denied) ? (
             <div className="p-12 text-center text-slate-500">Loading…</div>
           ) : (

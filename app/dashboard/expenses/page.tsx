@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { offlineInsert } from "@/lib/offlineQueue";
 import { Receipt, Plus, Loader2 } from "lucide-react";
 
 interface ExpenseRow {
@@ -27,6 +28,7 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({
     expense_date: new Date().toISOString().slice(0, 10),
     category: "transport",
@@ -51,24 +53,31 @@ export default function ExpensesPage() {
   async function submitExpense() {
     if (!form.amount) return;
     setSubmitting(true);
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) {
+    // getSession reads the phone's copy of the login, so this works offline
+    const { data: sess } = await supabase.auth.getSession();
+    const user = sess.session?.user;
+    if (!user) {
       setSubmitting(false);
       return;
     }
-    await supabase.from("expenses").insert({
-      rep_id: u.user.id,
+    const saved = await offlineInsert("expenses", {
+      rep_id: user.id,
       expense_date: form.expense_date,
       category: form.category,
       amount: parseFloat(form.amount),
       currency: "EGP",
       description: form.description || null,
       status: "submitted"
-    });
+    }, `Expense — ${form.category} ${form.amount} EGP`);
+    setSubmitting(false);
+    if (saved.error) {
+      setFormError(saved.error);
+      return;
+    }
+    setFormError(null);
     setForm({ expense_date: new Date().toISOString().slice(0, 10), category: "transport", amount: "", description: "" });
     setShowForm(false);
-    setSubmitting(false);
-    load();
+    if (!saved.queued) load();
   }
 
   const total = expenses.reduce((s, e) => s + e.amount, 0);
@@ -141,6 +150,7 @@ export default function ExpensesPage() {
               placeholder="e.g. Uber to Maadi clinic"
             />
           </div>
+          {formError && <p className="text-sm text-red-600">{formError}</p>}
           <div className="flex gap-2 pt-1">
             <button
               onClick={submitExpense}

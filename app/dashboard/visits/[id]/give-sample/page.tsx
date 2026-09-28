@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { offlineRpc, offlineUpload } from "@/lib/offlineQueue";
 import {
   ArrowLeft,
   Package,
@@ -52,12 +53,15 @@ export default function GiveSamplePage() {
   const [selectedBatch, setSelectedBatch] = useState<InventoryRow | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [queuedOffline, setQueuedOffline] = useState(false);
 
   useEffect(() => {
     if (!params.id) return;
     (async () => {
       setLoading(true);
-      const { data: u } = await supabase.auth.getUser();
+      // getSession reads the phone's copy of the login, so this works offline
+      const { data: sess } = await supabase.auth.getSession();
+      const u = { user: sess.session?.user ?? null };
 
       const [visitRes, invRes] = await Promise.all([
         supabase
@@ -88,37 +92,42 @@ export default function GiveSamplePage() {
     setStep("submitting");
 
     try {
-      // 1. Upload signature if present
+      const label = `Sample — ${selectedBatch.products?.name ?? "product"} ×${quantity} to ${visit.hcps?.full_name ?? "HCP"}`;
+      // 1. Upload signature if present (kept on the phone when offline; its
+      //    address is known in advance, so the hand-over can refer to it)
       let signature_url: string | null = null;
       const dataUrl = sigRef.current?.toDataURL();
       if (dataUrl) {
         const blob = await (await fetch(dataUrl)).blob();
         const filename = `sig-${visit.id}-${Date.now()}.png`;
-        const { data: u } = await supabase.auth.getUser();
-        const path = `${u.user?.id ?? "anon"}/${filename}`;
-        const { error: upErr } = await supabase.storage
-          .from("signatures")
-          .upload(path, blob, { contentType: "image/png" });
-        if (!upErr) {
-          const { data: urlData } = supabase.storage
-            .from("signatures")
-            .getPublicUrl(path);
-          signature_url = urlData.publicUrl;
+        const { data: sess } = await supabase.auth.getSession();
+        const path = `${sess.session?.user?.id ?? "anon"}/${filename}`;
+        const up = await offlineUpload("signatures", path, blob, "image/png", `${label} — signature`);
+        if (up.ok || up.queued) {
+          signature_url = supabase.storage.from("signatures").getPublicUrl(path).data.publicUrl;
         } else {
-          console.warn("Signature upload failed:", upErr.message);
+          console.warn("Signature upload failed:", up.error);
         }
       }
 
       // 2. Call the atomic RPC
-      const { data, error: rpcErr } = await supabase.rpc("give_sample_to_hcp", {
+      const sent = await offlineRpc("give_sample_to_hcp", {
         _visit_id: visit.id,
         _product_id: selectedBatch.product_id,
         _batch_number: selectedBatch.batch_number,
         _quantity: quantity,
         _signature_url: signature_url
-      });
+      }, label, true);
 
-      if (rpcErr) throw new Error(rpcErr.message);
+      if (sent.error) throw new Error(sent.error);
+      if (sent.queued) {
+        // Stock is checked again when it syncs; a refusal shows in the sync banner.
+        setQueuedOffline(true);
+        setStep("done");
+        setTimeout(() => router.push(`/dashboard/visits/${visit.id}`), 3000);
+        return;
+      }
+      const data = sent.data;
 
       type RpcResult = {
         success: boolean;
@@ -448,7 +457,9 @@ export default function GiveSamplePage() {
             {visit.hcps?.full_name}
           </p>
           <p className="text-xs text-slate-500 mt-3">
-            Inventory updated. Returning to visit…
+            {queuedOffline
+              ? "You're offline — saved on this phone with the signature. Stock is updated when it syncs. Returning to visit…"
+              : "Inventory updated. Returning to visit…"}
           </p>
         </div>
       )}

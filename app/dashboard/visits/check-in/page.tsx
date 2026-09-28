@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useGeolocation } from "@/lib/useGeolocation";
-import { fetchOrQueue } from "@/lib/offlineQueue";
+import { fetchOrQueue, offlineUpload } from "@/lib/offlineQueue";
 import {
   MapPin,
   Crosshair,
@@ -140,17 +140,16 @@ export default function CheckInPage() {
       if (selfieDataUrl) {
         const blob = await (await fetch(selfieDataUrl)).blob();
         const filename = `selfie-${Date.now()}.jpg`;
-        const { data: u } = await supabase.auth.getUser();
-        const path = `${u.user?.id ?? "anon"}/${filename}`;
-        const { error: upErr } = await supabase.storage
-          .from("visit-selfies")
-          .upload(path, blob, { contentType: "image/jpeg" });
-        if (upErr) {
-          // Non-fatal — proceed without selfie URL
-          console.warn("Selfie upload failed:", upErr.message);
+        // getSession reads the phone's copy of the login, so this works offline;
+        // the selfie waits on the phone and uploads before the check-in syncs
+        const { data: me } = await supabase.auth.getSession();
+        const path = `${me.session?.user?.id ?? "anon"}/${filename}`;
+        const up = await offlineUpload("visit-selfies", path, blob, "image/jpeg", "Check-in selfie");
+        if (up.ok || up.queued) {
+          selfie_url = supabase.storage.from("visit-selfies").getPublicUrl(path).data.publicUrl;
         } else {
-          const { data: urlData } = supabase.storage.from("visit-selfies").getPublicUrl(path);
-          selfie_url = urlData.publicUrl;
+          // Non-fatal — proceed without selfie URL
+          console.warn("Selfie upload failed:", up.error);
         }
       }
 

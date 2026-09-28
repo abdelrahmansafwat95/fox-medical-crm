@@ -1,7 +1,7 @@
 /* FoxSystems Medical CRM — Service Worker
    Network-first for everything; falls back to cache when offline.
 */
-const CACHE_NAME = "fox-medical-v1";
+const CACHE_NAME = "fox-medical-v2"; // bump when the offline behaviour changes
 const PRECACHE = ["/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png", "/offline.html"];
 
 self.addEventListener("install", (event) => {

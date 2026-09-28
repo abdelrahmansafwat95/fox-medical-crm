@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { offlineInsert } from "@/lib/offlineQueue";
 import {
   ArrowLeft,
   ClipboardEdit,
@@ -32,6 +33,7 @@ export default function ManualVisitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [queued, setQueued] = useState(false);
 
   // Form
   const [hcpId, setHcpId] = useState("");
@@ -93,8 +95,10 @@ export default function ManualVisitPage() {
 
     setSubmitting(true);
 
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) {
+    // getSession reads the phone's copy of the login, so this works offline
+    const { data: sess } = await supabase.auth.getSession();
+    const user = sess.session?.user;
+    if (!user) {
       setError("Not authenticated.");
       setSubmitting(false);
       return;
@@ -107,8 +111,8 @@ export default function ManualVisitPage() {
 
     const noteText = `[MANUAL ENTRY] Reason: ${reasonNoCheckIn}\n\n${notes}`.trim();
 
-    const { error: insErr } = await supabase.from("visits").insert({
-      rep_id: u.user.id,
+    const saved = await offlineInsert("visits", {
+      rep_id: user.id,
       hcp_id: hcpId,
       institution_id: institutionId,
       visit_type: visitType,
@@ -119,15 +123,16 @@ export default function ManualVisitPage() {
       doctor_attitude: doctorAttitude || null,
       notes: noteText,
       manager_status: "pending" // managers will review manual entries
-    });
+    }, `Manual visit — ${hcps.find((h) => h.id === hcpId)?.full_name ?? "HCP"}`);
 
     setSubmitting(false);
 
-    if (insErr) {
-      setError(insErr.message);
+    if (saved.error) {
+      setError(saved.error);
       return;
     }
 
+    setQueued(saved.queued);
     setSuccess(true);
     setTimeout(() => router.push("/dashboard/visits"), 1500);
   }
@@ -145,9 +150,11 @@ export default function ManualVisitPage() {
     return (
       <div className="max-w-md mx-auto p-12 text-center">
         <div className="text-6xl mb-2">✅</div>
-        <h2 className="font-bold text-emerald-900">Visit logged</h2>
+        <h2 className="font-bold text-emerald-900">{queued ? "Visit saved on this phone" : "Visit logged"}</h2>
         <p className="text-sm text-slate-600 mt-1">
-          Marked as &ldquo;pending&rdquo; for manager review.
+          {queued
+            ? "You're offline — it will sync automatically when the signal is back, then go to your manager for review."
+            : <>Marked as &ldquo;pending&rdquo; for manager review.</>}
         </p>
       </div>
     );

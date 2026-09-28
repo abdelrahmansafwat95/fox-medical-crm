@@ -65,7 +65,9 @@ export default function MyDayPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      // getSession reads the phone's copy of the login, so My Day opens offline
+      const { data: sess } = await supabase.auth.getSession();
+      const u = { user: sess.session?.user ?? null };
       if (!u.user) {
         setLoading(false);
         return;
