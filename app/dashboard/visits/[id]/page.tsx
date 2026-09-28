@@ -24,6 +24,7 @@ import EditModal, { type FieldConfig } from "@/components/EditModal";
 
 interface VisitFull {
   id: string;
+  rep_id: string;
   status: string;
   visit_type: string | null;
   check_in_at: string | null;
@@ -104,6 +105,10 @@ export default function VisitDetailPage() {
   const [samplesGiven, setSamplesGiven] = useState<SampleTransactionRow[]>([]);
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [detailing, setDetailing] = useState<DetailingRow[]>([]);
+  const [me, setMe] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setMe(data.session?.user.id ?? null));
+  }, []);
   const [loading, setLoading] = useState(true);
   const [rawNotes, setRawNotes] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
@@ -122,7 +127,7 @@ export default function VisitDetailPage() {
     const { data: vData, error: vErr } = await supabase
       .from("visits")
       .select(`
-        id, status, visit_type, check_in_at, check_out_at, duration_minutes,
+        id, rep_id, status, visit_type, check_in_at, check_out_at, duration_minutes,
         check_in_lat, check_in_lng, check_in_distance_m, check_in_within_geofence, check_in_selfie_url,
         ai_summary, ai_quality_score, ai_coaching_notes,
         doctor_attitude, doctor_feedback, objections, key_message_delivered,
@@ -359,7 +364,7 @@ export default function VisitDetailPage() {
 
         {/* Action buttons */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {visit.status === "in_progress" && (
+          {(visit.status === "in_progress" || visit.status === "completed") && visit.rep_id === me && (
             <Link
               href={`/dashboard/visits/${visit.id}/detail`}
               className="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-lg inline-flex items-center justify-center gap-2"
