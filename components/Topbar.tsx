@@ -66,7 +66,7 @@ export default function Topbar() {
               {profile?.full_name ?? profile?.email ?? tr("Loading…")}
             </div>
             <div className="text-slate-500 capitalize">
-              {profile?.role?.replaceAll("_", " ") ?? ""}
+              {profile?.role ? tr(profile.role) : ""}
             </div>
           </div>
         </div>

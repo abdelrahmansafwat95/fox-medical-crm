@@ -19,7 +19,7 @@ import {
   ArrowRight
 } from "lucide-react";
 
-import { tr } from "@/lib/i18n";
+import { tr, trf } from "@/lib/i18n";
 type Counts = {
   hcps: number | null;
   institutions: number | null;
@@ -145,10 +145,10 @@ export default function DashboardHome() {
               </div>
               <div className="text-xs text-slate-600 mt-0.5">
                 {[
-                  counts.pendingTourPlans ? `${counts.pendingTourPlans} tour plan${counts.pendingTourPlans === 1 ? "" : "s"}` : null,
-                  counts.flaggedVisits ? `${counts.flaggedVisits} visit${counts.flaggedVisits === 1 ? "" : "s"} to review` : null,
-                  counts.pendingExpenses ? `${counts.pendingExpenses} expense${counts.pendingExpenses === 1 ? "" : "s"}` : null,
-                  counts.openAlerts ? `${counts.openAlerts} compliance alert${counts.openAlerts === 1 ? "" : "s"}` : null
+                  counts.pendingTourPlans ? trf("{n} tour plans", { n: counts.pendingTourPlans }) : null,
+                  counts.flaggedVisits ? trf("{n} visits to review", { n: counts.flaggedVisits }) : null,
+                  counts.pendingExpenses ? trf("{n} expenses", { n: counts.pendingExpenses }) : null,
+                  counts.openAlerts ? trf("{n} compliance alerts", { n: counts.openAlerts }) : null
                 ].filter(Boolean).join(" · ")}
               </div>
             </div>
@@ -181,9 +181,9 @@ export default function DashboardHome() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
-        <QuickCard icon={MapPin}    title={tr("GPS Check-in")}   desc="Log a visit with geofence verification"   href="/dashboard/visits/check-in" accent="bg-brand-500" />
-        <QuickCard icon={Sparkles}  title={tr("AI Assistant")}   desc="Email, WhatsApp, pitches, objections"     href="/dashboard/assistant"       accent="bg-yellow-500" />
-        <QuickCard icon={Trophy}    title={tr("Leaderboard")}    desc="Rank reps + AI coaching insights"         href="/dashboard/leaderboard"     accent="bg-amber-500" />
+        <QuickCard icon={MapPin}    title={tr("GPS Check-in")}   desc={tr("Log a visit with geofence verification")}   href="/dashboard/visits/check-in" accent="bg-brand-500" />
+        <QuickCard icon={Sparkles}  title={tr("AI Assistant")}   desc={tr("Email, WhatsApp, pitches, objections")}     href="/dashboard/assistant"       accent="bg-yellow-500" />
+        <QuickCard icon={Trophy}    title={tr("Leaderboard")}    desc={tr("Rank reps + AI coaching insights")}         href="/dashboard/leaderboard"     accent="bg-amber-500" />
       </div>
     </div>
   );
