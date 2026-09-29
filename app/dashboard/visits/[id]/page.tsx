@@ -312,8 +312,9 @@ export default function VisitDetailPage() {
             <AlertTriangle className="w-4 h-4" />
           )}
           <span>
+            {visit.check_in_distance_m == null ? tr("✎ Manual entry, no GPS") : <>
             {visit.check_in_within_geofence ? tr("GPS-verified") : tr("Outside geofence")} ·{" "}
-            {visit.check_in_distance_m?.toFixed(0)}{tr("m from anchor")}
+            {visit.check_in_distance_m.toFixed(0)}{tr("m from anchor")}</>}
           </span>
         </div>
 

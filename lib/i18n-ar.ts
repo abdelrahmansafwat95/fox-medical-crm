@@ -55,6 +55,8 @@ export const AR: Record<string, string> = {
   "✓ Push notifications enabled on this device.": "✓ تم تفعيل الإشعارات الفورية على هذا الجهاز.",
   "✗ Outside geofence": "✗ خارج النطاق الجغرافي",
   "✗ Outside geofence (": "✗ خارج النطاق الجغرافي (",
+  "✎ Manual entry, no GPS": "✎ إدخال يدوي دون تحديد الموقع",
+  "MANUAL ENTRY": "إدخال يدوي",
   "🎤 SPEAKER": "🎤 متحدث",
   "📚 Evidence:": "📚 الدليل:",
   "1 saved item could not be synced": "تعذّرت مزامنة عنصر محفوظ واحد",

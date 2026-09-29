@@ -146,11 +146,9 @@ export default function VisitsPage() {
                           {tr("✓ Geo-verified (")}{v.check_in_distance_m?.toFixed(0)}m)
                         </span>
                       )}
-                      {v.check_in_within_geofence === false && (
-                        <span className="text-red-700">
-                          {tr("✗ Outside geofence (")}{v.check_in_distance_m?.toFixed(0)}m)
-                        </span>
-                      )}
+                      {v.check_in_within_geofence === false && (v.check_in_distance_m == null
+                        ? <span className="text-amber-700">{tr("✎ Manual entry, no GPS")}</span>
+                        : <span className="text-red-700">{tr("✗ Outside geofence (")}{v.check_in_distance_m.toFixed(0)}m)</span>)}
                       {v.check_in_at && (
                         <span className="text-slate-400">
                           {new Date(v.check_in_at).toLocaleString('en-US')}

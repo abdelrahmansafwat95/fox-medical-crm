@@ -538,7 +538,7 @@ export default function InboxPage() {
                     <div className="flex flex-wrap gap-2 mt-1.5">
                       {!v.check_in_within_geofence && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">
-                          {tr("OUTSIDE GEOFENCE (")}{v.check_in_distance_m?.toFixed(0)}m)
+                          {v.check_in_distance_m == null ? tr("MANUAL ENTRY") : <>{tr("OUTSIDE GEOFENCE (")}{v.check_in_distance_m.toFixed(0)}m)</>}
                         </span>
                       )}
                       {v.duration_minutes !== null && v.duration_minutes < 3 && (
