@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { CalendarCheck, MapPin, CheckCircle2, Circle, Loader2, ClipboardList, Sparkles, Navigation } from "lucide-react";
 
 import { tr, locale, trf } from "@/lib/i18n";
+import { localIso } from "@/lib/localDate";
 interface HCPLite {
   id: string;
   full_name: string;
@@ -73,7 +74,7 @@ export default function MyDayPage() {
         setLoading(false);
         return;
       }
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localIso();
       const startOfToday = new Date();
       startOfToday.setHours(0, 0, 0, 0);
 

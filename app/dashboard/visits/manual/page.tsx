@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { tr } from "@/lib/i18n";
+import { localIso } from "@/lib/localDate";
 interface HCPOption {
   id: string;
   full_name: string;
@@ -40,7 +41,7 @@ export default function ManualVisitPage() {
   const [hcpId, setHcpId] = useState("");
   const [institutionId, setInstitutionId] = useState("");
   const [visitType, setVisitType] = useState("detailing");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(localIso());
   const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
   const [duration, setDuration] = useState(15);
   const [notes, setNotes] = useState("");
@@ -251,7 +252,7 @@ export default function ManualVisitPage() {
             <input
               type="date"
               value={date}
-              max={new Date().toISOString().slice(0, 10)}
+              max={localIso()}
               onChange={(e) => setDate(e.target.value)}
               className="w-full p-2.5 border border-slate-300 rounded-lg text-sm"
             />

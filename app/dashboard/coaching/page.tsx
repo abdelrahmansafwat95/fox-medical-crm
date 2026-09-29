@@ -13,6 +13,7 @@ import { isManager, useRole } from "@/lib/roles";
 import { CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, Download, Loader2, Plus, X } from "lucide-react";
 
 import { tr } from "@/lib/i18n";
+import { localIso } from "@/lib/localDate";
 const SKILLS = [
   { key: "planning", label: "Pre-call planning", hint: "Knew the doctor, the last visit and the goal" },
   { key: "opening", label: "Opening", hint: "Built rapport, linked to the last commitment" },
@@ -35,7 +36,7 @@ interface Person { id: string; full_name: string; role: string; line_manager_id:
 interface DayVisit { id: string; planned_at: string; status: string; hcps: { full_name: string; specialty: string | null } | null }
 
 const REP_ROLES = ["medical_rep", "medical_rep_senior"];
-const iso = (d: Date) => d.toISOString().slice(0, 10);
+const iso = (d: Date) => localIso(d);
 const blank = (): Scores => Object.fromEntries(SKILLS.map((s) => [s.key, 3])) as Scores;
 const tone = (n: number) => (n >= 4 ? "bg-emerald-500" : n >= 3 ? "bg-amber-400" : "bg-rose-500");
 

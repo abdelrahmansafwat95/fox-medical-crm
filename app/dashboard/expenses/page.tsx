@@ -6,6 +6,7 @@ import { offlineInsert } from "@/lib/offlineQueue";
 import { Receipt, Plus, Loader2 } from "lucide-react";
 
 import { tr } from "@/lib/i18n";
+import { localIso } from "@/lib/localDate";
 interface ExpenseRow {
   id: string;
   expense_date: string;
@@ -31,7 +32,7 @@ export default function ExpensesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    expense_date: new Date().toISOString().slice(0, 10),
+    expense_date: localIso(),
     category: "transport",
     amount: "",
     description: ""
@@ -76,7 +77,7 @@ export default function ExpensesPage() {
       return;
     }
     setFormError(null);
-    setForm({ expense_date: new Date().toISOString().slice(0, 10), category: "transport", amount: "", description: "" });
+    setForm({ expense_date: localIso(), category: "transport", amount: "", description: "" });
     setShowForm(false);
     if (!saved.queued) load();
   }

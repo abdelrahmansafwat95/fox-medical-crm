@@ -7,6 +7,7 @@ import { notifyUser } from "@/lib/notify";
 import { Calendar, Plus, Loader2 } from "lucide-react";
 
 import { tr } from "@/lib/i18n";
+import { localInDays } from "@/lib/localDate";
 interface TourPlanRow {
   id: string;
   rep_id: string;
@@ -44,7 +45,7 @@ export default function TourPlansPage() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    plan_date: new Date(Date.now() + 86400_000).toISOString().slice(0, 10),
+    plan_date: localInDays(1),
     selected: [] as string[],
     notes: ""
   });
@@ -88,7 +89,7 @@ export default function TourPlansPage() {
       notes: form.notes || null,
       submitted_at: new Date().toISOString()
     });
-    setForm({ plan_date: new Date(Date.now() + 86400_000).toISOString().slice(0, 10), selected: [], notes: "" });
+    setForm({ plan_date: localInDays(1), selected: [], notes: "" });
     setShowForm(false);
     setSubmitting(false);
     load();

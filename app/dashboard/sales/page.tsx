@@ -13,6 +13,7 @@ import { isManager, useRole } from "@/lib/roles";
 import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet, LineChart, Loader2, Presentation, Trash2, Upload, X } from "lucide-react";
 
 import { tr } from "@/lib/i18n";
+import { monthEndIso } from "@/lib/localDate";
 interface VsRow { dimension: "product" | "customer"; key_id: string | null; label: string; units: number; value: number; verified_calls: number; value_per_call: number | null }
 interface Insight { product_id: string; product_name: string; sessions: number; doctors: number; avg_seconds: number; slides: { title: string; position: number; avg_seconds: number; views: number }[] }
 interface Named { id: string; name: string }
@@ -60,7 +61,7 @@ export default function SalesPage() {
 
   async function load() {
     setLoading(true);
-    const toEnd = new Date(Number(to.slice(0, 4)), Number(to.slice(5, 7)), 0).toISOString().slice(0, 10);
+    const toEnd = monthEndIso(to);
     const [vs, di] = await Promise.all([
       supabase.rpc("sales_vs_calls", { p_from: from, p_to: to }),
       supabase.rpc("detailing_insights", { p_from: `${from}-01`, p_to: toEnd })

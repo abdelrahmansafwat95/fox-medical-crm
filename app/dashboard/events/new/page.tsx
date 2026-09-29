@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { tr } from "@/lib/i18n";
+import { localIso } from "@/lib/localDate";
 const EVENT_TYPES = [
   { value: "symposium", label: "Symposium" },
   { value: "dinner_meeting", label: "Dinner Meeting" },
@@ -32,7 +33,7 @@ export default function NewEventPage() {
 
   // Form state — defaults sensibly for typical Egyptian pharma event
   const tomorrow = new Date(Date.now() + 86_400_000);
-  const dateDefault = tomorrow.toISOString().slice(0, 10);
+  const dateDefault = localIso(tomorrow);
 
   const [form, setForm] = useState({
     title: "",
